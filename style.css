@@ -189,3 +189,12 @@ select.ph option{color:var(--ink)}
   margin-top:8px;text-align:right;
   font-size:.78rem;color:#c9b8c0;letter-spacing:.02em;
 }
+
+/* スマホのときだけ出す案内 */
+.pc-note{display:none}
+@media (max-width:760px){
+  .pc-note{
+    display:block;background:var(--pink-light);border-radius:8px;
+    padding:10px 12px;font-size:.9rem;margin:0 0 16px;
+  }
+}
