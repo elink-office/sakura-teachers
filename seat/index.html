@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>座席表メーカー｜席替えを自動で・印刷できる無料ツール - さくら先生のお道具箱</title>
+<meta name="description" content="名簿を貼り付けるだけで席替えができる無料ツール。「この2人を離す」「この子は前のほうに」といった条件を入れたまま自動で配置し、そのまま印刷できます。入力した名簿は外部に送信されません。">
+<link rel="stylesheet" href="../style.css?v=1">
+<link rel="stylesheet" href="../print.css?v=1" media="print">
+</head>
+<body>
+
+<header class="site-head noprint">
+  <div class="wrap">
+    <a class="logo" href="../">🌸 さくら先生のお道具箱</a>
+    <nav><a href="../">ツール一覧</a></nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>座席表メーカー</h1>
+  <p class="lead">名簿を貼り付けて、ボタンを押すだけ。「この2人は離す」「この子は前のほうに」を入れたまま席替えできます。そのまま印刷できます。</p>
+
+  <div class="two-col">
+    <section class="card noprint">
+      <h2><span class="step">1</span>名簿を入力（データの貼り付けでもOK）</h2>
+      <textarea id="names" placeholder="1行に1人ずつ&#10;&#10;やまだ たろう&#10;さとう はなこ&#10;すずき いちろう"></textarea>
+      <div class="row tight" style="margin-top:10px">
+        <div><label>人数</label><div class="bignum" id="count">0人</div></div>
+        <div><label for="grade">学年</label>
+          <select id="grade" class="narrow"><option value="">－</option><option value="e1">1年</option><option value="e2">2年</option><option value="e3">3年</option><option value="e4">4年</option><option value="e5">5年</option><option value="e6">6年</option></select></div>
+        <div><label for="kumi">組</label>
+          <select id="kumi" class="narrow"><option value="">－</option><option value="1">1組</option><option value="2">2組</option><option value="3">3組</option><option value="4">4組</option><option value="5">5組</option><option value="6">6組</option><option value="7">7組</option><option value="8">8組</option><option value="9">9組</option><option value="10">10組</option></select></div>
+        <div><label for="clsFree">自分で書く</label><input id="clsFree" type="text" size="8" placeholder="ひまわり組"></div>
+      </div>
+      <p class="hint">「自分で書く」は「組」の代わりです。学年を選んでいれば「3年 さくら組」のように出力されます。</p>
+    </section>
+
+    <section class="card noprint">
+      <h2><span class="step">2</span>教室の形</h2>
+      <div class="row tight">
+        <div><label for="cols">横のならび</label><span class="ctl"><input id="cols" type="number" min="1" max="14" value="6"><span class="unit">席</span></span></div>
+        <div><label for="rows">縦のならび</label><span class="ctl"><input id="rows" type="number" min="1" max="14" value="6"><span class="unit">段</span></span></div>
+        <div><label>座席数</label><div class="bignum" id="seatcount">36</div></div>
+      </div>
+      <div class="row">
+        <div><label for="board">黒板の位置</label>
+          <select id="board">
+            <option value="top">上（画面の上が前）</option>
+            <option value="bottom">下（画面の下が前）</option>
+          </select>
+        </div>
+      </div>
+      <p class="hint" id="seatinfo"></p>
+    </section>
+  </div>
+
+  <details class="opt noprint">
+    <summary>詳しい条件を使う（離す・隣にする・席を決める）</summary>
+    <div class="body">
+      <h3>「隣」の考え方</h3>
+      <p class="hint">「離す」「隣にする」で、<strong>どこまでを“隣”とみなすか</strong>を決めます。きつくするほど、条件を満たす配置が見つかりにくくなります。</p>
+      <div class="radios">
+        <label><input type="radio" name="mode" value="lr"> 左右だけ</label>
+        <label><input type="radio" name="mode" value="cross" checked> 前後左右</label>
+        <label><input type="radio" name="mode" value="king"> まわり全部（ななめも）</label>
+      </div>
+
+      <h3>AさんとBさんを離す</h3>
+      <div id="sepList"></div>
+      <button class="mini" id="addSep" type="button">＋ 組を追加</button>
+
+      <h3>AさんとBさんを隣にする</h3>
+      <div id="adjList"></div>
+      <button class="mini" id="addAdj" type="button">＋ 組を追加</button>
+
+      <h3>Aさんの席を決める</h3>
+      <div id="fixList"></div>
+      <button class="mini" id="addFix" type="button">＋ 人を追加</button>
+      <p class="hint">視力などの配慮は<strong>「前のほう」がおすすめ</strong>です。席をぴったり決めると、毎回まったく同じ席になります。</p>
+    </div>
+  </details>
+
+  <p class="noprint" style="text-align:center;margin:24px 0">
+    <button class="primary" id="go" type="button">席替えする</button>
+  </p>
+  <div id="msg"></div>
+
+  <div id="result" hidden>
+    <div class="plan-tabs noprint" id="tabs"></div>
+
+    <div class="sheet" id="sheet">
+      <div class="sheet-head">
+        <span id="decoLeft" class="deco-mark"></span>
+        <div class="sheet-title" id="shTitle">座席表</div>
+        <div class="sheet-date" id="shDate"></div>
+      </div>
+      <div class="board" id="boardTop">黒 板</div>
+      <div class="grid" id="grid"></div>
+      <div class="board" id="boardBottom" hidden>黒 板</div>
+      <div class="sheet-foot">
+        <div id="decoBottom" class="deco-row"></div>
+        <img id="decoImg" class="deco-img" alt="" hidden>
+      </div>
+      <div class="sheet-credit" id="credit">さくら先生のお道具箱　sakura-teachers.com</div>
+    </div>
+
+    <div id="printAll"></div>
+
+    <p class="hint noprint">席をドラッグすると入れ替えられます。条件に反したところは赤くなりますが、そのままでも印刷できます。<strong>決めるのは先生です。</strong></p>
+    <div id="vio" class="noprint"></div>
+    <p class="noprint" style="margin:12px 0">
+      <button id="again" type="button">べつの案を出す</button>
+      <span class="hint" style="margin-left:8px">名簿はそのままです</span>
+    </p>
+
+    <section class="card noprint">
+      <h2><span class="step">3</span>印刷と見た目</h2>
+      <div class="row">
+        <div><label for="printWhat">印刷するもの</label>
+          <select id="printWhat">
+            <option value="one">いま表示している案</option>
+            <option value="all">3案すべて（3ページ）</option>
+          </select>
+        </div>
+        <div><label for="paper">用紙の向き</label>
+          <select id="paper"><option value="landscape">よこ</option><option value="portrait">たて</option></select>
+        </div>
+        <div><label for="nameMode">名前の見せ方</label>
+          <select id="nameMode">
+            <option value="wrap">姓と名で改行</option>
+            <option value="one">1行のまま</option>
+            <option value="sei">名字だけ</option>
+          </select>
+        </div>
+        <div><label for="kana">文字</label>
+          <select id="kana">
+            <option value="kanji">漢字（座席表・黒板）</option>
+            <option value="kana">ひらがな（ざせきひょう・こくばん）</option>
+          </select>
+        </div>
+        <div><label for="deco">かざり</label>
+          <select id="deco"><option value="none">なし</option><option value="sakura">さくら</option></select>
+        </div>
+        <div><label for="dt">日付</label><input id="dt" type="text" size="11"></div>
+        <div><label for="pic">画像を1枚入れる</label><input id="pic" type="file" accept="image/*"></div>
+      </div>
+      <p style="margin-top:10px">
+        <label style="font-weight:normal;display:inline">
+          <input type="checkbox" id="bold"> 掲示用（名前を太く・大きく）
+        </label>
+        <label style="font-weight:normal;display:inline;margin-left:18px">
+          <input type="checkbox" id="showCredit" checked> 右下にサイト名を入れる
+        </label>
+      </p>
+      <p class="hint">PDFにしたいときは、印刷画面で「送信先」を <strong>PDFに保存</strong> にしてください。画像はこのパソコンには保存されません（毎回選び直しになります）。</p>
+      <p style="margin-top:14px">
+        <button id="doPrint" type="button">🖨 印刷する</button>
+        <button id="doPng" type="button">🖼 画像で保存（PNG）</button>
+        <span class="hint" id="printNote" style="margin-left:8px"></span>
+      </p>
+    </section>
+  </div>
+
+  <section class="card noprint">
+    <h2>名簿の保存</h2>
+    <label style="font-weight:normal">
+      <input type="checkbox" id="save"> このパソコンに名簿を保存する（次回そのまま使えます）
+    </label>
+    <p class="hint">サーバーには送りません。いま使っているパソコンの中だけに残ります。</p>
+    <p><span class="saving" id="savingLabel"></span>
+      <button class="mini" id="clear" type="button">保存を消す</button></p>
+  </section>
+
+  <section class="read">
+    <h2>使い方</h2>
+    <ol>
+      <li>名簿を貼り付けます（1行に1人）。</li>
+      <li>横と縦の席の数、黒板の位置を選びます。</li>
+      <li>必要なら「詳しい条件を使う」を開いて、離す組・隣にする組・席を決める人を入れます。</li>
+      <li>「席替えする」を押すと<strong>3つの案</strong>が出るので、見比べて選びます。</li>
+      <li>気になるところはドラッグで入れ替えて、印刷します。</li>
+    </ol>
+
+    <h2>よくある質問</h2>
+    <dl>
+      <dt>名簿は外部に送られますか？</dt>
+      <dd>送りません。すべていま使っているパソコンの中だけで処理しています。</dd>
+      <dt>条件を入れたら「作れません」と出ました</dt>
+      <dd>条件がきつすぎて、全部を満たす配置が無い状態です。どの条件を外せば作れるかを画面に出しますので、それを外すか、「隣」の決め方をゆるくしてください。</dd>
+      <dt>3つの案は何が違うのですか？</dt>
+      <dd>どれも条件を満たしています。並びが違うだけなので、見た感じで選んでかまいません。</dd>
+      <dt>人数より席が多いときは？</dt>
+      <dd>うしろから空席になります。空席もドラッグで動かせます。</dd>
+      <dt>中学・高校でも使えますか？</dt>
+      <dd>使えます。横と縦の数を変えるだけです。</dd>
+    </dl>
+
+    <h2>こんなときに</h2>
+    <ul>
+      <li>学期はじめ・月はじめの席替え</li>
+      <li>視力や聞こえ方に配慮が必要な子がいるとき（「前のほう」で指定）</li>
+      <li>おしゃべりが増えてきた組み合わせを離したいとき</li>
+      <li>面倒見のいい子を隣にしてあげたいとき（「隣にする」で指定）</li>
+    </ul>
+
+    <h2>ほかのツール</h2>
+    <ul class="tools">
+      <li><span class="soon"><b>🧩 班分け</b><small>修学旅行・給食・掃除の班を自動で（準備中）</small></span></li>
+      <li><span class="soon"><b>🧹 当番表</b><small>掃除・給食の当番を割り振り（準備中）</small></span></li>
+      <li><span class="soon"><b>🎲 席替えルーレット</b><small>その場で発表する席替え（準備中）</small></span></li>
+    </ul>
+
+    <h2>このツールについて</h2>
+    <p>入力した名簿・条件は<strong>外部に送信されません。</strong>「名簿の保存」をオンにしたときだけ、いま使っているパソコンの中に残ります。オフのままなら、ページを閉じた時点で消えます。</p>
+    <p class="hint">「さくら先生」はこのサイトのキャラクターです。運営しているのは学校の教員ではありませんが、現場の先生に使ってもらいながら作っています。</p>
+  </section>
+</main>
+
+<footer class="noprint">
+  <div class="wrap">🌸 さくら先生のお道具箱　先生の「割り振る」を、かんたんに。</div>
+</footer>
+
+<script src="../seating.js?v=1"></script>
+<script src="seat.js?v=1"></script>
+</body>
+</html>
