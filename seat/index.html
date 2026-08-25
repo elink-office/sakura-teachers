@@ -125,12 +125,12 @@
           </select>
         </div>
         <div><label for="paper">用紙の向き</label>
-          <select id="paper"><option value="landscape">よこ</option><option value="portrait">たて</option></select>
+          <select id="paper"><option value="landscape">横</option><option value="portrait">縦</option></select>
         </div>
         <div><label for="nameMode">名前の見せ方</label>
           <select id="nameMode">
-            <option value="wrap">姓と名で改行</option>
             <option value="one">1行のまま</option>
+            <option value="wrap">姓と名で改行</option>
             <option value="sei">名字だけ</option>
           </select>
         </div>
@@ -143,7 +143,7 @@
         <div><label for="deco">かざり</label>
           <select id="deco"><option value="none">なし</option><option value="sakura">さくら</option></select>
         </div>
-        <div><label for="dt">日付</label><input id="dt" type="text" size="11"></div>
+        <div><label for="dt">日付</label><input id="dt" type="text" size="14"></div>
         <div><label for="pic">画像を1枚入れる</label><input id="pic" type="file" accept="image/*"></div>
       </div>
       <p style="margin-top:10px">
@@ -155,6 +155,7 @@
         </label>
       </p>
       <p class="hint">PDFにしたいときは、印刷画面で「送信先」を <strong>PDFに保存</strong> にしてください。画像はこのパソコンには保存されません（毎回選び直しになります）。</p>
+      <p class="pc-note noprint" style="margin-top:14px">スマホからは印刷できません。<strong>パソコンで開いて</strong>印刷してください。</p>
       <p style="margin-top:14px">
         <button id="doPrint" type="button">🖨 印刷する</button>
         <button id="doPng" type="button">🖼 画像で保存（PNG）</button>
