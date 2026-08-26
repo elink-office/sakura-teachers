@@ -260,3 +260,8 @@ select.ph option{color:var(--ink)}
   .hero b{font-size:1.25rem}
   .catch{font-size:1.05rem}
 }
+
+/* 名簿のところに出す安心の一言 */
+.safe{
+  margin:0 0 8px;font-size:.75rem;line-height:1.6;color:var(--ink-soft);
+}

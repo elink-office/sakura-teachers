@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>教室の座席表メーカー｜8列でも40人でも自由自在・テンプレート不要 - さくら先生の座席表</title>
 <meta name="description" content="8列でも40人でも、隣同士の組み合わせも自由自在。教室の座席表をランダムに作れる無料ツールです。Excelのテンプレートをダウンロードする必要はありません。名簿を貼り付けてボタンを押すだけ。「この2人は離す」「この子は前のほうに」も指定でき、そのまま印刷・PDFに。学校の先生のための無料ツールです。入力した名簿は外部に送信されません。">
-<link rel="stylesheet" href="../style.css?v=1">
-<link rel="stylesheet" href="../print.css?v=1" media="print">
+<link rel="stylesheet" href="../style.css?v=2">
+<link rel="stylesheet" href="../print.css?v=2" media="print">
 </head>
 <body>
 
@@ -30,6 +30,7 @@
         <p><strong>名前だけで大丈夫です。</strong>男女は、あとから画面で指定できます（名簿に書き足す必要はありません）。</p>
         <p>空のまま「席替えする」を押すと、サンプルの名簿で試せます。</p>
       </div>
+      <p class="safe">🔒 入力した内容は、外部に漏れることはありません。このパソコンだけで完結できるので、安心してご利用ください。</p>
       <textarea id="names" placeholder="1行に1人ずつ&#10;&#10;やまだ たろう&#10;さとう はなこ&#10;すずき いちろう&#10;&#10;空のままなら、サンプルが出力されます"></textarea>
       <div class="row tight" style="margin-top:10px">
         <div><label>人数</label><div class="bignum" id="count">0人</div></div>
@@ -39,8 +40,8 @@
           <select id="kumi" class="narrow"><option value="">－</option><option value="1">1組</option><option value="2">2組</option><option value="3">3組</option><option value="4">4組</option><option value="5">5組</option><option value="6">6組</option><option value="7">7組</option><option value="8">8組</option><option value="9">9組</option><option value="10">10組</option></select></div>
       </div>
       <div style="margin-top:8px">
-        <label for="clsFree">自分で書く（授業名なども）</label>
-        <input id="clsFree" type="text" placeholder="ひまわり組／基礎ゼミナールⅠ" style="width:100%">
+        <label for="clsFree">自分で書く（授業名などもOK）</label>
+        <input id="clsFree" type="text" placeholder="ひまわり組／さくら高校 英語 火3" style="width:100%">
       </div>
       <p class="hint">「自分で書く」は「組」の代わりです。学年を選んでいれば「3年 さくら組」のように出力されます。</p>
     </section>
@@ -275,7 +276,7 @@
     </ul>
 
     <h2>このツールについて</h2>
-    <p>入力した名簿・条件は<strong>外部に送信されません。</strong>「名簿の保存」をオンにしたときだけ、いま使っているパソコンの中に残ります。オフのままなら、ページを閉じた時点で消えます。</p>
+    <p><strong>入力した内容は、外部に漏れることはありません。</strong>このパソコンだけで完結できるので、安心してご利用ください。「名簿の保存」をオンにしたときだけ、いま使っているパソコンの中に残ります。オフのままなら、ページを閉じた時点で消えます。インストールも会員登録も要りません。</p>
     <p class="hint">「さくら先生」はこのサイトのキャラクターです。運営しているのは学校の教員ではありませんが、現場の先生に使ってもらいながら作っています。</p>
   </section>
 </main>
@@ -284,7 +285,7 @@
   <div class="wrap">🌸 さくら先生の座席表　先生の「割り振る」を、かんたんに。</div>
 </footer>
 
-<script src="../seating.js?v=1"></script>
-<script src="seat.js?v=1"></script>
+<script src="../seating.js?v=2"></script>
+<script src="seat.js?v=2"></script>
 </body>
 </html>
