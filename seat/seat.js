@@ -12,7 +12,7 @@
     sep: [], adj: [], fix: [],      // fix = [{name, col, fromFront, zone}]
     plans: [], cur: 0, seats: null,
     sex: {},                        // 名前 -> 'm' / 'f'（名前をキーにするので名簿を貼り直しても残る）
-    sample: false
+    sample: false, sampleNames: []  // サンプルは名簿欄に入れない（消す手間が出るので）
   };
 
   // ---- 名簿 ----
@@ -22,8 +22,14 @@
       .filter(function (s) { return s.length; });
   }
   function refreshNames() {
-    state.names = readNames();
-    $('count').textContent = state.names.length + '人';
+    var typed = readNames();
+    if (state.sample && !typed.length) {
+      state.names = state.sampleNames;
+      $('count').textContent = 'サンプル ' + state.names.length + '人';
+    } else {
+      state.names = typed;
+      $('count').textContent = state.names.length + '人';
+    }
     refreshSeatInfo();
     document.querySelectorAll('select.nameSel').forEach(fillNames);
   }
@@ -135,8 +141,7 @@
     return (c ? c + ' ' : '') + titleWord();
   }
   function sexColor(name) {
-    if (!$('useSex').checked) return '';
-    var g = state.sex[name];
+    var g = state.sex[name];        // 指定していない人は色を付けない（黒のまま）
     if (g === 'm') return $('colM').value;
     if (g === 'f') return $('colF').value;
     return '';
@@ -281,15 +286,16 @@
   function run() {
     // 名簿が空ならサンプルで動かす（初めての人に、何ができるかを1回で見せる）
     if (!readNames().length) {
-      // 教室の形はそのまま。席に入る分だけサンプルを使う
+      // 教室の形はそのまま。席に入る分だけサンプルを使う。
+      // ⚠名簿欄には入れない＝自分の名簿を貼るとき、消す手間が要らない
       var room = (+$('cols').value) * (+$('rows').value);
       var use = SAMPLE.slice(0, Math.max(1, Math.min(SAMPLE.length, room)));
-      $('names').value = use.map(function (x) { return x[0]; }).join(NL);
+      state.sampleNames = use.map(function (x) { return x[0]; });
       use.forEach(function (x) { state.sex[x[0]] = x[1]; });
       state.sample = true;
-      renderSexList();
     }
     refreshNames();
+    renderSexList();
     var opt = collect();
     var msg = $('msg');
     if (!opt.names.length) {
@@ -395,8 +401,11 @@
       }
     }
     // 印刷で紙いっぱいに使う。席が少ないときは1マスを大きくする
-    var avail = 140;                                   // A4よこ で座席に使える高さ(mm)の目安
-    var mm = Math.max(11, Math.min(28, Math.round(avail / rows)));
+    // 用紙の向きで、座席に使える高さ(mm)も1マスの上限も変わる
+    var wide = $('paper').value === 'landscape';
+    var avail = wide ? 140 : 228;
+    var cap = wide ? 28 : 40;
+    var mm = Math.max(11, Math.min(cap, Math.round(avail / rows)));
     $('sheet').style.setProperty('--seatH', mm + 'mm');
     // 印刷したときの1マスの大きさ（用紙の幅から逆算）
     var pageW = ($('paper').value === 'landscape' ? 297 : 210) - 24;
@@ -415,17 +424,19 @@
   }
 
   function showSample() {
-    var bar = document.getElementById('sampleBar');
+    $('sheet').classList.toggle('sample', state.sample);   // 座席の上に SAMPLE の透かし
+    var note = document.getElementById('sampleNote');
     if (state.sample) {
-      if (!bar) {
-        bar = document.createElement('div');
-        bar.id = 'sampleBar';
-        bar.className = 'sample-bar noprint';
-        bar.innerHTML = 'これは<strong>サンプル</strong>です。上の名簿を、自分のクラスのものに入れ替えてください。';
-        $('result').insertBefore(bar, $('result').firstChild);
+      if (!note) {
+        note = document.createElement('p');
+        note.id = 'sampleNote';
+        note.className = 'hint noprint';
+        note.style.marginTop = '8px';
+        note.textContent = '上の欄に、自分のクラスの名簿を入れてください。サンプルは消えます。';
+        $('sheet').parentNode.insertBefore(note, $('sheet').nextSibling);
       }
-    } else if (bar) {
-      bar.parentNode.removeChild(bar);
+    } else if (note) {
+      note.parentNode.removeChild(note);
     }
   }
 
@@ -650,8 +661,17 @@
     }
     if (credit) {
       x.font = '15px sans-serif'; x.fillStyle = '#c3b2ba'; x.textAlign = 'right';
-      x.fillText('さくら先生のお道具箱　sakura-teachers.com', W - pad, H - pad - 8);
+      x.fillText('さくら先生の座席表　sakura-teachers.com', W - pad, H - pad - 8);
       x.textAlign = 'left';
+    }
+    if (state.sample) {
+      x.save();
+      x.translate(W / 2, H / 2); x.rotate(-18 * Math.PI / 180);
+      x.fillStyle = 'rgba(229,143,174,0.22)';
+      x.font = 'bold ' + Math.round(W / 6) + 'px sans-serif';
+      x.textAlign = 'center'; x.textBaseline = 'middle';
+      x.fillText('SAMPLE', 0, 0);
+      x.restore();
     }
     var a = document.createElement('a');
     a.href = cv.toDataURL('image/png');
@@ -671,7 +691,7 @@
         nameMode: $('nameMode').value, bold: $('bold').checked,
         showCredit: $('showCredit').checked,
         order: $('order').value, dir: $('dir').value,
-        useSex: $('useSex').checked, colM: $('colM').value, colF: $('colF').value,
+        colM: $('colM').value, colF: $('colF').value,
         sex: (function () {              // いま名簿にある人だけ残す（去年の名前をためこまない）
           var out = {};
           state.names.forEach(function (n) { if (state.sex[n]) out[n] = state.sex[n]; });
@@ -702,7 +722,6 @@
       if (d.showCredit !== undefined) $('showCredit').checked = !!d.showCredit;
       if (d.order) $('order').value = d.order;
       if (d.dir) $('dir').value = d.dir;
-      $('useSex').checked = !!d.useSex;
       if (d.colM) $('colM').value = d.colM;
       if (d.colF) $('colF').value = d.colF;
       state.sex = d.sex || {};
@@ -750,23 +769,16 @@
     state.board = $('board').value;
     bindTips();
     orderChanged();
-    $('sexBox').hidden = !$('useSex').checked;
     renderSexList();
 
     $('names').addEventListener('input', function () {
-      state.sample = false;            // 自分の名簿を入れたらサンプルではなくなる
+      if (readNames().length) state.sample = false;   // 自分の名簿を入れたらサンプルではなくなる
       showSample();
       refreshNames(); renderSexList();
       if ($('save').checked) save();
     });
     $('order').addEventListener('change', orderChanged);
     $('dir').addEventListener('change', orderChanged);
-    $('useSex').addEventListener('change', function () {
-      $('sexBox').hidden = !$('useSex').checked;
-      renderSexList();
-      if (state.seats) drawSheet();
-      if ($('save').checked && !state.sample) save();
-    });
     ['colM', 'colF'].forEach(function (id) {
       $(id).addEventListener('change', function () {
         renderSexList();

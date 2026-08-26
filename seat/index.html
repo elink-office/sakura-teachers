@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>座席表メーカー｜席替えを自動で・印刷できる無料ツール - さくら先生のお道具箱</title>
-<meta name="description" content="名簿を貼り付けるだけで席替えができる無料ツール。「この2人を離す」「この子は前のほうに」といった条件を入れたまま自動で配置し、そのまま印刷できます。入力した名簿は外部に送信されません。">
+<title>教室の座席表メーカー｜8列でも40人でも自由自在・テンプレート不要 - さくら先生の座席表</title>
+<meta name="description" content="8列でも40人でも、隣同士の組み合わせも自由自在。教室の座席表をランダムに作れる無料ツールです。Excelのテンプレートをダウンロードする必要はありません。名簿を貼り付けてボタンを押すだけ。「この2人は離す」「この子は前のほうに」も指定でき、そのまま印刷・PDFに。学校の先生のための無料ツールです。入力した名簿は外部に送信されません。">
 <link rel="stylesheet" href="../style.css?v=1">
 <link rel="stylesheet" href="../print.css?v=1" media="print">
 </head>
@@ -12,14 +12,15 @@
 
 <header class="site-head noprint">
   <div class="wrap">
-    <a class="logo" href="../">🌸 さくら先生のお道具箱</a>
+    <a class="logo" href="../">🌸 さくら先生の座席表</a>
     <nav><a href="../">ツール一覧</a></nav>
   </div>
 </header>
 
 <main class="wrap">
-  <h1>座席表メーカー</h1>
-  <p class="lead">名簿を貼り付けて、ボタンを押すだけ。「この2人は離す」「この子は前のほうに」を入れたまま席替えできます。そのまま印刷できます。</p>
+  <h1>教室の座席表メーカー</h1>
+  <p class="catch">8列でも、40人でも、隣同士の組み合わせも自由自在</p>
+  <p class="lead">名簿を貼ってボタンひとつ。もうテンプレートは不要です。「この2人は離す」「この子は前のほうに」を入れたまま席替えできて、そのまま印刷・PDFにできます。</p>
 
   <div class="two-col">
     <section class="card noprint">
@@ -39,9 +40,9 @@
       </div>
       <div style="margin-top:8px">
         <label for="clsFree">自分で書く（授業名なども）</label>
-        <input id="clsFree" type="text" placeholder="ひまわり組／情報処理演習Ⅰ　火曜3限" style="width:100%">
+        <input id="clsFree" type="text" placeholder="ひまわり組／基礎ゼミナールⅠ" style="width:100%">
       </div>
-      <p class="hint">「自分で書く」は「組」の代わりです。学年を選んでいれば「3年 さくら組」のように出力されます。長い名前も入れられます。</p>
+      <p class="hint">「自分で書く」は「組」の代わりです。学年を選んでいれば「3年 さくら組」のように出力されます。</p>
     </section>
 
     <section class="card noprint">
@@ -122,8 +123,7 @@
       <div class="board" id="boardTop">黒 板</div>
       <div class="grid" id="grid"></div>
       <div class="board" id="boardBottom" hidden>黒 板</div>
-      <div class="sheet-foot"></div>
-      <div class="sheet-credit" id="credit">さくら先生のお道具箱　sakura-teachers.com</div>
+      <div class="sheet-credit" id="credit">さくら先生の座席表　sakura-teachers.com</div>
     </div>
 
     <div id="printAll"></div>
@@ -168,19 +168,19 @@
         </div>
         <div><label for="deco">アイコン</label>
           <select id="deco">
-            <option value="🌸">🌸 さくら</option>
-            <option value="😊">😊 にこにこ</option>
-            <option value="⭐">⭐ ほし</option>
-            <option value="🍀">🍀 よつば</option>
-            <option value="✏️">✏️ えんぴつ</option>
+            <option value="🌸">🌸</option>
+            <option value="😊">😊</option>
+            <option value="⭐">⭐</option>
+            <option value="🍀">🍀</option>
+            <option value="✏️">✏️</option>
             <option value="">なし</option>
           </select>
         </div>
-        <div><label for="dt">日付（変更可）</label><input id="dt" type="text" size="16" placeholder="1学期 / 4月 など"></div>
+        <div><label for="dt">日付・自由記入</label><input id="dt" type="text" size="16" placeholder="1学期 / 4月 など"></div>
       </div>
       <p style="margin-top:10px">
         <label style="font-weight:normal;display:inline">
-          <input type="checkbox" id="bold"> モニター用（名前を太く・大きく）
+          <input type="checkbox" id="bold" checked> 名前を大きく太く（モニター用）
         </label>
         <label style="font-weight:normal;display:inline;margin-left:18px">
           <input type="checkbox" id="showCredit" checked> 右下にサイト名を入れる
@@ -192,31 +192,27 @@
         <button id="doPng" type="button">🖼 画像で保存（PNG）</button>
         <span class="hint" id="printNote" style="margin-left:8px"></span>
       </p>
+      <p class="hint" style="margin-top:6px">印刷の向きや大きさは、お使いの機器・プリンターの設定によります。うまく収まらないときは、印刷画面の<strong>拡大・縮小</strong>で調整してください。</p>
     </section>
   </div>
 
-  <section class="card noprint">
-    <h2>男女で文字の色を変える<button type="button" class="tip-btn" aria-label="説明">i</button></h2>
-    <div class="tip-body" hidden>
-      <p>名簿に書き足す必要はありません。<strong>下の名前を押すたびに、なし → 男 → 女 と変わります。</strong></p>
-      <p><strong>色は選べます。</strong>はじめは色を付けない状態（黒）です。</p>
-      <p><strong>赤と緑は、いちばん見分けにくい組み合わせ</strong>です。教室のモニターに映して子どもが自分の席を探すことを考えて、このツールでは<strong>青系と赤紫系</strong>のように系統が離れた色を、はじめの組み合わせにしています。明るさも変えてあるので、色が分かりにくい人でも濃さで見分けられます。</p>
-    </div>
-    <p style="margin:0 0 8px">
-      <label style="font-weight:normal;display:inline">
-        <input type="checkbox" id="useSex"> 男女で文字の色を変える
-      </label>
-    </p>
-    <div id="sexBox" hidden>
+  <details class="opt noprint">
+    <summary>男女で文字の色を変える</summary>
+    <div class="body">
+      <h3>色の選びかた<button type="button" class="tip-btn" aria-label="説明">i</button></h3>
+      <div class="tip-body" hidden>
+        <p><strong>赤と緑は、いちばん見分けにくい組み合わせ</strong>です。教室のモニターに映して子どもが自分の席を探すことを考えて、このツールでは<strong>青系と赤紫系</strong>のように系統が離れた色を、はじめの組み合わせにしています。明るさも変えてあるので、色が分かりにくい人でも濃さで見分けられます。</p>
+        <p>色を付けたくないときは、両方とも「黒」を選んでください。</p>
+      </div>
       <div class="row tight">
         <div><label for="colM">男の色</label><select id="colM"></select></div>
         <div><label for="colF">女の色</label><select id="colF"></select></div>
       </div>
-      <p class="hint" style="margin-top:8px">名前を押すたびに <b>なし → 男 → 女</b> と変わります。</p>
+      <p class="hint" style="margin-top:8px">名前を押すたびに <b>なし → 男 → 女</b> と変わります。<strong>指定していない人は黒のままです。</strong>名簿に書き足す必要はありません。</p>
       <div id="sexList" class="chips"></div>
       <p style="margin-top:8px"><button class="mini" id="sexClear" type="button">男女の指定を全部消す</button></p>
     </div>
-  </section>
+  </details>
 
   <section class="card noprint">
     <h2>名簿の保存<button type="button" class="tip-btn" aria-label="説明">i</button></h2>
@@ -253,8 +249,14 @@
       <dd>どれも条件を満たしています。並びが違うだけなので、見た感じで選んでかまいません。</dd>
       <dt>人数より席が多いときは？</dt>
       <dd>うしろから空席になります。空席もドラッグで動かせます。</dd>
+      <dt>6列・7列・8列でも作れますか？ 30人・40人のクラスは？</dt>
+      <dd><strong>作れます。</strong>横と縦の数を変えるだけです。6列でも7列でも8列でも、30人でも40人でも、そのまま並びます。<strong>テンプレートのようにサイズが決まっていない</strong>ので、どんな教室の形にも合わせられます。</dd>
       <dt>中学・高校でも使えますか？</dt>
-      <dd>使えます。横と縦の数を変えるだけです。</dd>
+      <dd>使えます。横と縦の数を変えるだけです。大学の教室（縦に長い形）にも合わせられます。</dd>
+      <dt>ランダムに席替えできますか？</dt>
+      <dd>できます。ボタンを押すたびに<strong>ランダムに並べ替え</strong>ます。完全なランダムだけでなく、「この2人は離す」「この子は前のほうに」といった条件を入れたままランダムにできるのが、Excelのテンプレートとの違いです。出席番号順に並べることもできます。</dd>
+      <dt>座席表のテンプレートはありますか？</dt>
+      <dd><strong>テンプレートは要りません。</strong>Excelのファイルをダウンロードして編集する必要がなく、このページで名簿を貼り付ければ、そのまま座席表になります。印刷とPDFもこのページからできます。</dd>
     </dl>
 
     <h2>こんなときに</h2>
@@ -279,7 +281,7 @@
 </main>
 
 <footer class="noprint">
-  <div class="wrap">🌸 さくら先生のお道具箱　先生の「割り振る」を、かんたんに。</div>
+  <div class="wrap">🌸 さくら先生の座席表　先生の「割り振る」を、かんたんに。</div>
 </footer>
 
 <script src="../seating.js?v=1"></script>

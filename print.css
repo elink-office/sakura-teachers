@@ -55,3 +55,25 @@ body.landscape{}
     -webkit-print-color-adjust:exact;print-color-adjust:exact;
   }
 }
+
+@media print{
+  /* サンプルのまま刷ってしまう事故を防ぐので、透かしは紙にも出す */
+  .sheet.sample::after{
+    content:"SAMPLE";position:absolute;inset:0;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:bold;font-size:80pt;letter-spacing:.14em;
+    color:rgba(229,143,174,.3);transform:rotate(-18deg);
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+  }
+}
+
+@media print{
+  /* 紙の高さいっぱいに広げる。URLは紙の一番下に置く（下の余白が空かないように） */
+  .sheet{
+    min-height:calc(100vh - 24mm);
+    display:flex;flex-direction:column;
+  }
+  .sheet .grid{flex:0 0 auto}
+  .sheet-credit{margin-top:auto;padding-top:4mm}
+  .sheet-foot{display:none}
+}

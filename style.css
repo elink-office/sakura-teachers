@@ -185,13 +185,13 @@ select.ph option{color:var(--ink)}
 
 /* 〇にi の説明 */
 .tip-btn{
-  width:20px;height:20px;padding:0;margin-left:8px;
-  border-radius:50%;border:1.5px solid var(--pink);
-  background:#fff;color:var(--pink);
-  font-size:.75rem;font-weight:bold;font-style:italic;line-height:1;
+  position:relative;padding:0;margin-left:6px;border:0;background:none;
+  color:var(--pink);font-size:1rem;line-height:1;
   vertical-align:middle;cursor:pointer;
 }
-.tip-btn:hover,.tip-btn[aria-expanded="true"]{background:var(--pink);color:#fff}
+.tip-btn::before{content:"ⓘ"}
+.tip-btn::after{content:"";position:absolute;inset:-8px}  /* 見えないが押せる範囲 */
+.tip-btn:hover,.tip-btn[aria-expanded="true"]{color:#b8567f}
 .tip-body{
   background:var(--pink-pale);border:1px solid var(--pink-light);
   border-radius:8px;padding:10px 14px;margin:8px 0 12px;font-size:.9rem;
@@ -209,10 +209,14 @@ select.ph option{color:var(--ink)}
 .chip.m{border-color:currentColor}
 .chip.f{border-color:currentColor}
 
-/* サンプル中の帯 */
-.sample-bar{
-  background:var(--pink);color:#fff;border-radius:8px;
-  padding:10px 14px;margin:0 0 12px;font-size:.95rem;
+/* サンプル中は座席の上に透かし文字 */
+.sheet{position:relative}
+.sheet.sample::after{
+  content:"SAMPLE";
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-weight:bold;font-size:clamp(46px,17vw,150px);letter-spacing:.14em;
+  color:rgba(229,143,174,.22);transform:rotate(-18deg);
+  pointer-events:none;
 }
 
 /* ドラッグ（マウスも指も同じ動き） */
@@ -227,3 +231,32 @@ select.ph option{color:var(--ink)}
   transform:scale(1.06);transition:transform .12s ease;
 }
 .drag-ghost.snap{transition:left .12s ease,top .12s ease,transform .12s ease;transform:scale(1)}
+
+/* キャッチ（見出し扱い・句点なし） */
+.catch{
+  font-size:1.2rem;font-weight:bold;color:var(--pink);
+  margin:6px 0 8px;line-height:1.5;
+}
+
+/* トップページ：座席表をどーんと */
+.hero{
+  display:block;text-decoration:none;color:var(--ink);
+  background:#fff;border:2px solid var(--pink);border-radius:16px;
+  padding:22px 24px;margin:0 0 16px;
+  box-shadow:0 4px 14px rgba(229,143,174,.18);
+}
+.hero:hover{background:var(--pink-pale)}
+.hero b{display:block;font-size:1.5rem;margin-bottom:8px}
+.hero small{display:block;font-size:.95rem;color:var(--ink-soft);line-height:1.7}
+.hero-go{
+  display:inline-block;margin-top:14px;
+  background:var(--pink);color:#fff;border-radius:999px;
+  padding:10px 24px;font-weight:bold;
+}
+.tools.small b{font-size:.95rem}
+.tools.small small{font-size:.85rem}
+@media (max-width:600px){
+  .hero{padding:18px}
+  .hero b{font-size:1.25rem}
+  .catch{font-size:1.05rem}
+}
