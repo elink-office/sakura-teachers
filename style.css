@@ -114,13 +114,10 @@ details.opt > .body{padding:0 16px 16px}
 .sheet.bold .seat .nm{font-weight:bold}
 
 .deco{position:relative}
-.deco-img{max-height:70px;max-width:160px;object-fit:contain}
 .sheet-foot{
   display:grid;grid-template-columns:1fr auto 1fr;align-items:end;
   gap:10px;margin-top:12px;break-inside:avoid;page-break-inside:avoid;
 }
-.deco-row{grid-column:2;justify-self:center}
-.deco-img{grid-column:3;justify-self:end}
 
 .notice{background:var(--pink-light);border-radius:8px;padding:10px 12px;font-size:.9rem;margin:10px 0}
 .notice.warn{background:#fdeceb;color:#8c2b27}
@@ -149,11 +146,7 @@ footer{margin-top:40px;padding:20px 0;border-top:1px solid var(--line);font-size
 }
 
 /* かざり（さくら） */
-.deco-mark{display:flex;align-items:flex-end}
-.deco-row{display:flex;align-items:flex-end;gap:6px}
-.sakura-svg{display:block}
-.sheet.sakura{border:2.5px solid #f2c6d6}
-.sheet.sakura .sheet-title{color:#b8567f}
+.deco-mark{font-size:1.4rem;line-height:1.2}
 
 /* 2カラム（名簿 と 教室の形） */
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
@@ -190,11 +183,47 @@ select.ph option{color:var(--ink)}
   font-size:.78rem;color:#c9b8c0;letter-spacing:.02em;
 }
 
-/* スマホのときだけ出す案内 */
-.pc-note{display:none}
-@media (max-width:760px){
-  .pc-note{
-    display:block;background:var(--pink-light);border-radius:8px;
-    padding:10px 12px;font-size:.9rem;margin:0 0 16px;
-  }
+/* 〇にi の説明 */
+.tip-btn{
+  width:20px;height:20px;padding:0;margin-left:8px;
+  border-radius:50%;border:1.5px solid var(--pink);
+  background:#fff;color:var(--pink);
+  font-size:.75rem;font-weight:bold;font-style:italic;line-height:1;
+  vertical-align:middle;cursor:pointer;
 }
+.tip-btn:hover,.tip-btn[aria-expanded="true"]{background:var(--pink);color:#fff}
+.tip-body{
+  background:var(--pink-pale);border:1px solid var(--pink-light);
+  border-radius:8px;padding:10px 14px;margin:8px 0 12px;font-size:.9rem;
+}
+.tip-body p{margin:0 0 6px}
+.tip-body p:last-child{margin:0}
+
+/* 男女のチップ */
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{
+  font:inherit;font-size:.9rem;padding:5px 10px;cursor:pointer;
+  border:1.5px solid var(--line);border-radius:999px;background:#fff;color:var(--ink);
+}
+.chip .mk{font-size:.75rem;margin-left:4px;opacity:.7}
+.chip.m{border-color:currentColor}
+.chip.f{border-color:currentColor}
+
+/* サンプル中の帯 */
+.sample-bar{
+  background:var(--pink);color:#fff;border-radius:8px;
+  padding:10px 14px;margin:0 0 12px;font-size:.95rem;
+}
+
+/* ドラッグ（マウスも指も同じ動き） */
+.seat{touch-action:none;user-select:none;-webkit-user-select:none}
+.seat.lift{opacity:.25}
+.seat.over{border-color:var(--pink);background:var(--pink-pale);box-shadow:0 0 0 2px var(--pink-light) inset}
+.drag-ghost{
+  position:fixed;z-index:999;pointer-events:none;
+  border:2px solid var(--pink);border-radius:8px;background:#fff;
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  box-shadow:0 6px 16px rgba(0,0,0,.22);
+  transform:scale(1.06);transition:transform .12s ease;
+}
+.drag-ghost.snap{transition:left .12s ease,top .12s ease,transform .12s ease;transform:scale(1)}

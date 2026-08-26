@@ -23,20 +23,13 @@ body.landscape{}
   /* 画面用のサイズが要素に直接ついているので、印刷では上書きする */
   .seat .nm{font-size:var(--nmPrint,4mm) !important}
   .seat.bad{border-color:#999;background:#fff}
-  .deco-img{max-height:22mm}
 }
 
 @media print{
   /* 机は少しだけ角丸に（かたくしない） */
   .seat{border-radius:6px}
   /* かざりは印刷にも出す */
-  .sheet.sakura{
-    border:1.5pt solid #f2c6d6 !important;border-radius:6px;padding:6mm;
-    -webkit-print-color-adjust:exact;print-color-adjust:exact;
-  }
-  .sheet.sakura .sheet-title{color:#b8567f}
-  .deco-mark,.deco-row,.sakura-svg{display:block !important}
-  .deco-row{display:flex !important}
+  .deco-mark{font-size:14pt}
   .sheet-head{display:grid;grid-template-columns:auto 1fr auto;align-items:end;gap:6px}
 }
 
@@ -46,8 +39,6 @@ body.landscape{}
     display:grid !important;grid-template-columns:1fr auto 1fr;align-items:end;
     break-inside:avoid;page-break-inside:avoid;margin-top:6mm;
   }
-  .deco-row{grid-column:2;justify-self:center;display:flex !important}
-  .deco-img{grid-column:3;justify-self:end;display:block !important;max-height:20mm;max-width:45mm}
   .sheet.bold .seat .nm{font-weight:bold}
 }
 

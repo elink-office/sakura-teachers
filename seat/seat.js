@@ -10,7 +10,9 @@
   var state = {
     names: [], cols: 6, rows: 6, board: 'top', mode: 'cross',
     sep: [], adj: [], fix: [],      // fix = [{name, col, fromFront, zone}]
-    plans: [], cur: 0, seats: null
+    plans: [], cur: 0, seats: null,
+    sex: {},                        // 名前 -> 'm' / 'f'（名前をキーにするので名簿を貼り直しても残る）
+    sample: false
   };
 
   // ---- 名簿 ----
@@ -47,6 +49,21 @@
       }).join('');
     if (state.names.indexOf(v) >= 0) sel.value = v;
   }
+  // ---- 文字の色（赤と緑は見分けにくいので、はじめは青系と赤紫系にしてある） ----
+  var COLORS = [
+    ['#333333', '黒'], ['#1f5fbf', '青'], ['#b02a7a', '赤紫'],
+    ['#26418f', '紺'], ['#c4611a', 'だいだい'], ['#17724a', '緑'], ['#8a5a2b', '茶']
+  ];
+
+  // ---- サンプル（ひらがな20人・男女半々） ----
+  var SAMPLE = [
+    ['あおい', 'f'], ['はると', 'm'], ['ひなた', 'f'], ['そうた', 'm'],
+    ['ゆい', 'f'], ['りく', 'm'], ['さくら', 'f'], ['かいと', 'm'],
+    ['めい', 'f'], ['ゆうと', 'm'], ['こはる', 'f'], ['そら', 'm'],
+    ['あかり', 'f'], ['れん', 'm'], ['みお', 'f'], ['たくみ', 'm'],
+    ['のあ', 'f'], ['はやと', 'm'], ['いちか', 'f'], ['けんと', 'm']
+  ];
+
   // ---- クラス名・文字づかい ----
   var GRADE_KANJI = { e: '%d年', j: '中%d', h: '高%d' };
   function className(kana) {
@@ -117,12 +134,48 @@
     var kana = isKana(), c = className(kana);
     return (c ? c + ' ' : '') + titleWord();
   }
-  function sakuraSvg(size) {
-    var p = '';
-    for (var i = 0; i < 5; i++)
-      p += '<ellipse cx="50" cy="24" rx="13" ry="20" transform="rotate(' + (i * 72) + ' 50 50)"/>';
-    return '<svg class="sakura-svg" width="' + size + '" height="' + size + '" viewBox="0 0 100 100" aria-hidden="true">' +
-      '<g fill="#f6b8ce">' + p + '</g><circle cx="50" cy="50" r="7" fill="#e07a9f"/></svg>';
+  function sexColor(name) {
+    if (!$('useSex').checked) return '';
+    var g = state.sex[name];
+    if (g === 'm') return $('colM').value;
+    if (g === 'f') return $('colF').value;
+    return '';
+  }
+
+  function fillColorSelect(sel, val) {
+    sel.innerHTML = COLORS.map(function (c) {
+      return '<option value="' + c[0] + '">' + c[1] + '</option>';
+    }).join('');
+    sel.value = val;
+  }
+
+  function renderSexList() {
+    var box = $('sexList');
+    if (!box) return;
+    box.innerHTML = '';
+    state.names.forEach(function (n) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      var g = state.sex[n];
+      b.className = 'chip' + (g ? ' ' + g : '');
+      b.textContent = n;
+      var mk = document.createElement('span');
+      mk.className = 'mk';
+      mk.textContent = g === 'm' ? '男' : g === 'f' ? '女' : '－';
+      b.appendChild(mk);
+      var col = sexColor(n);
+      if (col) b.style.color = col;
+      b.onclick = function () {
+        var cur = state.sex[n];
+        if (!cur) state.sex[n] = 'm';
+        else if (cur === 'm') state.sex[n] = 'f';
+        else delete state.sex[n];
+        renderSexList();
+        if (state.seats) drawSheet();
+        if ($('save').checked) save();
+      };
+      box.appendChild(b);
+    });
   }
 
   function esc(s) {
@@ -210,8 +263,32 @@
   window.__seatCollect = collect;
   window.__seatState = state;
 
+  // ---- 出席番号順（入力した順に並べる） ----
+  function orderedSeats(opt) {
+    var cols = opt.cols, rows = opt.rows, total = cols * rows;
+    var seats = new Array(total).fill(null);
+    var order = [], r, c;
+    if ($('dir').value === 'v') {
+      for (c = 0; c < cols; c++) for (r = 0; r < rows; r++) order.push(r * cols + c);
+    } else {
+      for (r = 0; r < rows; r++) for (c = 0; c < cols; c++) order.push(r * cols + c);
+    }
+    opt.names.forEach(function (n, i) { if (i < order.length) seats[order[i]] = n; });
+    return seats;
+  }
+
   // ---- 席替えを実行 ----
   function run() {
+    // 名簿が空ならサンプルで動かす（初めての人に、何ができるかを1回で見せる）
+    if (!readNames().length) {
+      // 教室の形はそのまま。席に入る分だけサンプルを使う
+      var room = (+$('cols').value) * (+$('rows').value);
+      var use = SAMPLE.slice(0, Math.max(1, Math.min(SAMPLE.length, room)));
+      $('names').value = use.map(function (x) { return x[0]; }).join(NL);
+      use.forEach(function (x) { state.sex[x[0]] = x[1]; });
+      state.sample = true;
+      renderSexList();
+    }
     refreshNames();
     var opt = collect();
     var msg = $('msg');
@@ -224,6 +301,19 @@
       return;
     }
     msg.innerHTML = '';
+
+    // 出席番号順のときは条件を使わず、答えは1つだけ
+    if ($('order').value === 'number') {
+      opt.separate = []; opt.adjacent = []; opt.fixed = {}; opt.zone = {};
+      state.plans = [orderedSeats(opt)]; state.cur = 0; state.opt = opt;
+      state.seats = state.plans[0].slice();
+      $('result').hidden = false;
+      drawTabs(); drawSheet(); printNote(); showSample();
+      $('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if ($('save').checked && !state.sample) save();
+      return;
+    }
+
     var plans = Seating.generate(opt, 3, 2000);
     if (!plans.length) {
       var who = Seating.blame(opt);
@@ -236,8 +326,10 @@
     state.seats = plans[0].slice();
     $('result').hidden = false;
     drawTabs(); drawSheet(); printNote();
+    showSample();
     $('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    if ($('save').checked) save();
+    if (state.sample) { /* サンプルは保存しない */ }
+    else if ($('save').checked) save();
     else {
       msg.innerHTML = '<div class="notice">名簿の保存は<strong>オフ</strong>です。' +
         'ページを閉じたり読み込み直すと、入れた名簿は消えます。' +
@@ -250,6 +342,8 @@
 
   function drawTabs() {
     var t = $('tabs'); t.innerHTML = '';
+    t.hidden = state.plans.length < 2;
+    if (t.hidden) return;
     state.plans.forEach(function (p, i) {
       var b = document.createElement('button');
       b.type = 'button'; b.textContent = '案 ' + (i + 1);
@@ -293,6 +387,8 @@
           var sp = document.createElement('span');
           sp.className = 'nm';
           sp.textContent = displayName(name);
+          var col = sexColor(name);
+          if (col) sp.style.color = col;
           d.appendChild(sp);
         } else d.textContent = '空';
         g.appendChild(d);
@@ -303,8 +399,7 @@
     var mm = Math.max(11, Math.min(28, Math.round(avail / rows)));
     $('sheet').style.setProperty('--seatH', mm + 'mm');
     // 印刷したときの1マスの大きさ（用紙の幅から逆算）
-    var pageW = ($('paper').value === 'landscape' ? 297 : 210) - 24
-      - ($('deco').value === 'sakura' ? 12 : 0);
+    var pageW = ($('paper').value === 'landscape' ? 297 : 210) - 24;
     var cellWmm = (pageW - (cols - 1) * 1.6) / cols;
     $('credit').hidden = !$('showCredit').checked;
     $('sheet').classList.toggle('bold', $('bold').checked);
@@ -317,6 +412,21 @@
     bindDrag();
     drawViolations();
     drawDeco();
+  }
+
+  function showSample() {
+    var bar = document.getElementById('sampleBar');
+    if (state.sample) {
+      if (!bar) {
+        bar = document.createElement('div');
+        bar.id = 'sampleBar';
+        bar.className = 'sample-bar noprint';
+        bar.innerHTML = 'これは<strong>サンプル</strong>です。上の名簿を、自分のクラスのものに入れ替えてください。';
+        $('result').insertBefore(bar, $('result').firstChild);
+      }
+    } else if (bar) {
+      bar.parentNode.removeChild(bar);
+    }
   }
 
   function drawViolations() {
@@ -333,27 +443,96 @@
       '<br><small>このままでも印刷できます。</small></div>';
   }
 
-  // ---- ドラッグで入れ替え ----
+  // ---- 席を動かす（マウスも指も同じ動き。離すとぱちっとはまる） ----
+  var drag = null;
+
+  function cellAt(x, y) {
+    var el = document.elementFromPoint(x, y);
+    while (el && el !== document.body) {
+      if (el.classList && el.classList.contains('seat')) return el;
+      el = el.parentElement;
+    }
+    return null;
+  }
+
   function bindDrag() {
-    var from = null;
     $('grid').querySelectorAll('.seat').forEach(function (d) {
-      d.addEventListener('dragstart', function (e) {
-        from = +d.dataset.i; d.classList.add('drag');
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('text/plain', String(from));
-      });
-      d.addEventListener('dragend', function () { d.classList.remove('drag'); });
-      d.addEventListener('dragover', function (e) { e.preventDefault(); });
-      d.addEventListener('drop', function (e) {
-        e.preventDefault();
-        var to = +d.dataset.i;
-        var src = from != null ? from : +e.dataTransfer.getData('text/plain');
-        if (src === to || isNaN(src)) return;
-        var t = state.seats[src]; state.seats[src] = state.seats[to]; state.seats[to] = t;
-        from = null;
-        drawSheet();
-      });
+      d.addEventListener('pointerdown', dragStart);
     });
+  }
+
+  function dragStart(e) {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    var d = e.currentTarget;
+    drag = { el: d, from: +d.dataset.i, id: e.pointerId,
+             x0: e.clientX, y0: e.clientY, active: false, ghost: null, over: null };
+    try { d.setPointerCapture(e.pointerId); } catch (err) { }
+    d.addEventListener('pointermove', dragMove);
+    d.addEventListener('pointerup', dragEnd);
+    d.addEventListener('pointercancel', dragEnd);
+  }
+
+  function lift(x, y) {
+    var r = drag.el.getBoundingClientRect();
+    var gh = document.createElement('div');
+    gh.className = 'drag-ghost';
+    gh.style.width = r.width + 'px';
+    gh.style.height = r.height + 'px';
+    gh.style.left = r.left + 'px';
+    gh.style.top = r.top + 'px';
+    gh.innerHTML = drag.el.innerHTML;
+    document.body.appendChild(gh);
+    drag.ghost = gh;
+    drag.dx = x - r.left;
+    drag.dy = y - r.top;
+    drag.active = true;
+    drag.el.classList.add('lift');
+  }
+
+  function dragMove(e) {
+    if (!drag) return;
+    if (!drag.active) {
+      if (Math.abs(e.clientX - drag.x0) + Math.abs(e.clientY - drag.y0) < 6) return;
+      lift(drag.x0, drag.y0);
+    }
+    e.preventDefault();
+    drag.ghost.style.left = (e.clientX - drag.dx) + 'px';
+    drag.ghost.style.top = (e.clientY - drag.dy) + 'px';
+    var t = cellAt(e.clientX, e.clientY);
+    if (t !== drag.over) {
+      if (drag.over) drag.over.classList.remove('over');
+      drag.over = t;
+      if (t) t.classList.add('over');
+    }
+  }
+
+  function dragEnd() {
+    if (!drag) return;
+    var d = drag.el;
+    d.removeEventListener('pointermove', dragMove);
+    d.removeEventListener('pointerup', dragEnd);
+    d.removeEventListener('pointercancel', dragEnd);
+    try { d.releasePointerCapture(drag.id); } catch (err) { }
+    if (!drag.active) { drag = null; return; }
+
+    var target = drag.over, gh = drag.ghost, from = drag.from;
+    if (target) target.classList.remove('over');
+    var to = target ? +target.dataset.i : from;
+    var rect = (target || d).getBoundingClientRect();
+
+    // ぱちっとはまる
+    gh.classList.add('snap');
+    gh.style.left = rect.left + 'px';
+    gh.style.top = rect.top + 'px';
+    setTimeout(function () {
+      if (gh.parentNode) gh.parentNode.removeChild(gh);
+      d.classList.remove('lift');
+      if (to !== from) {
+        var t2 = state.seats[from]; state.seats[from] = state.seats[to]; state.seats[to] = t2;
+      }
+      drawSheet();
+    }, 140);
+    drag = null;
   }
 
   // ---- 印刷 ----
@@ -383,11 +562,15 @@
     document.body.classList.add('print-all');
   }
 
-  function doPrint() {
-    document.body.classList.toggle('landscape', $('paper').value === 'landscape');
+  function setPaper() {
     var st = document.getElementById('pageRule');
     if (!st) { st = document.createElement('style'); st.id = 'pageRule'; document.head.appendChild(st); }
     st.textContent = '@page{size:A4 ' + $('paper').value + ';margin:12mm}';
+    document.body.classList.toggle('landscape', $('paper').value === 'landscape');
+  }
+
+  function doPrint() {
+    setPaper();
     if ($('printWhat').value === 'all' && state.plans.length) buildAll();
     window.print();
   }
@@ -407,36 +590,26 @@
     x.closePath();
   }
 
-  function pngSakura(x, cx, cy, r) {
-    x.save(); x.translate(cx, cy);
-    x.fillStyle = '#f6b8ce';
-    for (var i = 0; i < 5; i++) {
-      x.save(); x.rotate(i * Math.PI * 2 / 5);
-      x.beginPath(); x.ellipse(0, -r * 0.5, r * 0.26, r * 0.4, 0, 0, Math.PI * 2); x.fill();
-      x.restore();
-    }
-    x.fillStyle = '#e07a9f';
-    x.beginPath(); x.arc(0, 0, r * 0.14, 0, Math.PI * 2); x.fill();
-    x.restore();
-  }
-
   function doPng() {
     var o = state.opt, cols = o.cols, rows = o.rows;
-    var deco = $('deco').value === 'sakura';
+    var icon = $('deco').value || '';
     var credit = $('showCredit').checked;
     var cw = 150, ch = 90, pad = 40, head = 70, boardH = 40;
     var W = pad * 2 + cols * cw;
-    var H = pad * 2 + head + boardH + rows * ch + (deco ? 46 : 0) + (credit ? 28 : 0);
+    var H = pad * 2 + head + boardH + rows * ch + (credit ? 28 : 0);
     var cv = document.createElement('canvas');
     cv.width = W; cv.height = H;
     var x = cv.getContext('2d');
     x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
 
-    x.fillStyle = '#333'; x.font = 'bold 28px sans-serif'; x.textBaseline = 'top';
-    x.fillText(sheetTitle(), pad + (deco ? 42 : 0), pad - 10);
-    if (deco) pngSakura(x, pad + 18, pad + 6, 30);
-    x.font = '18px sans-serif'; x.fillStyle = '#777';
+    x.font = '18px sans-serif';
     var dt = $('dt').value || '';
+    x.fillStyle = '#333'; x.font = 'bold 28px sans-serif'; x.textBaseline = 'top';
+    var tx = pad + (icon ? 44 : 0);
+    var dtw = dt ? x.measureText(dt).width + 20 : 0;
+    x.fillText(sheetTitle(), tx, pad - 10, W - pad - tx - dtw);
+    if (icon) { x.font = '30px sans-serif'; x.fillText(icon, pad, pad - 8); x.font = 'bold 28px sans-serif'; }
+    x.font = '18px sans-serif'; x.fillStyle = '#777';
     x.fillText(dt, W - pad - x.measureText(dt).width, pad - 4);
 
     var top = pad + head;
@@ -467,18 +640,13 @@
           if (!wide && lines.length * size * 1.25 < ch - 16) break;
           size -= 1;
         }
-        x.fillStyle = '#333'; x.font = weight + size + 'px sans-serif';
+        x.fillStyle = sexColor(name) || '#333';
+        x.font = weight + size + 'px sans-serif';
         x.textAlign = 'center'; x.textBaseline = 'middle';
         var lh = size * 1.25, top0 = py + ch / 2 - (lines.length - 1) * lh / 2;
         lines.forEach(function (t, li) { x.fillText(t, px + cw / 2, top0 + li * lh); });
         x.textAlign = 'left'; x.textBaseline = 'top';
       }
-    }
-    var footY = pad + head + boardH + rows * ch + 22;
-    if (deco) {
-      pngSakura(x, W / 2 - 40, footY, 22);
-      pngSakura(x, W / 2, footY + 4, 30);
-      pngSakura(x, W / 2 + 40, footY, 22);
     }
     if (credit) {
       x.font = '15px sans-serif'; x.fillStyle = '#c3b2ba'; x.textAlign = 'right';
@@ -501,7 +669,14 @@
         board: $('board').value,
         mode: (document.querySelector('input[name=mode]:checked') || {}).value || 'cross',
         nameMode: $('nameMode').value, bold: $('bold').checked,
-        showCredit: $('showCredit').checked
+        showCredit: $('showCredit').checked,
+        order: $('order').value, dir: $('dir').value,
+        useSex: $('useSex').checked, colM: $('colM').value, colF: $('colF').value,
+        sex: (function () {              // いま名簿にある人だけ残す（去年の名前をためこまない）
+          var out = {};
+          state.names.forEach(function (n) { if (state.sex[n]) out[n] = state.sex[n]; });
+          return out;
+        })()
       }));
       showSaving();
     } catch (e) { }
@@ -525,6 +700,12 @@
       if (d.nameMode) $('nameMode').value = d.nameMode;
       $('bold').checked = !!d.bold;
       if (d.showCredit !== undefined) $('showCredit').checked = !!d.showCredit;
+      if (d.order) $('order').value = d.order;
+      if (d.dir) $('dir').value = d.dir;
+      $('useSex').checked = !!d.useSex;
+      if (d.colM) $('colM').value = d.colM;
+      if (d.colF) $('colF').value = d.colF;
+      state.sex = d.sex || {};
       $('save').checked = true;
     } catch (e) { }
   }
@@ -535,14 +716,69 @@
   }
 
   // ---- 起動 ----
+  // 〇にi をひらく／とじる（PCはクリック、タブレット・スマホはタップ）
+  function bindTips() {
+    document.addEventListener('click', function (e) {
+      var b = e.target;
+      while (b && b !== document.body && !(b.classList && b.classList.contains('tip-btn'))) b = b.parentElement;
+      if (!b || b === document.body) return;
+      var head = b.parentElement;
+      var body = head.nextElementSibling;
+      if (!body || !body.classList.contains('tip-body')) return;
+      var willOpen = body.hidden;
+      body.hidden = !willOpen;
+      b.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+    });
+  }
+
+  function orderChanged() {
+    var byNumber = $('order').value === 'number';
+    $('dirWrap').hidden = !byNumber;
+    $('orderNote').textContent = byNumber
+      ? '入力した順にならべます。「離す」「隣にする」「席を決める」の条件は使いません。'
+      : '';
+    if ($('save').checked && !state.sample) save();
+  }
+
   function init() {
     var d = new Date();
     $('dt').value = d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日';
+    fillColorSelect($('colM'), '#1f5fbf');
+    fillColorSelect($('colF'), '#b02a7a');
     load();
     refreshNames();
     state.board = $('board').value;
+    bindTips();
+    orderChanged();
+    $('sexBox').hidden = !$('useSex').checked;
+    renderSexList();
 
-    $('names').addEventListener('input', function () { refreshNames(); if ($('save').checked) save(); });
+    $('names').addEventListener('input', function () {
+      state.sample = false;            // 自分の名簿を入れたらサンプルではなくなる
+      showSample();
+      refreshNames(); renderSexList();
+      if ($('save').checked) save();
+    });
+    $('order').addEventListener('change', orderChanged);
+    $('dir').addEventListener('change', orderChanged);
+    $('useSex').addEventListener('change', function () {
+      $('sexBox').hidden = !$('useSex').checked;
+      renderSexList();
+      if (state.seats) drawSheet();
+      if ($('save').checked && !state.sample) save();
+    });
+    ['colM', 'colF'].forEach(function (id) {
+      $(id).addEventListener('change', function () {
+        renderSexList();
+        if (state.seats) drawSheet();
+        if ($('save').checked && !state.sample) save();
+      });
+    });
+    $('sexClear').onclick = function () {
+      state.sex = {}; renderSexList();
+      if (state.seats) drawSheet();
+      if ($('save').checked && !state.sample) save();
+    };
     ['cols', 'rows'].forEach(function (id) { $(id).addEventListener('input', refreshSeatInfo); });
     ['grade', 'kumi', 'clsFree'].forEach(function (id) {
       $(id).addEventListener('input', function () {
@@ -561,6 +797,8 @@
     $('again').onclick = run;
     $('doPrint').onclick = doPrint;
     $('printWhat').addEventListener('change', printNote);
+    $('paper').addEventListener('change', setPaper);
+    setPaper();
     $('doPng').onclick = doPng;
     $('save').addEventListener('change', function () {
       if ($('save').checked) save(); else { try { localStorage.removeItem(KEY); } catch (e) { } showSaving(); }
@@ -576,21 +814,10 @@
     document.querySelectorAll('input[name=mode]').forEach(function (r) {
       r.addEventListener('change', function () { if ($('save').checked) save(); });
     });
-    $('pic').addEventListener('change', function (e) {
-      var f = e.target.files[0];
-      if (!f) { $('decoImg').hidden = true; return; }
-      var fr = new FileReader();
-      fr.onload = function () { $('decoImg').src = fr.result; $('decoImg').hidden = false; };
-      fr.readAsDataURL(f);
-    });
     showSaving();
   }
   function drawDeco() {
-    var on = $('deco').value === 'sakura';
-    $('sheet').classList.toggle('sakura', on);
-    $('decoLeft').innerHTML = on ? sakuraSvg(30) : '';
-    $('decoBottom').innerHTML = on
-      ? sakuraSvg(20) + sakuraSvg(28) + sakuraSvg(20) : '';
+    $('decoLeft').textContent = $('deco').value || '';
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
