@@ -29,10 +29,14 @@ body.landscape{}
   .seat.grp{border-width:1mm !important;border-color:var(--gLine) !important}
   .seat.g-both,.seat.g-fill{background:var(--gFill) !important}
   .seat.g-fill{border-width:.3mm !important;border-color:#b5b5b5 !important}
+  .seat.g-none{border-width:1pt !important;border-color:#b5b5b5 !important;background:#fff !important}
+  .seat.g-none .gno{color:#555 !important}
   .seat .gno{
     font-size:3.2mm !important;color:var(--gLine) !important;
     -webkit-print-color-adjust:exact;print-color-adjust:exact;
   }
+  /* 「班の番号を出す」を外したぶんは、紙には出さない */
+  .seat .gno.dim{display:none !important}
 }
 
 @media print{

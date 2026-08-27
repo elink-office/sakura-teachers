@@ -6,8 +6,8 @@
 <meta name="google-site-verification" content="PfjmCGxUaN1hzuj_dRw3e4PTY6xepghfXM_CrU_sO-A" />
 <title>教室の座席表メーカー｜8列でも40人でも自由自在・テンプレート不要 - さくら先生の座席表</title>
 <meta name="description" content="8列でも40人でも、隣同士の組み合わせも自由自在。教室の座席表をランダムに作れる無料ツールです。Excelのテンプレートをダウンロードする必要はありません。名簿を貼り付けてボタンを押すだけ。「この2人は離す」「この子は前のほうに」も指定でき、そのまま印刷・PDFに。学校の先生のための無料ツールです。入力した名簿は外部に送信されません。">
-<link rel="stylesheet" href="../style.css?v=25">
-<link rel="stylesheet" href="../print.css?v=25" media="print">
+<link rel="stylesheet" href="../style.css?v=42">
+<link rel="stylesheet" href="../print.css?v=42" media="print">
 </head>
 <body>
 
@@ -25,14 +25,14 @@
 
   <div class="two-col">
     <section class="card noprint">
-      <h2><span class="step">1</span>名簿を入力（データの貼り付けでもOK）<button type="button" class="tip-btn" aria-label="説明"></button></h2>
+      <h2><span class="step">1</span>名簿を入力&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h2>
       <div class="tip-body" hidden>
         <p><strong>Excelなどからそのまま貼り付けられます。</strong>名前が縦にならんだ列をコピーして、この欄に貼るだけです。</p>
         <p><strong>名前だけで大丈夫です。</strong>男女は、あとから画面で指定できます（名簿に書き足す必要はありません）。</p>
-        <p>空のまま「席替えする」を押すと、サンプルの名簿で試せます。</p>
+        <p><strong>いま出ている座席表はサンプルです。</strong>名簿を入れると、自分のクラスに変わります。入れる前でも、席を動かしたり班に分けたりして試せます。</p>
       </div>
       <p class="safe">🔒 入力した内容は、外部に漏れることはありません。このパソコンだけで完結できるので、安心してご利用ください。</p>
-      <textarea id="names" placeholder="1行に1人ずつ&#10;&#10;やまだ たろう&#10;さとう はなこ&#10;すずき いちろう&#10;&#10;空のままなら、サンプルが出力されます"></textarea>
+      <textarea id="names" placeholder="1行に1人ずつ（Excelから貼り付けてもOK）&#10;&#10;やまだ たろう&#10;さとう はなこ&#10;すずき いちろう&#10;&#10;空のままだと、サンプルのままです"></textarea>
       <div class="row tight" style="margin-top:10px">
         <div><label>人数</label><div class="bignum" id="count">0人</div></div>
         <div><label for="grade">学年</label>
@@ -84,7 +84,7 @@
   <details class="opt noprint">
     <summary>詳しい条件を使う（離す・隣にする・席を決める）</summary>
     <div class="body">
-      <h3>「隣」の考え方<button type="button" class="tip-btn" aria-label="説明"></button></h3>
+      <h3>「隣」の考え方&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h3>
       <div class="tip-body" hidden>
         <p>「離す」「隣にする」で、<strong>どこまでを“隣”とみなすか</strong>を決めます。</p>
         <p>きつくするほど、条件を満たす配置が見つかりにくくなります。作れないときは、ここをゆるくしてみてください。</p>
@@ -142,32 +142,36 @@
     <div id="vio" class="noprint"></div>
 
     <details class="opt noprint" id="sexCard">
-      <summary><span class="step">3</span>男女で文字の色を変える<button type="button" class="tip-btn" aria-label="説明"></button></summary>
+      <summary><span class="step">3</span>男女で文字の色を変える&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></summary>
       <div class="body">
       <div class="tip-body" hidden>
         <p><strong>赤と緑は、いちばん見分けにくい組み合わせ</strong>です。教室のモニターに映して子どもが自分の席を探すことを考えて、このツールでは<strong>青系と赤紫系</strong>のように系統が離れた色を、はじめの組み合わせにしています。明るさも変えてあるので、色が分かりにくい人でも濃さで見分けられます。</p>
         <p>色を付けたくないときは、両方とも「黒」を選んでください。</p>
       </div>
+      <p class="note-sm">下の名前を押すたびに <b>なし → 男 → 女</b> と変わります。<strong>指定していない人は黒のままです。</strong>名簿に書き足す必要はありません。</p>
       <div class="row tight">
         <div><label for="colM">男の色</label><select id="colM"></select></div>
         <div><label for="colF">女の色</label><select id="colF"></select></div>
         <div><label>&nbsp;</label><button class="mini" id="sexClear" type="button">男女の指定を全部消す</button></div>
       </div>
-      <p class="hint" style="margin-top:8px">名前を押すたびに <b>なし → 男 → 女</b> と変わります。<strong>指定していない人は黒のままです。</strong>名簿に書き足す必要はありません。</p>
       <div id="sexList" class="chips"></div>
       </div>
     </details>
 
     <details class="opt noprint" id="grpCard">
-      <summary><span class="step">4</span>班に分ける<button type="button" class="tip-btn" aria-label="説明"></button></summary>
+      <summary><span class="step">4</span>班に分ける&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></summary>
       <div class="body">
       <div class="tip-body" hidden>
         <p>班は<strong>机のかたまり</strong>に付きます。席をドラッグして人を入れ替えると、班もそのまま入れ替わります。</p>
         <p>机は前後2つをひと組にして数えます。4人なら2席×2段、6人なら3席×2段、<strong>3人ならかぎ型</strong>になります。</p>
         <p>ひとりだけの班は作りません。35人を2人ずつに分けるときは、3人の班をひとつ作って、あとは2人ずつになります。</p>
-        <p><strong>班の番号を押すと、その席を次の班にうつせます。</strong>「この子だけ となりの班に」を手で直せます。もう一度席替えをすると、手で直したぶんは元にもどります。</p>
+        <p><strong>班の番号を押すと、その席の班をえらべます。</strong>「この子だけ となりの班に」を手で直せます。もう一度席替えをすると、手で直したぶんは元にもどります。</p>
+        <p>「班の番号を出す」を外しても、この画面には薄く残ります。押して班を変えられます。紙・モニター・画像には出ません。</p>
         <p>色は印刷にも画像にもそのまま出ます。色の見分けがつきにくい方にも伝わる組み合わせを選んであります。</p>
       </div>
+      <p class="note-sm">
+        班に分けると色が付きます。<strong>班番号を押すと、座席表の班を変更できます。</strong>
+      </p>
       <label class="chk-inline">
         <input type="checkbox" id="grpOn"> 班に分ける
       </label>
@@ -188,6 +192,7 @@
               <option value="both">枠線＋うすい色</option>
               <option value="edge">枠線だけ</option>
               <option value="fill">ぬりつぶし</option>
+              <option value="none">色なし（番号だけ）</option>
             </select></div>
         </div>
       </div>
@@ -195,7 +200,7 @@
     </details>
 
     <details class="opt noprint" id="printCard">
-      <summary><span class="step">5</span>印刷と見た目<button type="button" class="tip-btn" aria-label="説明"></button></summary>
+      <summary><span class="step">5</span>印刷と見た目&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></summary>
       <div class="body">
       <div class="tip-body" hidden>
         <p><strong>印刷できないとき</strong></p>
@@ -236,9 +241,13 @@
             <option value="">なし</option>
           </select>
         </div>
-        <div><label for="dt">日付・自由記入</label><input id="dt" type="text" size="16" placeholder="1学期 / 4月 など"></div>
+        <div style="min-width:15em"><label for="dt">日付・自由記入</label>
+          <input id="dt" type="text" placeholder="1学期 / 4月 など" style="width:100%"></div>
       </div>
       <p style="margin-top:10px">
+        <label style="font-weight:normal;display:inline;margin-right:18px">
+          <input type="checkbox" id="dtOff"> 日付を入れない
+        </label>
         <label style="font-weight:normal;display:inline">
           <input type="checkbox" id="bold" checked> 名前を大きく太く（モニター用）
         </label>
@@ -266,7 +275,7 @@
 
 
   <section class="card noprint">
-    <h2>名簿の保存<button type="button" class="tip-btn" aria-label="説明"></button></h2>
+    <h2>名簿の保存&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h2>
     <div class="tip-body" hidden>
       <p><strong>いま使っている機器の中だけ</strong>に残ります。サーバーには送りません。</p>
       <p>保存されるのは、名簿・教室の形・条件・男女の指定です。<strong>読み込んだ画像は保存されません。</strong></p>
@@ -335,7 +344,7 @@
   <div class="wrap">🌸 さくら先生の座席表　先生の「割り振る」を、かんたんに。</div>
 </footer>
 
-<script src="../seating.js?v=25"></script>
-<script src="seat.js?v=25"></script>
+<script src="../seating.js?v=42"></script>
+<script src="seat.js?v=42"></script>
 </body>
 </html>

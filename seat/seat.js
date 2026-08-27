@@ -22,16 +22,25 @@
   // [線の色, うすい塗り, ぬりつぶしの塗り]
   // ⚠ぬりつぶしの塗りは、名前が読める濃さまでにとどめる。
   //   色ごとに明るさが違うので、濃さは1色ずつ決めてある
+  // 赤・橙・黄・黄緑・緑・水色・青・紫・桃 の9色。
+  // ［線の色, うすい塗り, ぬりつぶしの塗り, 色あい（色相）］
+  // ⚠水色と青は色が近いので、明るさを変えてある
   var GCOL = [
-    ['#E69F00', 'rgba(230,159,0,.16)', 'rgba(230,159,0,.32)'],    // 橙
-    ['#0072B2', 'rgba(0,114,178,.14)', 'rgba(0,114,178,.22)'],    // 青
-    ['#009E73', 'rgba(0,158,115,.15)', 'rgba(0,158,115,.26)'],    // 緑
-    ['#CC79A7', 'rgba(204,121,167,.16)', 'rgba(204,121,167,.28)'],// 桃むらさき
-    ['#D55E00', 'rgba(213,94,0,.14)', 'rgba(213,94,0,.22)'],      // 朱
-    ['#56B4E9', 'rgba(86,180,233,.18)', 'rgba(86,180,233,.34)'],  // 空
-    ['#5D3A9B', 'rgba(93,58,155,.14)', 'rgba(93,58,155,.22)'],    // むらさき
-    ['#7A8B00', 'rgba(122,139,0,.16)', 'rgba(122,139,0,.28)']     // 黄みどり
+    ['#EF6B6B', 'rgba(239,107,107,.20)', 'rgba(239,107,107,.42)', 0],   // 赤
+    ['#3FBF88', 'rgba(63,191,136,.20)', 'rgba(63,191,136,.42)', 145],   // 緑
+    ['#EF6BAE', 'rgba(239,107,174,.18)', 'rgba(239,107,174,.38)', 325], // 桃
+    ['#4A8FD6', 'rgba(74,143,214,.20)', 'rgba(74,143,214,.40)', 220],   // 青
+    ['#F2913F', 'rgba(242,145,63,.22)', 'rgba(242,145,63,.46)', 28],    // 橙
+    ['#6FC9E8', 'rgba(111,201,232,.26)', 'rgba(111,201,232,.52)', 193], // 水色
+    ['#8CC63F', 'rgba(140,198,63,.24)', 'rgba(140,198,63,.48)', 85],    // 黄緑
+    ['#9B6BE0', 'rgba(155,107,224,.18)', 'rgba(155,107,224,.36)', 270], // 紫
+    ['#E8B62A', 'rgba(232,182,42,.24)', 'rgba(232,182,42,.50)', 50]     // 黄
   ];
+
+  // 班の番号の順に、上から色を使う。9班をこえたら赤にもどってくり返す。
+  // ⚠となり合う班の色を計算で離す作りも試したが、取り下げた（2026-08-27 本人の判断）＝
+  //   使われない色が出て見た目がさびしくなる／近い色がとなり合っても先生が番号を押して直せる／
+  //   それより「3人班がちゃんとかぎ型になっている」ほうが大事
   function gcol(no) { return GCOL[(no - 1) % GCOL.length]; }
 
   // ---- 名簿 ----
@@ -156,6 +165,12 @@
     while (size > 7 && (span.scrollWidth > w || span.scrollHeight > h)) {
       size -= 1; span.style.fontSize = size + 'px';
     }
+  }
+
+  // 座席表に出す日付（「日付を入れない」のときは空）
+  // ＝モニターに映すときは消して、紙に残すときだけ入れる、という使い分けのため
+  function dateText() {
+    return $('dtOff').checked ? '' : ($('dt').value || '');
   }
 
   function isKana() { var e = $('kana'); return e && e.value === 'kana'; }
@@ -404,7 +419,7 @@
   function drawSheet() {
     var o = state.opt, cols = o.cols, rows = o.rows;
     $('shTitle').textContent = sheetTitle();
-    $('shDate').textContent = $('dt').value || '';
+    $('shDate').textContent = dateText();
     $('boardTop').hidden = (state.board !== 'top');
     $('boardBottom').hidden = (state.board !== 'bottom');
     $('boardTop').textContent = boardWord();
@@ -449,16 +464,16 @@
           d.classList.add('grp', 'g-' + state.grp.look);
           d.style.setProperty('--gLine', gc[0]);
           d.style.setProperty('--gFill', state.grp.look === 'fill' ? gc[2] : gc[1]);
-          if (state.grp.num) {
-            var gn = document.createElement('span');
-            gn.className = 'gno';
-            gn.textContent = gm[i];
-            gn.title = '押すと、この席を次の班にうつせます';
-            // 席を動かすほうの操作と混ざらないように、ここで止める
-            gn.addEventListener('pointerdown', function (ev) { ev.stopPropagation(); });
-            gn.addEventListener('click', nextGroup);
-            d.appendChild(gn);
-          }
+          var gn = document.createElement('span');
+          // 「班の番号を出す」を外しても、この画面では薄く残す（押して班を変えられるように）。
+          // 紙・モニター・画像には出さない
+          gn.className = 'gno' + (state.grp.num ? '' : ' dim');
+          gn.textContent = gm[i];
+          gn.title = '押すと、この席の班をえらべます';
+          // 席を動かすほうの操作と混ざらないように、ここで止める
+          gn.addEventListener('pointerdown', function (ev) { ev.stopPropagation(); });
+          gn.addEventListener('click', openGroupPick);
+          d.appendChild(gn);
         }
         if (name) {
           var sp = document.createElement('span');
@@ -498,6 +513,12 @@
       sp.style.setProperty('--nmPrint',
         fitPrintSize(sp.textContent, cellWmm - 7, mm - 5, $('bold').checked) + 'mm');
     });
+    var note = document.querySelector('.drag-note');
+    if (note) {
+      note.innerHTML = state.grp.on
+        ? '席をドラッグすると、配置の移動ができます。<strong>班番号を押すと、座席表の班を変更できます</strong>'
+        : '席をドラッグすると、配置の移動ができます';
+    }
     bindDrag();
     drawViolations();
     drawDeco();
@@ -539,15 +560,57 @@
     }
   }
 
-  // 班番号を押すと、その席を次の班にうつす（1 → 2 → 3 …→ 最後 → 1）
-  function nextGroup(e) {
+  // ---- 班をえらぶ小さな窓 ----
+  var pick = null;
+
+  function closeGroupPick() {
+    if (pick && pick.parentNode) pick.parentNode.removeChild(pick);
+    pick = null;
+  }
+
+  // 班番号を押すと、その席のそばに班の一覧が開く
+  function openGroupPick(e) {
     e.stopPropagation();
+    closeGroupPick();
     var cell = this.parentNode;
     var i = +cell.dataset.i;
     var now = (state.gmap && state.gmap[i]) || 1;
     var max = Math.max(1, state.gcount);
-    state.gfix[i] = (now % max) + 1;
-    drawSheet();
+
+    var box = document.createElement('div');
+    box.className = 'gpick noprint';
+    for (var n = 1; n <= max; n++) {
+      (function (no) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = no;
+        var c = gcol(no);
+        b.style.borderColor = c[0];
+        b.style.background = c[1];
+        b.style.color = c[0];
+        if (no === now) b.className = 'on';
+        b.onclick = function (ev) {
+          ev.stopPropagation();
+          state.gfix[i] = no;
+          closeGroupPick();
+          drawSheet();
+        };
+        box.appendChild(b);
+      })(n);
+    }
+    document.body.appendChild(box);
+    pick = box;
+
+    // 位置を決める。画面からはみ出さないようにする
+    var onScreen = document.body.classList.contains('screen');
+    var r = cell.getBoundingClientRect();
+    var w = box.offsetWidth, h = box.offsetHeight;
+    var left = Math.max(8, Math.min(window.innerWidth - w - 8, r.left));
+    var below = r.bottom + 6, above = r.top - h - 6;
+    var top = (r.bottom + h + 12 > window.innerHeight && above > 8) ? above : below;
+    box.style.position = onScreen ? 'fixed' : 'absolute';
+    box.style.left = left + (onScreen ? 0 : window.scrollX) + 'px';
+    box.style.top = top + (onScreen ? 0 : window.scrollY) + 'px';
   }
 
   function grpChanged() {
@@ -594,6 +657,7 @@
   }
 
   function dragStart(e) {
+    closeGroupPick();
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     var d = e.currentTarget;
     drag = { el: d, from: +d.dataset.i, id: e.pointerId,
@@ -735,7 +799,7 @@
     x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
 
     x.font = '18px sans-serif';
-    var dt = $('dt').value || '';
+    var dt = dateText();
     x.fillStyle = '#333'; x.font = 'bold 28px sans-serif'; x.textBaseline = 'top';
     var tx = pad + (icon ? 44 : 0);
     var dtw = dt ? x.measureText(dt).width + 20 : 0;
@@ -762,20 +826,21 @@
         var px = pad + c * cw, py = gy + dr * ch;
         var gi = state.gmap ? state.gmap[r * cols + c] : 0;
         roundRect(x, px + 4, py + 4, cw - 8, ch - 8, 10);
-        if (gi) {
+        var look = state.grp.look;
+        if (gi && look !== 'none') {
           var gc = gcol(gi);
-          if (state.grp.look !== 'edge') {
-            x.fillStyle = gc[state.grp.look === 'fill' ? 2 : 1];
+          if (look !== 'edge') {
+            x.fillStyle = gc[look === 'fill' ? 2 : 1];
             x.fill();
           }
-          if (state.grp.look === 'fill') { x.strokeStyle = '#c9c9c9'; x.lineWidth = 2; }
+          if (look === 'fill') { x.strokeStyle = '#c9c9c9'; x.lineWidth = 2; }
           else { x.strokeStyle = gc[0]; x.lineWidth = 3; }
         } else {
           x.strokeStyle = '#c9c9c9'; x.lineWidth = 2;
         }
         x.stroke();
         if (gi && state.grp.num) {
-          x.fillStyle = gcol(gi)[0];
+          x.fillStyle = (look === 'none') ? '#555' : gcol(gi)[0];
           x.font = 'bold 17px sans-serif';
           x.fillText(String(gi), px + 14, py + 12);
         }
@@ -831,6 +896,7 @@
         order: $('order').value, dir: $('dir').value,
         colM: $('colM').value, colF: $('colF').value,
         sexPrint: $('sexPrint').checked,
+        dt: $('dt').value, dtOff: $('dtOff').checked,
         grp: state.grp,
         sex: (function () {              // いま名簿にある人だけ残す（去年の名前をためこまない）
           var out = {};
@@ -866,6 +932,11 @@
       if (d.colF) $('colF').value = d.colF;
       // ⚠前に保存した人は、この項目を持っていない。そのときは既定（オン）のままにする
       if (d.sexPrint !== undefined) $('sexPrint').checked = !!d.sexPrint;
+      if (d.dt) $('dt').value = d.dt;
+      if (d.dtOff) {
+        $('dtOff').checked = true;
+        $('dt').disabled = true;
+      }
       state.sex = d.sex || {};
       if (d.grp) {
         state.grp = {
@@ -931,7 +1002,7 @@
 
   function init() {
     var d = new Date();
-    $('dt').value = d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日';
+    $('dt').value = '作成日：' + d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日';
     fillColorSelect($('colM'), '#1f5fbf');
     fillColorSelect($('colF'), '#b02a7a');
     load();
@@ -949,6 +1020,11 @@
     });
     $('order').addEventListener('change', orderChanged);
     $('dir').addEventListener('change', orderChanged);
+    $('dtOff').addEventListener('change', function () {
+      $('dt').disabled = this.checked;
+      if (state.seats) drawSheet();
+      if ($('save').checked && !state.sample) save();
+    });
     $('sexPrint').addEventListener('change', function () {
       if (state.seats) drawSheet();
       if ($('save').checked && !state.sample) save();
@@ -1005,6 +1081,9 @@
       if ($('save').checked) save(); else { try { localStorage.removeItem(KEY); } catch (e) { } showSaving(); }
     });
     $('clear').onclick = clearSaved;
+    document.addEventListener('click', function (e) {
+      if (pick && !pick.contains(e.target)) closeGroupPick();
+    });
     $('screenOn').onclick = screenOn;
     $('screenOff').onclick = screenOff;
     // 全画面から抜けたとき（Esc・ブラウザのボタン）も、画面をもとに戻す
@@ -1012,7 +1091,7 @@
       if (!document.fullscreenElement) screenOff();
     });
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') screenOff();
+      if (e.key === 'Escape') { closeGroupPick(); screenOff(); }
     });
     window.addEventListener('resize', function () {
       if (document.body.classList.contains('screen') && state.seats) drawSheet();

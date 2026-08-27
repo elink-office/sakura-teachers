@@ -55,6 +55,8 @@ input[type=number]{width:5em}
 .row > div{flex:0 0 auto}
 .count{color:var(--pink);font-weight:bold}
 .hint{font-size:.85rem;color:var(--ink-soft);margin:4px 0 0}
+/* 操作の説明。読まない人がちょっと読めればいいので、小さめ */
+.note-sm{font-size:.78rem;color:var(--ink-soft);margin:0 0 10px;line-height:1.6}
 
 /* ボタン */
 button{
@@ -115,6 +117,9 @@ details.opt > .body{padding:0 16px 16px}
 .seat.g-edge{border-color:var(--gLine);border-width:3px}
 /* ぬりつぶしは塗りで見分けるので、枠は細いグレーにして文字を読みやすくする */
 .seat.g-fill{background:var(--gFill);border-color:#c9c9c9;border-width:1.5px}
+/* 色なし＝番号だけ（中高生のクラスなど、色分けが要らない先生むけ） */
+.seat.g-none{background:#fff;border-color:var(--line);border-width:1.5px}
+.seat.g-none .gno{color:#555}
 .seat .gno{
   position:absolute;top:0;left:0;
   /* 押せるように、数字のまわりに余白を持たせる（見た目は数字だけ） */
@@ -123,6 +128,22 @@ details.opt > .body{padding:0 16px 16px}
   cursor:pointer;user-select:none;-webkit-user-select:none;
 }
 .seat .gno:hover{background:rgba(0,0,0,.06);border-radius:6px}
+/* 「班の番号を出す」を外したとき＝この画面だけ薄く残す（押して班を変えられる） */
+.seat .gno.dim{color:#c4c4c4}
+body.screen .seat .gno.dim{display:none}
+
+/* 班をえらぶ小さな窓 */
+.gpick{
+  position:absolute;z-index:9500;background:#fff;
+  border:1px solid var(--line);border-radius:12px;padding:9px;
+  box-shadow:0 8px 24px rgba(0,0,0,.18);
+  display:flex;flex-wrap:wrap;gap:6px;max-width:270px;
+}
+.gpick button{
+  min-width:40px;padding:7px 9px;font:inherit;font-weight:bold;font-size:.9rem;
+  border:2px solid;border-radius:9px;cursor:pointer;
+}
+.gpick button.on{box-shadow:0 0 0 2px var(--ink) inset}
 .seat.empty{background:#f6f6f6;border-style:dashed;color:#bbb}
 .seat.bad{border-color:var(--bad);background:#fdeceb}
 .seat.drag{opacity:.4}
@@ -218,6 +239,7 @@ select.ph option{color:var(--ink)}
 
 /* 男女のチップ */
 .chips{display:flex;flex-wrap:wrap;gap:6px}
+#sexList{margin-top:14px}
 .chip{
   font:inherit;font-size:.9rem;padding:5px 10px;cursor:pointer;
   border:1.5px solid var(--line);border-radius:999px;background:#fff;color:var(--ink);
@@ -246,7 +268,10 @@ select.ph option{color:var(--ink)}
 /* 使えないときはグレーに（消さずに、あることは見せておく） */
 .off{opacity:.45}
 .off label{color:#999}
-select:disabled{background:#f2f2f2;color:#999;cursor:not-allowed}
+select:disabled,input:disabled{background:#f2f2f2;color:#999;cursor:not-allowed}
+/* 「日付を入れない」のチェックだけは、薄くせずそのまま押せるように */
+.off .chk-inline{opacity:1}
+.off .chk-inline,.off .chk-inline *{color:var(--ink);cursor:pointer}
 
 /* モニターに映す（教室の大きな画面に、座席表だけを出す） */
 #screenOff{display:none}
@@ -268,7 +293,10 @@ body.screen #screenOff{
   font-size:.9rem;padding:6px 12px;opacity:.5;
 }
 body.screen #screenOff:hover{opacity:1}
-body.screen .seat .gno{font-size:clamp(11px,1.6vh,22px)}
+body.screen /* 色なし＝番号だけ（中高生のクラスなど、色分けが要らない先生むけ） */
+.seat.g-none{background:#fff;border-color:var(--line);border-width:1.5px}
+.seat.g-none .gno{color:#555}
+.seat .gno{font-size:clamp(11px,1.6vh,22px)}
 /* モニターに映すときは、紙と同じ見た目にそろえる */
 /* 男女の色は出さない（⑤のチェックで出せる） */
 body.screen .sheet:not(.sexprint) .seat .nm{color:#111 !important}
