@@ -4,7 +4,7 @@ body.landscape{}
 @media print{
   body{background:#fff}
   .noprint,.site-head,.read,footer,.plan-tabs,.card,details.opt,.notice,
-  h1,.lead,.two-col{display:none !important}
+  h1,.catch,.lead,.two-col{display:none !important}
   .wrap{max-width:none;padding:0;margin:0}
   #result{margin:0}
   .sheet{border:none;border-radius:0;padding:0}
@@ -22,7 +22,17 @@ body.landscape{}
   }
   /* 画面用のサイズが要素に直接ついているので、印刷では上書きする */
   .seat .nm{font-size:var(--nmPrint,4mm) !important}
+  /* 男女の色は紙では出さない（⑤のチェックを入れたときだけ出す） */
+  .sheet:not(.sexprint) .seat .nm{color:#111 !important}
   .seat.bad{border-color:#999;background:#fff}
+  /* 班の色は紙にも出す。線は太めにして、色が薄い印刷機でも見分けられるように */
+  .seat.grp{border-width:1mm !important;border-color:var(--gLine) !important}
+  .seat.g-both,.seat.g-fill{background:var(--gFill) !important}
+  .seat.g-fill{border-width:.3mm !important;border-color:#b5b5b5 !important}
+  .seat .gno{
+    font-size:3.2mm !important;color:var(--gLine) !important;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+  }
 }
 
 @media print{

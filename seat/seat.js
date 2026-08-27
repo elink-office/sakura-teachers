@@ -12,8 +12,27 @@
     sep: [], adj: [], fix: [],      // fix = [{name, col, fromFront, zone}]
     plans: [], cur: 0, seats: null,
     sex: {},                        // 名前 -> 'm' / 'f'（名前をキーにするので名簿を貼り直しても残る）
-    sample: false, sampleNames: []  // サンプルは名簿欄に入れない（消す手間が出るので）
+    sample: false, sampleNames: [],  // サンプルは名簿欄に入れない（消す手間が出るので）
+    grp: { on: false, size: 4, style: 'block', look: 'both', num: true },
+    gmap: null, gcount: 0,
+    gfix: {}                        // 先生が手で変えた班（席の番号 → 班の番号）
   };
+
+  // 班の色（色の見分けがつきにくい方にも伝わる組み合わせ）
+  // [線の色, うすい塗り, ぬりつぶしの塗り]
+  // ⚠ぬりつぶしの塗りは、名前が読める濃さまでにとどめる。
+  //   色ごとに明るさが違うので、濃さは1色ずつ決めてある
+  var GCOL = [
+    ['#E69F00', 'rgba(230,159,0,.16)', 'rgba(230,159,0,.32)'],    // 橙
+    ['#0072B2', 'rgba(0,114,178,.14)', 'rgba(0,114,178,.22)'],    // 青
+    ['#009E73', 'rgba(0,158,115,.15)', 'rgba(0,158,115,.26)'],    // 緑
+    ['#CC79A7', 'rgba(204,121,167,.16)', 'rgba(204,121,167,.28)'],// 桃むらさき
+    ['#D55E00', 'rgba(213,94,0,.14)', 'rgba(213,94,0,.22)'],      // 朱
+    ['#56B4E9', 'rgba(86,180,233,.18)', 'rgba(86,180,233,.34)'],  // 空
+    ['#5D3A9B', 'rgba(93,58,155,.14)', 'rgba(93,58,155,.22)'],    // むらさき
+    ['#7A8B00', 'rgba(122,139,0,.16)', 'rgba(122,139,0,.28)']     // 黄みどり
+  ];
+  function gcol(no) { return GCOL[(no - 1) % GCOL.length]; }
 
   // ---- 名簿 ----
   function readNames() {
@@ -61,13 +80,19 @@
     ['#26418f', '紺'], ['#c4611a', 'だいだい'], ['#17724a', '緑'], ['#8a5a2b', '茶']
   ];
 
-  // ---- サンプル（ひらがな20人・男女半々） ----
+  // ---- サンプル（ひらがな35人・男女半々） ----
+  // ⚠35人にしてあるのは、日本の1クラスが最大35人だから。
+  //   少ない人数だと、実際の教室の埋まり方が伝わらない
   var SAMPLE = [
     ['あおい', 'f'], ['はると', 'm'], ['ひなた', 'f'], ['そうた', 'm'],
     ['ゆい', 'f'], ['りく', 'm'], ['さくら', 'f'], ['かいと', 'm'],
     ['めい', 'f'], ['ゆうと', 'm'], ['こはる', 'f'], ['そら', 'm'],
     ['あかり', 'f'], ['れん', 'm'], ['みお', 'f'], ['たくみ', 'm'],
-    ['のあ', 'f'], ['はやと', 'm'], ['いちか', 'f'], ['けんと', 'm']
+    ['のあ', 'f'], ['はやと', 'm'], ['いちか', 'f'], ['けんと', 'm'],
+    ['ゆあ', 'f'], ['ゆうき', 'm'], ['りん', 'f'], ['そうすけ', 'm'],
+    ['あん', 'f'], ['あさひ', 'm'], ['ひまり', 'f'], ['りひと', 'm'],
+    ['つむぎ', 'f'], ['はるき', 'm'], ['いろは', 'f'], ['ゆうま', 'm'],
+    ['すみれ', 'f'], ['そうま', 'm'], ['ことは', 'f']
   ];
 
   // ---- クラス名・文字づかい ----
@@ -272,18 +297,30 @@
   function orderedSeats(opt) {
     var cols = opt.cols, rows = opt.rows, total = cols * rows;
     var seats = new Array(total).fill(null);
-    var order = [], r, c;
-    if ($('dir').value === 'v') {
-      for (c = 0; c < cols; c++) for (r = 0; r < rows; r++) order.push(r * cols + c);
+    var order = [], r, c, cc;
+    // 縦か横か／左の列からか右の列からか（学校によって1番の席が逆になる）
+    var dv = $('dir').value;
+    var tate = (dv === 'v' || dv === 'vr');
+    var migi = (dv === 'vr' || dv === 'hr');
+    if (tate) {
+      for (c = 0; c < cols; c++) {
+        cc = migi ? cols - 1 - c : c;
+        for (r = 0; r < rows; r++) order.push(r * cols + cc);
+      }
     } else {
-      for (r = 0; r < rows; r++) for (c = 0; c < cols; c++) order.push(r * cols + c);
+      for (r = 0; r < rows; r++) {
+        for (c = 0; c < cols; c++) {
+          cc = migi ? cols - 1 - c : c;
+          order.push(r * cols + cc);
+        }
+      }
     }
     opt.names.forEach(function (n, i) { if (i < order.length) seats[order[i]] = n; });
     return seats;
   }
 
   // ---- 席替えを実行 ----
-  function run() {
+  function run(first) {
     // 名簿が空ならサンプルで動かす（初めての人に、何ができるかを1回で見せる）
     if (!readNames().length) {
       // 教室の形はそのまま。席に入る分だけサンプルを使う。
@@ -296,6 +333,7 @@
     }
     refreshNames();
     renderSexList();
+    state.gfix = {};                // 席替えをしたら、手で変えた班は白紙に戻す
     var opt = collect();
     var msg = $('msg');
     if (!opt.names.length) {
@@ -315,7 +353,7 @@
       state.seats = state.plans[0].slice();
       $('result').hidden = false;
       drawTabs(); drawSheet(); printNote(); showSample();
-      $('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (!first) $('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
       if ($('save').checked && !state.sample) save();
       return;
     }
@@ -333,7 +371,7 @@
     $('result').hidden = false;
     drawTabs(); drawSheet(); printNote();
     showSample();
-    $('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (!first) $('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
     if (state.sample) { /* サンプルは保存しない */ }
     else if ($('save').checked) save();
     else {
@@ -380,6 +418,22 @@
       v.seats.forEach(function (i) { bad[i] = true; });
     });
 
+    // 班（席のかたまりに付ける。人を動かせば班も入れ替わる）
+    var gm = null;
+    if (state.grp.on) {
+      var gr = Seating.groups(state.seats, cols, rows, state.grp.size, state.grp.style, state.board);
+      gm = gr.map; state.gcount = gr.count;
+      // 先生が手で変えたぶんを上からかぶせる
+      for (var fk in state.gfix) {
+        var fi = +fk;
+        if (state.seats[fi]) {
+          gm[fi] = state.gfix[fk];
+          if (state.gfix[fk] > state.gcount) state.gcount = state.gfix[fk];
+        }
+      }
+    } else state.gcount = 0;
+    state.gmap = gm;
+
     for (var dr = 0; dr < rows; dr++) {
       var r = (state.board === 'top') ? dr : rows - 1 - dr;
       for (var c = 0; c < cols; c++) {
@@ -387,8 +441,25 @@
         var name = state.seats[i];
         var d = document.createElement('div');
         d.className = 'seat' + (name ? '' : ' empty') + (bad[i] ? ' bad' : '');
-        d.draggable = true;
+        // ⚠draggable は付けない。ブラウザ標準のドラッグが割り込んで、
+        //   マウスで動かしたときに禁止マークが出てしまう（動かすのは下の自作の処理）
         d.dataset.i = i;
+        if (gm && gm[i]) {
+          var gc = gcol(gm[i]);
+          d.classList.add('grp', 'g-' + state.grp.look);
+          d.style.setProperty('--gLine', gc[0]);
+          d.style.setProperty('--gFill', state.grp.look === 'fill' ? gc[2] : gc[1]);
+          if (state.grp.num) {
+            var gn = document.createElement('span');
+            gn.className = 'gno';
+            gn.textContent = gm[i];
+            gn.title = '押すと、この席を次の班にうつせます';
+            // 席を動かすほうの操作と混ざらないように、ここで止める
+            gn.addEventListener('pointerdown', function (ev) { ev.stopPropagation(); });
+            gn.addEventListener('click', nextGroup);
+            d.appendChild(gn);
+          }
+        }
         if (name) {
           var sp = document.createElement('span');
           sp.className = 'nm';
@@ -412,7 +483,16 @@
     var cellWmm = (pageW - (cols - 1) * 1.6) / cols;
     $('credit').hidden = !$('showCredit').checked;
     $('sheet').classList.toggle('bold', $('bold').checked);
+    var onScreen = document.body.classList.contains('screen');
+    // 男女の色は画面では出したまま、紙では黒にする（既定）。
+    // 班の色を付けると、男女の色まで乗って読みにくくなるため
+    $('sheet').classList.toggle('sexprint', $('sexPrint').checked);
     var base = $('bold').checked ? 22 : 17;
+    if (onScreen) {
+      // 教室のモニターは遠くから見るので、マスの高さから逆算して大きく出す
+      var one = g.querySelector('.seat');
+      base = one ? Math.max(20, Math.floor(one.clientHeight * 0.52)) : 48;
+    }
     g.querySelectorAll('.seat .nm').forEach(function (sp) {
       fitText(sp.parentNode, sp, base);
       sp.style.setProperty('--nmPrint',
@@ -421,6 +501,25 @@
     bindDrag();
     drawViolations();
     drawDeco();
+  }
+
+  // ---- モニターに映す（教室の大きな画面に、座席表だけを出す）----
+  function screenOn() {
+    document.body.classList.add('screen');
+    var el = document.documentElement;
+    if (el.requestFullscreen) { try { el.requestFullscreen()['catch'](function () { }); } catch (e) { } }
+    drawSheet();
+    // 全画面になるまで少し間があるので、大きさを決め直す
+    setTimeout(function () { if (state.seats) drawSheet(); }, 350);
+  }
+
+  function screenOff() {
+    if (!document.body.classList.contains('screen')) return;
+    document.body.classList.remove('screen');
+    if (document.fullscreenElement && document.exitFullscreen) {
+      try { document.exitFullscreen()['catch'](function () { }); } catch (e) { }
+    }
+    if (state.seats) drawSheet();
   }
 
   function showSample() {
@@ -438,6 +537,27 @@
     } else if (note) {
       note.parentNode.removeChild(note);
     }
+  }
+
+  // 班番号を押すと、その席を次の班にうつす（1 → 2 → 3 …→ 最後 → 1）
+  function nextGroup(e) {
+    e.stopPropagation();
+    var cell = this.parentNode;
+    var i = +cell.dataset.i;
+    var now = (state.gmap && state.gmap[i]) || 1;
+    var max = Math.max(1, state.gcount);
+    state.gfix[i] = (now % max) + 1;
+    drawSheet();
+  }
+
+  function grpChanged() {
+    state.gfix = {};                // 分け方が変わったら、手で変えたぶんは捨てる
+    state.grp.size = Math.max(2, Math.min(8, +$('grpSize').value || 4));
+    state.grp.style = $('grpStyle').value;
+    state.grp.look = $('grpLook').value;
+    state.grp.num = $('grpNum').checked;
+    if (state.seats) drawSheet();
+    if ($('save').checked && !state.sample) save();
   }
 
   function drawViolations() {
@@ -469,6 +589,7 @@
   function bindDrag() {
     $('grid').querySelectorAll('.seat').forEach(function (d) {
       d.addEventListener('pointerdown', dragStart);
+      d.addEventListener('dragstart', function (e) { e.preventDefault(); });
     });
   }
 
@@ -639,8 +760,25 @@
       for (var c = 0; c < cols; c++) {
         var name = state.seats[r * cols + c];
         var px = pad + c * cw, py = gy + dr * ch;
-        x.strokeStyle = '#c9c9c9'; x.lineWidth = 2;
-        roundRect(x, px + 4, py + 4, cw - 8, ch - 8, 10); x.stroke();
+        var gi = state.gmap ? state.gmap[r * cols + c] : 0;
+        roundRect(x, px + 4, py + 4, cw - 8, ch - 8, 10);
+        if (gi) {
+          var gc = gcol(gi);
+          if (state.grp.look !== 'edge') {
+            x.fillStyle = gc[state.grp.look === 'fill' ? 2 : 1];
+            x.fill();
+          }
+          if (state.grp.look === 'fill') { x.strokeStyle = '#c9c9c9'; x.lineWidth = 2; }
+          else { x.strokeStyle = gc[0]; x.lineWidth = 3; }
+        } else {
+          x.strokeStyle = '#c9c9c9'; x.lineWidth = 2;
+        }
+        x.stroke();
+        if (gi && state.grp.num) {
+          x.fillStyle = gcol(gi)[0];
+          x.font = 'bold 17px sans-serif';
+          x.fillText(String(gi), px + 14, py + 12);
+        }
         if (!name) continue;
         var lines = displayName(name).split(NL);
         var weight = $('bold').checked ? 'bold ' : '';
@@ -651,7 +789,7 @@
           if (!wide && lines.length * size * 1.25 < ch - 16) break;
           size -= 1;
         }
-        x.fillStyle = sexColor(name) || '#333';
+        x.fillStyle = ($('sexPrint').checked ? sexColor(name) : null) || '#333';
         x.font = weight + size + 'px sans-serif';
         x.textAlign = 'center'; x.textBaseline = 'middle';
         var lh = size * 1.25, top0 = py + ch / 2 - (lines.length - 1) * lh / 2;
@@ -692,6 +830,8 @@
         showCredit: $('showCredit').checked,
         order: $('order').value, dir: $('dir').value,
         colM: $('colM').value, colF: $('colF').value,
+        sexPrint: $('sexPrint').checked,
+        grp: state.grp,
         sex: (function () {              // いま名簿にある人だけ残す（去年の名前をためこまない）
           var out = {};
           state.names.forEach(function (n) { if (state.sex[n]) out[n] = state.sex[n]; });
@@ -724,7 +864,25 @@
       if (d.dir) $('dir').value = d.dir;
       if (d.colM) $('colM').value = d.colM;
       if (d.colF) $('colF').value = d.colF;
+      // ⚠前に保存した人は、この項目を持っていない。そのときは既定（オン）のままにする
+      if (d.sexPrint !== undefined) $('sexPrint').checked = !!d.sexPrint;
       state.sex = d.sex || {};
+      if (d.grp) {
+        state.grp = {
+          on: !!d.grp.on,
+          size: d.grp.size || 4,
+          style: d.grp.style || 'block',
+          look: d.grp.look || 'both',
+          num: d.grp.num !== false
+        };
+        $('grpOn').checked = state.grp.on;
+        $('grpOpts').hidden = !state.grp.on;
+        $('grpNumWrap').hidden = !state.grp.on;
+        $('grpSize').value = state.grp.size;
+        $('grpStyle').value = state.grp.style;
+        $('grpLook').value = state.grp.look;
+        $('grpNum').checked = state.grp.num;
+      }
       $('save').checked = true;
     } catch (e) { }
   }
@@ -741,8 +899,18 @@
       var b = e.target;
       while (b && b !== document.body && !(b.classList && b.classList.contains('tip-btn'))) b = b.parentElement;
       if (!b || b === document.body) return;
+      // 見出しが summary のとき
+      // ・閉じているなら開く（説明も一緒に見える）
+      // ・開いているなら閉じない（説明を読みたいだけなので）
+      if (b.parentElement && b.parentElement.tagName === 'SUMMARY') {
+        var det = b.parentElement.parentElement;
+        if (det && det.tagName === 'DETAILS' && !det.open) det.open = true;
+        e.preventDefault();
+      }
       var head = b.parentElement;
       var body = head.nextElementSibling;
+      // summary の次はまとまり（div.body）なので、その中の説明文を探す
+      if (body && !body.classList.contains('tip-body')) body = body.querySelector('.tip-body');
       if (!body || !body.classList.contains('tip-body')) return;
       var willOpen = body.hidden;
       body.hidden = !willOpen;
@@ -752,7 +920,9 @@
 
   function orderChanged() {
     var byNumber = $('order').value === 'number';
-    $('dirWrap').hidden = !byNumber;
+    // 出席番号順のときだけ使う。ふだんは押せない形にして「あること」は見せておく
+    $('dir').disabled = !byNumber;
+    $('dirWrap').classList.toggle('off', !byNumber);
     $('orderNote').textContent = byNumber
       ? '入力した順にならべます。「離す」「隣にする」「席を決める」の条件は使いません。'
       : '';
@@ -779,6 +949,10 @@
     });
     $('order').addEventListener('change', orderChanged);
     $('dir').addEventListener('change', orderChanged);
+    $('sexPrint').addEventListener('change', function () {
+      if (state.seats) drawSheet();
+      if ($('save').checked && !state.sample) save();
+    });
     ['colM', 'colF'].forEach(function (id) {
       $(id).addEventListener('change', function () {
         renderSexList();
@@ -786,6 +960,19 @@
         if ($('save').checked && !state.sample) save();
       });
     });
+    // 班
+    $('grpOn').addEventListener('change', function () {
+      state.grp.on = this.checked;
+      $('grpOpts').hidden = !this.checked;
+      $('grpNumWrap').hidden = !this.checked;
+      if (state.seats) drawSheet();
+      if ($('save').checked && !state.sample) save();
+    });
+    ['grpSize', 'grpStyle', 'grpLook', 'grpNum'].forEach(function (id) {
+      $(id).addEventListener('input', grpChanged);
+      $(id).addEventListener('change', grpChanged);
+    });
+
     $('sexClear').onclick = function () {
       state.sex = {}; renderSexList();
       if (state.seats) drawSheet();
@@ -805,8 +992,10 @@
     $('addSep').onclick = function () { addPairRow('sepList'); };
     $('addAdj').onclick = function () { addPairRow('adjList'); };
     $('addFix').onclick = addFixRow;
-    $('go').onclick = run;
-    $('again').onclick = run;
+    // ⚠run を直接わたさない。クリックの情報が第1引数に入って「初回」と間違われる
+    $('go').onclick = function () { run(); };
+    // ⚠「べつの案を出す」は座席表を見ながら押すので、画面を動かさない
+    $('again').onclick = function () { run(true); };
     $('doPrint').onclick = doPrint;
     $('printWhat').addEventListener('change', printNote);
     $('paper').addEventListener('change', setPaper);
@@ -816,6 +1005,18 @@
       if ($('save').checked) save(); else { try { localStorage.removeItem(KEY); } catch (e) { } showSaving(); }
     });
     $('clear').onclick = clearSaved;
+    $('screenOn').onclick = screenOn;
+    $('screenOff').onclick = screenOff;
+    // 全画面から抜けたとき（Esc・ブラウザのボタン）も、画面をもとに戻す
+    document.addEventListener('fullscreenchange', function () {
+      if (!document.fullscreenElement) screenOff();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') screenOff();
+    });
+    window.addEventListener('resize', function () {
+      if (document.body.classList.contains('screen') && state.seats) drawSheet();
+    });
     $('deco').addEventListener('change', drawDeco);
     ['nameMode', 'bold', 'showCredit'].forEach(function (id) {
       $(id).addEventListener('change', function () {
@@ -827,6 +1028,12 @@
       r.addEventListener('change', function () { if ($('save').checked) save(); });
     });
     showSaving();
+
+    // ページを開いた時点で、もう座席表が見えているようにする。
+    // 「このアプリ何？」と思った人は、まずスクロールする（とくにスマホ）。
+    // 押す前に現物が見えていれば、それだけで伝わる。
+    // ⚠名簿を保存している先生には、サンプルではなく自分の名簿で出す
+    try { run(true); } catch (e) { }
   }
   function drawDeco() {
     $('decoLeft').textContent = $('deco').value || '';

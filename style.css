@@ -83,7 +83,9 @@ details.opt > .body{padding:0 16px 16px}
 .pair select{max-width:11em}
 
 /* 座席表 */
-.plan-tabs{display:flex;gap:6px;margin-bottom:10px}
+.tabs-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.plan-tabs{display:flex;gap:6px}
+.drag-note{margin:0 0 10px}
 .plan-tabs button.on{background:var(--pink);color:#fff;border-color:var(--pink)}
 
 .sheet{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:16px}
@@ -107,6 +109,20 @@ details.opt > .body{padding:0 16px 16px}
   height:58px;display:flex;align-items:center;justify-content:center;
   text-align:center;padding:3px;cursor:grab;overflow:hidden;
 }
+/* 班（色は席のかたまりに付く） */
+.seat.grp{position:relative}
+.seat.g-both{background:var(--gFill);border-color:var(--gLine);border-width:3px}
+.seat.g-edge{border-color:var(--gLine);border-width:3px}
+/* ぬりつぶしは塗りで見分けるので、枠は細いグレーにして文字を読みやすくする */
+.seat.g-fill{background:var(--gFill);border-color:#c9c9c9;border-width:1.5px}
+.seat .gno{
+  position:absolute;top:0;left:0;
+  /* 押せるように、数字のまわりに余白を持たせる（見た目は数字だけ） */
+  padding:2px 7px 4px 5px;
+  font-size:.72rem;font-weight:bold;line-height:1.3;color:var(--gLine);
+  cursor:pointer;user-select:none;-webkit-user-select:none;
+}
+.seat .gno:hover{background:rgba(0,0,0,.06);border-radius:6px}
 .seat.empty{background:#f6f6f6;border-style:dashed;color:#bbb}
 .seat.bad{border-color:var(--bad);background:#fdeceb}
 .seat.drag{opacity:.4}
@@ -186,12 +202,13 @@ select.ph option{color:var(--ink)}
 /* 〇にi の説明 */
 .tip-btn{
   position:relative;padding:0;margin-left:6px;border:0;background:none;
-  color:var(--pink);font-size:1rem;line-height:1;
+  /* 小さくしたぶん、色は濃いめにして見えるようにする */
+  color:#c2557e;font-size:.78rem;line-height:1;
   vertical-align:middle;cursor:pointer;
 }
 .tip-btn::before{content:"ⓘ"}
 .tip-btn::after{content:"";position:absolute;inset:-8px}  /* 見えないが押せる範囲 */
-.tip-btn:hover,.tip-btn[aria-expanded="true"]{color:#b8567f}
+.tip-btn:hover,.tip-btn[aria-expanded="true"]{color:#9c3d63}
 .tip-body{
   background:var(--pink-pale);border:1px solid var(--pink-light);
   border-radius:8px;padding:10px 14px;margin:8px 0 12px;font-size:.9rem;
@@ -219,8 +236,50 @@ select.ph option{color:var(--ink)}
   pointer-events:none;
 }
 
+/* 横にならべるチェックボックス。
+   ⚠label は既定で縦積み（display:block）なので、指定しないと下にずれる */
+.chk-inline{display:inline-block;font-weight:normal;margin:0;vertical-align:middle}
+.chk-inline.gap{margin-left:18px}
+/* ⚠インラインの display があると hidden が効かなくなるので、こちらを強くしておく */
+[hidden]{display:none !important}
+
+/* 使えないときはグレーに（消さずに、あることは見せておく） */
+.off{opacity:.45}
+.off label{color:#999}
+select:disabled{background:#f2f2f2;color:#999;cursor:not-allowed}
+
+/* モニターに映す（教室の大きな画面に、座席表だけを出す） */
+#screenOff{display:none}
+body.screen{overflow:hidden}
+body.screen .sheet{
+  position:fixed;inset:0;z-index:9000;margin:0;
+  border:0;border-radius:0;padding:2.5vh 2.5vw;
+  display:flex;flex-direction:column;
+}
+body.screen .sheet-head{flex:0 0 auto}
+body.screen .sheet-title{font-size:clamp(20px,3.2vh,44px)}
+body.screen .sheet-date{font-size:clamp(13px,2vh,26px)}
+body.screen .board{flex:0 0 auto;font-size:clamp(14px,2.2vh,30px);padding:1vh}
+body.screen .grid{flex:1 1 auto;grid-auto-rows:1fr;gap:1vh}
+body.screen .seat{height:auto;min-height:0}
+body.screen .sheet-credit{flex:0 0 auto}
+body.screen #screenOff{
+  display:block;position:absolute;top:12px;right:14px;z-index:2;
+  font-size:.9rem;padding:6px 12px;opacity:.5;
+}
+body.screen #screenOff:hover{opacity:1}
+body.screen .seat .gno{font-size:clamp(11px,1.6vh,22px)}
+/* モニターに映すときは、紙と同じ見た目にそろえる */
+/* 男女の色は出さない（⑤のチェックで出せる） */
+body.screen .sheet:not(.sexprint) .seat .nm{color:#111 !important}
+/* 空いている席の「空」も出さない（紙と同じ。子どもに見せる画面なので） */
+body.screen .seat.empty{
+  background:#fff;border-style:solid;font-size:0;color:transparent;
+}
+
 /* ドラッグ（マウスも指も同じ動き） */
-.seat{touch-action:none;user-select:none;-webkit-user-select:none}
+.seat{touch-action:none;user-select:none;-webkit-user-select:none;-webkit-user-drag:none}
+.seat img,.seat span{-webkit-user-drag:none}
 .seat.lift{opacity:.25}
 .seat.over{border-color:var(--pink);background:var(--pink-pale);box-shadow:0 0 0 2px var(--pink-light) inset}
 .drag-ghost{
