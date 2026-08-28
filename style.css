@@ -177,6 +177,7 @@ body.screen .seat .gno.dim{display:none}
 footer{margin-top:40px;padding:20px 0;border-top:1px solid var(--line);font-size:.85rem;color:var(--ink-soft)}
 .fnav{display:block;margin-top:8px}
 .fnav a{color:var(--ink-soft)}
+.copy{display:block;margin-top:6px;font-size:.8rem;color:#a89aa0}
 
 @media (max-width:600px){
   .wrap{padding:12px}
