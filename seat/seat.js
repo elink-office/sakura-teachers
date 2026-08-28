@@ -26,15 +26,15 @@
   // ［線の色, うすい塗り, ぬりつぶしの塗り, 色あい（色相）］
   // ⚠水色と青は色が近いので、明るさを変えてある
   var GCOL = [
-    ['#EF6B6B', 'rgba(239,107,107,.20)', 'rgba(239,107,107,.42)', 0],   // 赤
-    ['#3FBF88', 'rgba(63,191,136,.20)', 'rgba(63,191,136,.42)', 145],   // 緑
-    ['#EF6BAE', 'rgba(239,107,174,.18)', 'rgba(239,107,174,.38)', 325], // 桃
-    ['#4A8FD6', 'rgba(74,143,214,.20)', 'rgba(74,143,214,.40)', 220],   // 青
-    ['#F2913F', 'rgba(242,145,63,.22)', 'rgba(242,145,63,.46)', 28],    // 橙
-    ['#6FC9E8', 'rgba(111,201,232,.26)', 'rgba(111,201,232,.52)', 193], // 水色
-    ['#8CC63F', 'rgba(140,198,63,.24)', 'rgba(140,198,63,.48)', 85],    // 黄緑
-    ['#9B6BE0', 'rgba(155,107,224,.18)', 'rgba(155,107,224,.36)', 270], // 紫
-    ['#E8B62A', 'rgba(232,182,42,.24)', 'rgba(232,182,42,.50)', 50]     // 黄
+    ['#EF6B6B', 'rgba(239,107,107,.14)', 'rgba(239,107,107,.29)', 0],   // 赤
+    ['#3FBF88', 'rgba(63,191,136,.14)', 'rgba(63,191,136,.29)', 145],   // 緑
+    ['#EF6BAE', 'rgba(239,107,174,.13)', 'rgba(239,107,174,.27)', 325], // 桃
+    ['#4A8FD6', 'rgba(74,143,214,.14)', 'rgba(74,143,214,.28)', 220],   // 青
+    ['#F2913F', 'rgba(242,145,63,.15)', 'rgba(242,145,63,.32)', 28],    // 橙
+    ['#6FC9E8', 'rgba(111,201,232,.18)', 'rgba(111,201,232,.36)', 193], // 水色
+    ['#8CC63F', 'rgba(140,198,63,.17)', 'rgba(140,198,63,.34)', 85],    // 黄緑
+    ['#9B6BE0', 'rgba(155,107,224,.13)', 'rgba(155,107,224,.25)', 270], // 紫
+    ['#E8B62A', 'rgba(232,182,42,.17)', 'rgba(232,182,42,.35)', 50]     // 黄
   ];
 
   // 班の番号の順に、上から色を使う。9班をこえたら赤にもどってくり返す。
@@ -489,8 +489,11 @@
     // 印刷で紙いっぱいに使う。席が少ないときは1マスを大きくする
     // 用紙の向きで、座席に使える高さ(mm)も1マスの上限も変わる
     var wide = $('paper').value === 'landscape';
-    var avail = wide ? 140 : 228;
-    var cap = wide ? 28 : 40;
+    // 紙で座席に使える高さ(mm)と、1マスの上限(mm)。
+    // ⚠A4横なら「210 − 余白24 − 見出しや黒板ぶん24」で約162mm使える。
+    //   前は140mmしか割り当てず、22mmあまらせていた（紙だけ縮こまって見えた原因）
+    var avail = wide ? 154 : 242;
+    var cap = wide ? 36 : 46;
     var mm = Math.max(11, Math.min(cap, Math.round(avail / rows)));
     $('sheet').style.setProperty('--seatH', mm + 'mm');
     // 印刷したときの1マスの大きさ（用紙の幅から逆算）
@@ -522,11 +525,13 @@
     bindDrag();
     drawViolations();
     drawDeco();
+    fitSheet();
   }
 
   // ---- モニターに映す（教室の大きな画面に、座席表だけを出す）----
   function screenOn() {
     document.body.classList.add('screen');
+    fitSheet();
     var el = document.documentElement;
     if (el.requestFullscreen) { try { el.requestFullscreen()['catch'](function () { }); } catch (e) { } }
     drawSheet();
@@ -541,6 +546,28 @@
       try { document.exitFullscreen()['catch'](function () { }); } catch (e) { }
     }
     if (state.seats) drawSheet();
+  }
+
+  // ---- スマホでは、座席表ぜんぶを縮めて出す ----
+  // ⚠マスの高さや文字だけ小さくすると、形が変わって縦長に見えてしまう。
+  //   パソコンで見た形のまま、まるごと縮めるほうが伝わる（先生は作らないが、サンプルは必ずスマホで見る）
+  var SHEET_W = 640;   // パソコンで見たときの幅
+  function fitSheet() {
+    var box = $('sheetBox'), sh = $('sheet');
+    if (!box || !sh) return;
+    var narrow = window.innerWidth <= 600 && !document.body.classList.contains('screen');
+    if (!narrow) {
+      sh.style.width = ''; sh.style.transform = ''; box.style.height = '';
+      return;
+    }
+    var room = box.parentNode.clientWidth;
+    // ⚠読みこみの途中はまだ幅が決まっていない。0のまま計算すると scale(0) になって消える
+    if (!room || room <= 0) return;
+    var scale = Math.min(1, room / SHEET_W);
+    sh.style.width = SHEET_W + 'px';
+    sh.style.transformOrigin = 'top left';
+    sh.style.transform = 'scale(' + scale + ')';
+    box.style.height = Math.ceil(sh.offsetHeight * scale) + 'px';
   }
 
   function showSample() {
@@ -1095,7 +1122,11 @@
     });
     window.addEventListener('resize', function () {
       if (document.body.classList.contains('screen') && state.seats) drawSheet();
+      else fitSheet();
     });
+    window.addEventListener('beforeprint', function () { fitSheet(); });
+    // 画像や字体が出そろってから、もう一度あてはめ直す
+    window.addEventListener('load', function () { fitSheet(); });
     $('deco').addEventListener('change', drawDeco);
     ['nameMode', 'bold', 'showCredit'].forEach(function (id) {
       $(id).addEventListener('change', function () {

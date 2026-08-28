@@ -258,30 +258,29 @@
     }
 
     // 机のかたまり
-    // 🔴机は「前後2つをくっつける」のが基本なので、2段ずつを一区切りにする
-    var BAND = 2;
-    var bands = [];
-    for (var r0 = 0; r0 < rows; r0 += BAND) bands.push([r0, Math.min(BAND, rows - r0)]);
-    // 黒板が下のときは、後ろの段が上に見える。番号が上から1・2・3…になるように順を返す
-    if (board === 'bottom') bands.reverse();
-
+    // 🔴机は横に2つくっつけるのが基本なので、**2列ずつ**をひとまとまりにして考える。
+    //   そのまとまりの中を「左→右、上の段から下の段へ」の順に並べ、人数ぶん切る。
+    //   こうすると3人班が前後をふくむ**かぎ型**になる（先生の実際の組み方）。
+    //     1 1 | 3 3
+    //     1 2 | 3 4
+    //     2 2 | 4 4
     var members = [];
-    bands.forEach(function (bd) {
-      var top = bd[0], high = bd[1];
+    for (var c0 = 0; c0 < cols; c0 += 2) {
+      var wide = Math.min(2, cols - c0);
 
-      // 🔴列ごとに「前の席 → 後ろの席」の順に並べる。
-      //   こうすると3人班が「横に3人」ではなく、前後を含む**かぎ型**になる。
-      //   （先生は机を前後でくっつけるので、これが実際の組み方）
       var list = [];
-      for (var cc = 0; cc < cols; cc++) {
-        for (var rr = top; rr < top + high; rr++) {
+      for (var t = 0; t < rows; t++) {
+        // 黒板が下のときは、後ろの段が画面の上に見える。
+        // 班の番号が画面の上から1・2・3…になるように、走る向きを変える
+        var rr = (board === 'bottom') ? rows - 1 - t : t;
+        for (var cc = c0; cc < c0 + wide; cc++) {
           var ii = rr * cols + cc;
           if (seats[ii]) list.push(ii);
         }
       }
-      if (!list.length) return;
+      if (!list.length) continue;
 
-      // この区切りの中で、人数がなるべく同じになるように分ける
+      // このまとまりの中で、人数がなるべく同じになるように分ける
       // （30人を4人班にすると「4人が6班と2人が1班」になってしまうので、3人・3人に均す）
       var k = Math.max(1, Math.round(list.length / size));
       // 指定した人数より多い班は作らない（机が足りなくなるので）
@@ -290,13 +289,14 @@
       //   35人を2人班にすると「2人が17班と1人が1班」になってしまう。
       //   班をひとつ減らして「3人が1班と2人が16班」にする（先生の組み方）
       while (k > 1 && Math.floor(list.length / k) < 2) k--;
+
       var base = Math.floor(list.length / k), rest = list.length % k, at = 0;
       for (var j = 0; j < k; j++) {
         var take = base + (j < rest ? 1 : 0);
         members.push(list.slice(at, at + take));
         at += take;
       }
-    });
+    }
 
     members.forEach(function (m, idx) {
       m.forEach(function (s) { g[s] = idx + 1; });

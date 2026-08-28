@@ -178,9 +178,21 @@ footer{margin-top:40px;padding:20px 0;border-top:1px solid var(--line);font-size
 
 @media (max-width:600px){
   .wrap{padding:12px}
-  .seat{min-height:44px}
-  .seat .nm{font-size:.85rem}
+  /* ⚠マスや文字だけ小さくすると形が変わるので、座席表はまるごと縮める（seat.js の fitSheet） */
+  #sheetBox{overflow:hidden}
 }
+/* モニターに映すときは縮めない */
+body.screen #sheetBox{height:auto !important;overflow:visible}
+body.screen .sheet{width:auto !important;transform:none !important}
+
+/* できること */
+.can{list-style:none;padding:0;margin:10px 0 0}
+.can li{
+  border:1px solid var(--line);border-radius:12px;background:#fff;
+  padding:12px 14px;margin-bottom:10px;
+}
+.can b{display:block;font-size:1.02rem}
+.can small{display:block;color:var(--ink-soft);font-size:.88rem;margin-top:3px}
 
 /* かざり（さくら） */
 .deco-mark{font-size:1.4rem;line-height:1.2}

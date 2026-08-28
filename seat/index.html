@@ -3,6 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="さくら先生の座席表">
+<meta property="og:title" content="教室の座席表メーカー｜8列でも40人でも自由自在">
+<meta property="og:description" content="8列でも40人でも、隣同士の組み合わせも自由自在。名簿を貼るだけで教室の座席表ができます。班分け・色分け・印刷・PDFに対応。無料・登録不要。">
+<meta property="og:url" content="https://sakura-teachers.com/seat/">
+<meta property="og:image" content="https://sakura-teachers.com/ogp.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-GCK29PTKBG"></script>
 <script>
@@ -14,15 +23,15 @@
 <meta name="google-site-verification" content="PfjmCGxUaN1hzuj_dRw3e4PTY6xepghfXM_CrU_sO-A" />
 <title>教室の座席表メーカー｜8列でも40人でも自由自在・テンプレート不要 - さくら先生の座席表</title>
 <meta name="description" content="8列でも40人でも、隣同士の組み合わせも自由自在。教室の座席表をランダムに作れる無料ツールです。Excelのテンプレートをダウンロードする必要はありません。名簿を貼り付けてボタンを押すだけ。「この2人は離す」「この子は前のほうに」も指定でき、そのまま印刷・PDFに。学校の先生のための無料ツールです。入力した名簿は外部に送信されません。">
-<link rel="stylesheet" href="../style.css?v=42">
-<link rel="stylesheet" href="../print.css?v=42" media="print">
+<link rel="stylesheet" href="../style.css?v=48">
+<link rel="stylesheet" href="../print.css?v=48" media="print">
 </head>
 <body>
 
 <header class="site-head noprint">
   <div class="wrap">
     <a class="logo" href="../">🌸 さくら先生の座席表</a>
-    <nav><a href="../">ツール一覧</a></nav>
+    <nav><a href="../">トップに戻る</a></nav>
   </div>
 </header>
 
@@ -39,7 +48,7 @@
         <p><strong>名前だけで大丈夫です。</strong>男女は、あとから画面で指定できます（名簿に書き足す必要はありません）。</p>
         <p><strong>いま出ている座席表はサンプルです。</strong>名簿を入れると、自分のクラスに変わります。入れる前でも、席を動かしたり班に分けたりして試せます。</p>
       </div>
-      <p class="safe">🔒 入力した内容は、外部に漏れることはありません。このパソコンだけで完結できるので、安心してご利用ください。</p>
+      <p class="safe">🔒 入力した内容は、外部に漏れることはありません。<strong>このパソコンだけで完結</strong>できるので、安心してご利用ください。</p>
       <textarea id="names" placeholder="1行に1人ずつ（Excelから貼り付けてもOK）&#10;&#10;やまだ たろう&#10;さとう はなこ&#10;すずき いちろう&#10;&#10;空のままだと、サンプルのままです"></textarea>
       <div class="row tight" style="margin-top:10px">
         <div><label>人数</label><div class="bignum" id="count">0人</div></div>
@@ -131,6 +140,7 @@
     </div>
     <p class="hint drag-note noprint">席は自由に動かせます</p>
 
+    <div id="sheetBox">
     <div class="sheet" id="sheet">
       <div class="sheet-head">
         <span id="decoLeft" class="deco-mark"></span>
@@ -142,6 +152,7 @@
       <div class="board" id="boardBottom" hidden>黒 板</div>
       <div class="sheet-credit" id="credit">さくら先生の座席表　sakura-teachers.com</div>
       <button type="button" id="screenOff" class="noprint">✕ とじる</button>
+    </div>
     </div>
 
     <div id="printAll"></div>
@@ -300,12 +311,21 @@
   <section class="read">
     <h2>使い方</h2>
     <ol>
-      <li>名簿を貼り付けます（1行に1人）。</li>
+      <li><strong>名簿をExcelからコピーして貼り付けます</strong>（1行に1人）。手で打ってもかまいません。</li>
       <li>横と縦の席の数、黒板の位置を選びます。</li>
       <li>必要なら「詳しい条件を使う」を開いて、離す組・隣にする組・席を決める人を入れます。</li>
       <li>「席替えする」を押すと<strong>3つの案</strong>が出るので、見比べて選びます。</li>
-      <li>気になるところはドラッグで入れ替えて、印刷します。</li>
+      <li>気になるところは<strong>ドラッグで入れ替えて</strong>、印刷します。</li>
     </ol>
+
+    <h2>できること</h2>
+    <ul class="can">
+      <li><b>マグネットのように入れ替えも自由自在</b><small>席をつまんで動かすだけ。マウスでも指でも同じように動きます</small></li>
+      <li><b>班分け</b><small>1班の人数を決めるだけ。3人なら前後をふくむかぎ型に組みます</small></li>
+      <li><b>色分け</b><small>班ごとに色が付きます。印刷にもそのまま出ます</small></li>
+      <li><b>印刷・PDF</b><small>紙にもPDFにも、このページから出せます</small></li>
+      <li><b>モニター表示</b><small>教室の画面に大きく映せます。映したまま席替えもできます</small></li>
+    </ul>
 
     <h2>よくある質問</h2>
     <dl>
@@ -343,8 +363,7 @@
     </ul>
 
     <h2>このツールについて</h2>
-    <p><strong>入力した内容は、外部に漏れることはありません。</strong>このパソコンだけで完結できるので、安心してご利用ください。「名簿の保存」をオンにしたときだけ、いま使っているパソコンの中に残ります。オフのままなら、ページを閉じた時点で消えます。インストールも会員登録も要りません。</p>
-    <p class="hint">「さくら先生」はこのサイトのキャラクターです。運営しているのは学校の教員ではありませんが、現場の先生に使ってもらいながら作っています。</p>
+    <p><strong>入力した内容は、外部に漏れることはありません。</strong><strong>このパソコンだけで完結</strong>できるので、安心してご利用ください。「名簿の保存」をオンにしたときだけ、いま使っているパソコンの中に残ります。オフのままなら、ページを閉じた時点で消えます。インストールも会員登録も要りません。</p>
   </section>
 </main>
 
@@ -352,7 +371,7 @@
   <div class="wrap">🌸 さくら先生の座席表　先生の「割り振る」を、かんたんに。</div>
 </footer>
 
-<script src="../seating.js?v=42"></script>
-<script src="seat.js?v=42"></script>
+<script src="../seating.js?v=48"></script>
+<script src="seat.js?v=48"></script>
 </body>
 </html>
