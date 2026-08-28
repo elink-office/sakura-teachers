@@ -30,7 +30,7 @@ body{
 h1{font-size:1.5rem;margin:24px 0 4px}
 h2{font-size:1.15rem;margin:32px 0 10px;padding-left:10px;border-left:5px solid var(--pink)}
 h3{font-size:1rem;margin:20px 0 6px}
-.lead{color:var(--ink-soft);margin:0 0 20px}
+.lead{color:var(--ink-soft);margin:0 0 20px;font-size:.92rem;line-height:1.75}
 
 /* カード */
 .card{
@@ -184,6 +184,9 @@ footer{margin-top:40px;padding:20px 0;border-top:1px solid var(--line);font-size
 /* モニターに映すときは縮めない */
 body.screen #sheetBox{height:auto !important;overflow:visible}
 body.screen .sheet{width:auto !important;transform:none !important}
+
+/* 見出しの折り返しを、意味のまとまりで止める（「で」だけ次の行に落ちるのを防ぐ） */
+.nb{display:inline-block}
 
 /* できること */
 .can{list-style:none;padding:0;margin:10px 0 0}
