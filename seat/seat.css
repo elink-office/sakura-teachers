@@ -1,0 +1,16 @@
+/* 座席表専用の見た目
+   ⚠ 席次表（/seki/）には読み込まれない。ここを直しても席次表は影響を受けない。 */
+
+/* ---- 書体 ---- */
+/* ⚠ 丸文字はWindows（HG丸ｺﾞｼｯｸM-PRO）とiPad・Mac（ヒラギノ丸ゴ ProN）だけ。
+   AndroidとChromebookには入っていないので、静かにゴシックになる（崩れはしない） */
+.sheet.f-mincho .seat .nm{
+  font-family: "Yu Mincho", YuMincho, "Hiragino Mincho ProN", "MS PMincho", serif;
+}
+.sheet.f-gothic .seat .nm{
+  font-family: "Yu Gothic", YuGothic, "Hiragino Sans", "Meiryo", sans-serif;
+}
+.sheet.f-maru .seat .nm{
+  font-family: "HG丸ｺﾞｼｯｸM-PRO", HGMaruGothicMPRO,
+               "Hiragino Maru Gothic ProN", "Yu Gothic", sans-serif;
+}

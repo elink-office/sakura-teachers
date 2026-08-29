@@ -83,6 +83,19 @@
       }).join('');
     if (state.names.indexOf(v) >= 0) sel.value = v;
   }
+  // ---- 書体 ----
+  // ⚠ 丸文字はWindows（HG丸ｺﾞｼｯｸM-PRO）とiPad・Mac（ヒラギノ丸ゴ ProN）だけ。
+  //   無い機器では静かにゴシックになる（崩れはしない）
+  var FONTS = {
+    mincho: '"Yu Mincho", YuMincho, "Hiragino Mincho ProN", "MS PMincho", serif',
+    gothic: '"Yu Gothic", YuGothic, "Hiragino Sans", Meiryo, sans-serif',
+    maru: '"HG丸ｺﾞｼｯｸM-PRO", HGMaruGothicMPRO, "Hiragino Maru Gothic ProN", "Yu Gothic", sans-serif'
+  };
+  function fontStack() {
+    var v = $('font') ? $('font').value : 'gothic';
+    return FONTS[v] || FONTS.gothic;
+  }
+
   // ---- 文字の色（赤と緑は見分けにくいので、はじめは青系と赤紫系にしてある） ----
   var COLORS = [
     ['#333333', '黒'], ['#1f5fbf', '青'], ['#b02a7a', '赤紫'],
@@ -501,6 +514,8 @@
     var cellWmm = (pageW - (cols - 1) * 1.6) / cols;
     $('credit').hidden = !$('showCredit').checked;
     $('sheet').classList.toggle('bold', $('bold').checked);
+    $('sheet').classList.remove('f-mincho', 'f-gothic', 'f-maru');
+    $('sheet').classList.add('f-' + ($('font') ? $('font').value : 'gothic'));
     var onScreen = document.body.classList.contains('screen');
     // 男女の色は画面では出したまま、紙では黒にする（既定）。
     // 班の色を付けると、男女の色まで乗って読みにくくなるため
@@ -519,7 +534,7 @@
     var note = document.querySelector('.drag-note');
     if (note) {
       note.innerHTML = state.grp.on
-        ? '席をドラッグすると、配置の移動ができます。<strong>班番号を押すと、座席表の班を変更できます</strong>'
+        ? '席をドラッグすると、配置の移動ができます。<strong>班番号を押すと、席の班と色を変更できます</strong>'
         : '席をドラッグすると、配置の移動ができます';
     }
     bindDrag();
@@ -876,13 +891,13 @@
         var weight = $('bold').checked ? 'bold ' : '';
         var size = $('bold').checked ? 34 : 28;
         while (size > 9) {
-          x.font = weight + size + 'px sans-serif';
+          x.font = weight + size + 'px ' + fontStack();
           var wide = lines.some(function (t) { return x.measureText(t).width > cw - 20; });
           if (!wide && lines.length * size * 1.25 < ch - 16) break;
           size -= 1;
         }
         x.fillStyle = ($('sexPrint').checked ? sexColor(name) : null) || '#333';
-        x.font = weight + size + 'px sans-serif';
+        x.font = weight + size + 'px ' + fontStack();
         x.textAlign = 'center'; x.textBaseline = 'middle';
         var lh = size * 1.25, top0 = py + ch / 2 - (lines.length - 1) * lh / 2;
         lines.forEach(function (t, li) { x.fillText(t, px + cw / 2, top0 + li * lh); });
@@ -918,7 +933,7 @@
         cols: $('cols').value, rows: $('rows').value,
         board: $('board').value,
         mode: (document.querySelector('input[name=mode]:checked') || {}).value || 'cross',
-        nameMode: $('nameMode').value, bold: $('bold').checked,
+        nameMode: $('nameMode').value, font: $('font').value, bold: $('bold').checked,
         showCredit: $('showCredit').checked,
         order: $('order').value, dir: $('dir').value,
         colM: $('colM').value, colF: $('colF').value,
@@ -951,6 +966,7 @@
       var mr = document.querySelector('input[name=mode][value="' + (d.mode || 'cross') + '"]');
       if (mr) mr.checked = true;
       if (d.nameMode) $('nameMode').value = d.nameMode;
+      if (d.font) $('font').value = d.font;
       $('bold').checked = !!d.bold;
       if (d.showCredit !== undefined) $('showCredit').checked = !!d.showCredit;
       if (d.order) $('order').value = d.order;
@@ -1101,7 +1117,13 @@
     $('again').onclick = function () { run(true); };
     $('doPrint').onclick = doPrint;
     $('printWhat').addEventListener('change', printNote);
-    $('paper').addEventListener('change', setPaper);
+    // 🔴 用紙の向きで1マスの高さが変わる。描き直さないと、
+    //    横で計算した高さのまま縦の紙に刷られてしまう
+    $('paper').addEventListener('change', function () {
+      setPaper();
+      if (state.seats) drawSheet();
+      if ($('save').checked && !state.sample) save();
+    });
     setPaper();
     $('doPng').onclick = doPng;
     $('save').addEventListener('change', function () {
@@ -1128,7 +1150,7 @@
     // 画像や字体が出そろってから、もう一度あてはめ直す
     window.addEventListener('load', function () { fitSheet(); });
     $('deco').addEventListener('change', drawDeco);
-    ['nameMode', 'bold', 'showCredit'].forEach(function (id) {
+    ['nameMode', 'font', 'bold', 'showCredit'].forEach(function (id) {
       $(id).addEventListener('change', function () {
         if (state.seats) drawSheet();
         if ($('save').checked) save();

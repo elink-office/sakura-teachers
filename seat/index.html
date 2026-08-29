@@ -26,6 +26,7 @@
 <title>教室の座席表メーカー｜席替えを簡単に・30人40人・4列〜8列対応</title>
 <meta name="description" content="教室の座席表の作り方は簡単。名簿を貼るだけで席替えができるフリーツールです。30人・35人・40人のクラス、4列・5列・6列・8列の教室席配置に対応。掲示用と教師用に上下反転もでき、班分けと色分けもそのまま印刷・PDFにできます。Excelテンプレートは不要です。名簿はブラウザの中だけで処理し、AIの学習にも使われません。">
 <link rel="stylesheet" href="../style.css?v=54">
+<link rel="stylesheet" href="seat.css?v=1">
 <link rel="stylesheet" href="../print.css?v=54" media="print">
 </head>
 <body>
@@ -101,7 +102,7 @@
   </div>
 
   <details class="opt noprint">
-    <summary>詳しい条件を使う（離す・隣にする・席を決める）</summary>
+    <summary>詳しい条件（離す・隣にする・席を決める）</summary>
     <div class="body">
       <h3>「隣」の考え方&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h3>
       <div class="tip-body" hidden>
@@ -114,15 +115,15 @@
         <label><input type="radio" name="mode" value="king"> まわり全部（ななめも）</label>
       </div>
 
-      <h3>AさんとBさんを離す</h3>
+      <h3>離す組み合わせ</h3>
       <div id="sepList"></div>
       <button class="mini" id="addSep" type="button">＋ 組を追加</button>
 
-      <h3>AさんとBさんを隣にする</h3>
+      <h3>隣にする組み合わせ</h3>
       <div id="adjList"></div>
       <button class="mini" id="addAdj" type="button">＋ 組を追加</button>
 
-      <h3>Aさんの席を決める</h3>
+      <h3>席を決める人</h3>
       <div id="fixList"></div>
       <button class="mini" id="addFix" type="button">＋ 人を追加</button>
       <p class="hint">視力などの配慮は<strong>「前のほう」がおすすめ</strong>です。席をぴったり決めると、毎回まったく同じ席になります。</p>
@@ -163,7 +164,7 @@
     <div id="vio" class="noprint"></div>
 
     <details class="opt noprint" id="sexCard">
-      <summary><span class="step">3</span>男女で文字の色を変える&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></summary>
+      <summary><span class="step">3</span>男女の文字色&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></summary>
       <div class="body">
       <div class="tip-body" hidden>
         <p><strong>赤と緑は、いちばん見分けにくい組み合わせ</strong>です。教室のモニターに映して子どもが自分の席を探すことを考えて、このツールでは<strong>青系と赤紫系</strong>のように系統が離れた色を、はじめの組み合わせにしています。明るさも変えてあるので、色が分かりにくい人でも濃さで見分けられます。</p>
@@ -180,7 +181,7 @@
     </details>
 
     <details class="opt noprint" id="grpCard">
-      <summary><span class="step">4</span>班に分ける&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></summary>
+      <summary><span class="step">4</span>班分け&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></summary>
       <div class="body">
       <div class="tip-body" hidden>
         <p>班は<strong>机のかたまり</strong>に付きます。席をドラッグして人を入れ替えると、班もそのまま入れ替わります。</p>
@@ -191,7 +192,7 @@
         <p>色は印刷にも画像にもそのまま出ます。色の見分けがつきにくい方にも伝わる組み合わせを選んであります。</p>
       </div>
       <p class="note-sm">
-        班に分けると色が付きます。<strong>班番号を押すと、座席表の班を変更できます。</strong>
+        「班に分ける」にチェックを入れると、班ごとに色が付きます。<strong>班番号を押すと、席の班と色を変更できます。</strong>
       </p>
       <label class="chk-inline">
         <input type="checkbox" id="grpOn"> 班に分ける
@@ -228,6 +229,7 @@
         <p>お使いの機器がプリンターとつながっているか確認してください。つながっていれば、スマホからでも印刷できます。</p>
         <p><strong>PDFにしたいとき</strong>は、印刷画面で「送信先」を「PDFに保存」にしてください。</p>
         <p><strong>たて向きで出てしまうとき</strong>（スマホ・タブレットに多いです）は、印刷画面の設定で<strong>用紙の向きを「横」</strong>に変えてください。機器によっては、こちらの指定より端末の設定が優先されます。</p>
+        <p><strong>丸文字はWindowsとiPadだけ。</strong>ほかの機器ではゴシック体になりますが、崩れません。</p>
       </div>
       <div class="row">
         <div><label for="printWhat">印刷するもの</label>
@@ -238,6 +240,13 @@
         </div>
         <div><label for="paper">用紙の向き</label>
           <select id="paper"><option value="landscape">横</option><option value="portrait">縦</option></select>
+        </div>
+        <div><label for="font">書体</label>
+          <select id="font">
+            <option value="gothic" selected>ゴシック体</option>
+            <option value="maru">丸文字（Windows・iPadのみ）</option>
+            <option value="mincho">明朝体</option>
+          </select>
         </div>
         <div><label for="nameMode">名前の見せ方</label>
           <select id="nameMode">
@@ -288,7 +297,7 @@
     </details>
 
     <p class="noprint" style="margin:14px 0">
-      <button id="doPrint" type="button">🖨 印刷する</button>
+      <button id="doPrint" type="button">🖨 印刷（PDF作成）</button>
       <button id="doPng" type="button">🖼 画像で保存（PNG）</button>
       <span class="hint" id="printNote" style="margin-left:8px"></span>
     </p>
@@ -385,6 +394,6 @@
 </footer>
 
 <script src="../seating.js?v=54"></script>
-<script src="seat.js?v=54"></script>
+<script src="seat.js?v=57"></script>
 </body>
 </html>
