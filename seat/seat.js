@@ -1179,6 +1179,19 @@
     }
 
     try { run(true); } catch (e) { }
+
+    // ---- 「完成サンプルを見る」から来たとき ----
+    // ⚠ #result は最初 hidden なので、ブラウザの目印飛び（#result）が効かない。自分で送る
+    if (location.hash === '#result') {
+      setTimeout(function () {
+        var r = $('result');
+        if (r && !r.hidden) r.scrollIntoView({ block: 'start' });
+        // 🔴スマホは1マスが小さすぎて読めない。映す画面で開いて「✕ とじる」で戻れるようにする。
+        // ⚠タブレットは読めているので、そのままページで見せる（幅600px以下だけ）
+        if (window.innerWidth <= 600 && /(^|[?&])demo=1(&|$)/.test(location.search)) screenOn();
+      }, 150);
+    }
+
   }
   function drawDeco() {
     $('decoLeft').textContent = $('deco').value || '';

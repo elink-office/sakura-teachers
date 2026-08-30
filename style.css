@@ -427,13 +427,27 @@ body.screen .sheet-head{flex:0 0 auto}
 body.screen .sheet-title{font-size:clamp(20px,3.2vh,44px)}
 body.screen .sheet-date{font-size:clamp(13px,2vh,26px)}
 body.screen .board{flex:0 0 auto;font-size:clamp(14px,2.2vh,30px);padding:1vh}
-body.screen .grid{flex:1 1 auto;grid-auto-rows:1fr;gap:1vh}
+/* ⚠ 1fr だけだと、マスの中身（縦書きの名前）の分だけ行が伸びて、画面からはみ出す。
+   スマホを縦に持つと6行×209px＝1293pxになり、画面812pxを大きく超えていた（2026-08-30）。
+   minmax(0,1fr) と min-height:0 で「入るだけ」に抑える。文字は fitText が縮める */
+body.screen .grid{flex:1 1 auto;grid-auto-rows:minmax(0,1fr);gap:1vh;min-height:0}
 body.screen .seat{height:auto;min-height:0}
 /* 🔴 映しているあいだは席を動かせないようにする（2026-08-30 本人の指摘）。
    ⚠スマホ・タブレットは指でスクロールしようとして席をつかんでしまう。
      しかも body.screen は overflow:hidden なので、逃げ場がない。
    ⚠ ✕とじる（#screenOff）はシートの中にあるが席の中ではないので、押せるまま残る */
 body.screen .seat{pointer-events:none}
+
+/* 映す画面で、スマホを縦に持っているときだけ出す案内。
+   ⭐横にした瞬間に消える＝タイマーを使わずに済む（CSSだけで完結） */
+.rotate-tip{display:none}
+@media (max-width:600px) and (orientation:portrait){
+  body.screen .rotate-tip{
+    display:block;position:fixed;left:50%;bottom:14px;transform:translateX(-50%);
+    z-index:9500;background:rgba(0,0,0,.72);color:#fff;   /* ⚠シートが9000なので、その上 */
+    font-size:.85rem;padding:8px 16px;border-radius:999px;pointer-events:none;white-space:nowrap;
+  }
+}
 body.screen .sheet-credit{flex:0 0 auto}
 body.screen #screenOff{
   display:block;position:absolute;top:12px;right:14px;z-index:2;
