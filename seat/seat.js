@@ -1183,12 +1183,25 @@
     // ---- 「完成サンプルを見る」から来たとき ----
     // ⚠ #result は最初 hidden なので、ブラウザの目印飛び（#result）が効かない。自分で送る
     if (location.hash === '#result') {
+      var fromSample = /(^|[?&])demo=1(&|$)/.test(location.search);
+      if (fromSample) {
+        // 🔴 見に来ただけの人を、道具の画面に置き去りにしない（2026-08-30 本人の指摘）。
+        // ①「✕ とじる」でトップへ戻す
+        var off = $('screenOff');
+        if (off) off.addEventListener('click', function () { location.href = '../'; });
+        // ②映す画面を開かない端末（タブレットなど）むけに、戻り道を出しておく
+        var back = document.createElement('p');
+        back.className = 'back-top noprint';
+        back.innerHTML = '<a href="../">← トップにもどる</a>';
+        var rr = $('result');
+        if (rr) rr.insertBefore(back, rr.firstChild);
+      }
       setTimeout(function () {
         var r = $('result');
         if (r && !r.hidden) r.scrollIntoView({ block: 'start' });
         // 🔴スマホは1マスが小さすぎて読めない。映す画面で開いて「✕ とじる」で戻れるようにする。
         // ⚠タブレットは読めているので、そのままページで見せる（幅600px以下だけ）
-        if (window.innerWidth <= 600 && /(^|[?&])demo=1(&|$)/.test(location.search)) screenOn();
+        if (window.innerWidth <= 600 && fromSample) screenOn();
       }, 150);
     }
 

@@ -440,6 +440,11 @@ body.screen .seat{pointer-events:none}
 
 /* 映す画面で、スマホを縦に持っているときだけ出す案内。
    ⭐横にした瞬間に消える＝タイマーを使わずに済む（CSSだけで完結） */
+/* サンプルから来た人に出す戻り道（2026-08-30 本人「閉じるとトップ画面に戻らない」） */
+.back-top{margin:0 0 12px;font-size:.9rem}
+.back-top a{color:var(--ink-soft);text-decoration:underline;text-underline-offset:3px}
+.back-top a:hover{color:var(--ink)}
+
 .rotate-tip{display:none}
 @media (max-width:600px) and (orientation:portrait){
   body.screen .rotate-tip{
