@@ -7,6 +7,8 @@
 
 :root{
   --midori:#3f7a68;        /* 右＝仕事 */
+  --midori-pale:#eef4f2;   /* 薄いほうのボタン（完成サンプルを見る） */
+  --pink-deep:#a84a72;     /* ⚠薄いピンクの上に --pink をのせると薄すぎる（読みやすさ 3.2 → 4.9） */
 }
 /* ⚠ トップだけ薄くしていたが、2026-08-30 に全ページへ広げた（本人の希望）。
    いまは共通の style.css で #f8f9fa。ここでの上書きは不要 */
@@ -56,16 +58,26 @@
 .t-col.r h2{color:var(--midori)}
 .t-col .who{font-size:.8rem;color:var(--ink-soft);margin:0 0 22px}
 
-.t-tool{display:block;text-decoration:none;color:var(--ink);margin-bottom:20px}
+.t-tool{display:block;text-decoration:none;color:var(--ink);margin-bottom:0}
 .t-tool .nm{font-size:1.08rem;font-weight:700;display:block;margin-bottom:5px}
 .t-tool .ds{font-size:.86rem;color:var(--ink-soft);display:block;line-height:1.7}
-.t-tool .go{
-  display:inline-block;margin-top:11px;font-size:.85rem;padding:8px 18px;
-  border-radius:999px;color:#fff;
+
+/* 🔴「使ってみる」と「完成サンプルを見る」を横に並べる（2026-08-30 本人）。
+   ⚠ .t-tool は <a> なので、この2つは中に置けない（リンクの入れ子になる）。外に出してある。
+   ⭐ 薄いほうがサンプル＝どちらが本命かが色で分かる。押せることは丸い形が言う。
+   🔴 アイコンや画像の見本にはしない（本人）＝飾りに見えて飛ばされる */
+.t-btns{display:flex;flex-wrap:wrap;gap:8px;margin:11px 0 20px}
+.t-btns .go{
+  display:inline-block;font-size:.85rem;padding:8px 18px;
+  border-radius:999px;color:#fff;text-decoration:none;font-weight:700;
 }
-.t-col.l .t-tool .go{background:var(--pink)}
-.t-col.r .t-tool .go{background:var(--midori)}
-.t-tool:hover .go{opacity:.88}
+/* 薄いほうは太くしない＝本命がどちらかが、色と太さの両方で分かる */
+.t-btns .go.sub{font-weight:400}
+.t-col.l .t-btns .go{background:var(--pink)}
+.t-col.r .t-btns .go{background:var(--midori)}
+.t-col.l .t-btns .go.sub{background:var(--pink-pale);color:var(--pink-deep)}
+.t-col.r .t-btns .go.sub{background:var(--midori-pale);color:var(--midori)}
+.t-btns .go:hover{opacity:.88}
 
 /* じゅんび中は、枠を作らず文字だけ。できているものと見分けがつくように */
 .t-soon{border-top:1px solid var(--line);margin-top:22px;padding-top:16px}

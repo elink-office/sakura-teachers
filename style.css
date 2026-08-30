@@ -429,6 +429,11 @@ body.screen .sheet-date{font-size:clamp(13px,2vh,26px)}
 body.screen .board{flex:0 0 auto;font-size:clamp(14px,2.2vh,30px);padding:1vh}
 body.screen .grid{flex:1 1 auto;grid-auto-rows:1fr;gap:1vh}
 body.screen .seat{height:auto;min-height:0}
+/* 🔴 映しているあいだは席を動かせないようにする（2026-08-30 本人の指摘）。
+   ⚠スマホ・タブレットは指でスクロールしようとして席をつかんでしまう。
+     しかも body.screen は overflow:hidden なので、逃げ場がない。
+   ⚠ ✕とじる（#screenOff）はシートの中にあるが席の中ではないので、押せるまま残る */
+body.screen .seat{pointer-events:none}
 body.screen .sheet-credit{flex:0 0 auto}
 body.screen #screenOff{
   display:block;position:absolute;top:12px;right:14px;z-index:2;
