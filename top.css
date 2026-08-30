@@ -54,6 +54,9 @@
 /* ⚠ 共通CSSの h2 には縦棒が付く。トップの見出しは文字に色を付ける作りなので、
    縦棒は消す（付いたままだと文字と重なるうえ、右側までピンクになる） */
 .t-col h2::before,.t-about h2::before{content:none}
+/* サンプルから「← トップにもどる」で戻ってきたときの着地点。
+   ⚠ 上の帯が居座るので、少し余裕を取らないと見出しが隠れる */
+.t-col{scroll-margin-top:84px}
 .t-col.l h2{color:var(--pink)}
 .t-col.r h2{color:var(--midori)}
 .t-col .who{font-size:.8rem;color:var(--ink-soft);margin:0 0 22px}
@@ -78,6 +81,19 @@
 .t-col.l .t-btns .go.sub{background:var(--pink-pale);color:var(--pink-deep)}
 .t-col.r .t-btns .go.sub{background:var(--midori-pale);color:var(--midori)}
 .t-btns .go:hover{opacity:.88}
+
+/* 🔴 古いHTMLを覚えている端末むけの保険（2026-08-30）。
+   ⚠HTMLには ?v= が付けられないので、CSSだけ新しくなる時間帯が必ずできる。
+     その間、古いHTML（.t-tool の中に .go がある形）だと飾りが当たらず、
+     ボタンがただの文字になってしまった（本人の端末で実際に起きた）。
+   ⭐だから古い形の見た目も残しておく。HTMLが行き渡っても害はない */
+.t-tool .go{
+  display:inline-block;margin-top:11px;font-size:.85rem;padding:8px 18px;
+  border-radius:999px;color:#fff;font-weight:700;
+}
+.t-col.l .t-tool .go{background:var(--pink)}
+.t-col.r .t-tool .go{background:var(--midori)}
+.t-tool:hover .go{opacity:.88}
 
 /* じゅんび中は、枠を作らず文字だけ。できているものと見分けがつくように */
 .t-soon{border-top:1px solid var(--line);margin-top:22px;padding-top:16px}

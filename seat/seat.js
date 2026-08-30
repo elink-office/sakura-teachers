@@ -1183,16 +1183,18 @@
     // ---- 「完成サンプルを見る」から来たとき ----
     // ⚠ #result は最初 hidden なので、ブラウザの目印飛び（#result）が効かない。自分で送る
     if (location.hash === '#result') {
-      var fromSample = /(^|[?&])demo=1(&|$)/.test(location.search);
+      // ⚠ demo=1 では判断しない。index.html は ?v= が付けられず古いまま残ることがあるので、
+      //   印が消えていても戻り道が出るように「#result で来たか」で見る（2026-08-30）
+      var fromSample = true;
       if (fromSample) {
         // 🔴 見に来ただけの人を、道具の画面に置き去りにしない（2026-08-30 本人の指摘）。
         // ①「✕ とじる」でトップへ戻す
         var off = $('screenOff');
-        if (off) off.addEventListener('click', function () { location.href = '../'; });
+        if (off) off.addEventListener('click', function () { location.href = '../#seat'; });
         // ②映す画面を開かない端末（タブレットなど）むけに、戻り道を出しておく
         var back = document.createElement('p');
         back.className = 'back-top noprint';
-        back.innerHTML = '<a href="../">← トップにもどる</a>';
+        back.innerHTML = '<a href="../#seat">← トップにもどる</a>';
         var rr = $('result');
         if (rr) rr.insertBefore(back, rr.firstChild);
       }
@@ -1201,7 +1203,7 @@
         if (r && !r.hidden) r.scrollIntoView({ block: 'start' });
         // 🔴スマホは1マスが小さすぎて読めない。映す画面で開いて「✕ とじる」で戻れるようにする。
         // ⚠タブレットは読めているので、そのままページで見せる（幅600px以下だけ）
-        if (window.innerWidth <= 600 && fromSample) screenOn();
+        if (window.innerWidth <= 600) screenOn();
       }, 150);
     }
 
