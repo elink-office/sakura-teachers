@@ -1,23 +1,31 @@
-/* 桜ティーチャーズ 共通スタイル */
+/* さくら先生の座席表 共通スタイル
+   🔴 2026-08-29 見た目を入れ替えた＝ベースは薄いグレー。
+      アクセントの色はページごとに分ける（座席表＝桜色／席次表＝緑）。
+      ⚠ 変数名は --pink のまま。名前を変えると、この下の指定を全部直すことになる。
+        席次表は seki.css で中身だけ緑に上書きしている。 */
 :root{
-  --pink:#e58fae;
-  --pink-light:#fbe6ed;
-  --pink-pale:#fdf5f8;
-  --ink:#333;
-  --ink-soft:#6b6b6b;
-  --line:#e3d7dc;
-  --bg:#fffafc;
+  --pink:#c86a8e;        /* 座席表＝学校＝桜色 */
+  --pink-light:#f3e2e8;
+  --pink-pale:#fbf1f4;
+  --ink:#2c2e30;
+  --ink-soft:#82868c;
+  --line:#e3e5e8;
+  --bg:#f8f9fa;          /* ベース＝薄いグレー */
   --ok:#3b8f6b;
   --bad:#d8453f;
-  --radius:12px;
+  --radius:14px;
+  /* 🔴 端末がダークモードでも、スクロールバー・チェックボックス・セレクトが
+     勝手に暗く描かれるのを止める。CSSで色を指定していても起きるので、これが要る */
+  color-scheme: light;
 }
+input[type=checkbox],input[type=radio]{accent-color:var(--pink)}
 *{box-sizing:border-box}
 body{
   margin:0; padding:0;
   font-family:"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;
   color:var(--ink); background:var(--bg); line-height:1.7;
 }
-.wrap{max-width:900px;margin:0 auto;padding:16px}
+.wrap{max-width:900px;margin:0 auto;padding:20px}
 
 /* ヘッダー */
 .site-head{background:#fff;border-bottom:2px solid var(--pink-light);position:sticky;top:0;z-index:30}
@@ -25,23 +33,59 @@ body{
 .site-head a{color:var(--ink);text-decoration:none;font-weight:bold}
 .site-head .logo{font-size:1.1rem}
 .site-head nav{margin-left:auto;font-size:.9rem}
-.site-head nav a{margin-left:14px;font-weight:normal;color:var(--ink-soft)}
+/* 🔴 ヘッダーはツールへの入口。左＝学校（桜色）／右＝仕事（緑）。
+   ⚠ 席次表のページでは --pink が緑になるので、ここは色を直接書く
+     （どのページでも「左は桜、右は緑」を変えないため） */
+.site-head nav{display:flex;gap:18px}
+.site-head nav a{
+  margin-left:0;font-weight:normal;color:var(--ink-soft);
+  /* ⚠ 太字にしたときに幅が動かないよう、あらかじめ場所を取っておく */
+  min-width:3.5em;text-align:center;
+}
+.site-head nav a.l{color:#c86a8e}
+.site-head nav a.r{color:#3f7a68}
+/* 🔴 いま見ているページは色を落とす＝色が付いているほうが「行ける先」だと分かる */
+/* ⚠ 太字にはしない。色を落とすだけで「いまここ」は伝わる（本人の判断） */
+.site-head nav a[aria-current="page"]{color:var(--ink-soft)}
+/* マウスを乗せたら太くする */
+.site-head nav a:hover{font-weight:bold}
 
 h1{font-size:1.5rem;margin:24px 0 4px}
-h2{font-size:1.15rem;margin:32px 0 10px;padding-left:10px;border-left:5px solid var(--pink)}
+/* 🔴 見出しの縦棒と、開け閉めする帯の縦棒を同じにする（本人「全部そろえたほうがすっきり」）。
+   ⚠ 縦棒は ::before で描く。box-shadow だと、帯に上下の余白を足したときに
+     棒まで伸びてしまい、見出しと形が変わる。::before なら文字の高さのまま */
+h2{font-size:1.15rem;margin:32px 0 10px}
+h2,details.opt > summary{position:relative;padding-left:15px}
+h2::before,details.opt > summary::before{
+  content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);
+  width:5px;height:1.15em;background:var(--pink);border-radius:3px;
+}
 h3{font-size:1rem;margin:20px 0 6px}
 .lead{color:var(--ink-soft);margin:0 0 20px;font-size:.92rem;line-height:1.75}
 
 /* カード */
 .card{
   background:#fff;border:1px solid var(--line);border-radius:var(--radius);
-  padding:16px;margin-bottom:14px;
+  padding:20px 18px;margin-bottom:18px;
 }
 .card > h2{margin-top:0}
+/* 🔴 ぬりつぶしの丸。⚠ 幅と高さをそろえないと、数字によって楕円になる。
+   ⚠ line-height:1 と flex で、数字を円のまん中に置く
+     （日本語フォントは行の高さに余白を持つので、指定しないと下にずれる） */
 .step{
-  display:inline-block;background:var(--pink);color:#fff;
-  border-radius:999px;padding:1px 10px;font-size:.8rem;margin-right:8px;
+  display:inline-flex;align-items:center;justify-content:center;
+  width:1.7em;height:1.7em;line-height:1;
+  background:var(--pink);color:#fff;border:0;
+  border-radius:50%;font-size:.82rem;margin-right:9px;
+  flex:0 0 auto;
 }
+
+/* 🔴 入力欄の見本（placeholder）は、小さく・薄く。
+   ⚠ 普通に入力してあるように見えると、消していいのか迷う（本人の指摘）。
+     読めなくてよい＝雰囲気が分かればいい。
+   ⚠ 座席表の中に出る「サンプル30人」は別物。ここでは触らない */
+::placeholder{color:#b6b9bf;font-size:.84em;opacity:1}
+textarea::placeholder{font-size:.8em;line-height:1.7}
 
 /* 入力 */
 label{display:block;font-size:.9rem;margin:10px 0 4px;font-weight:bold}
@@ -54,9 +98,10 @@ input[type=number]{width:5em}
 .row{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
 .row > div{flex:0 0 auto}
 .count{color:var(--pink);font-weight:bold}
-.hint{font-size:.85rem;color:var(--ink-soft);margin:4px 0 0}
+/* 🔴 補足は本文より小さく。同じ大きさだと補足に見えない */
+.hint{font-size:.78rem;color:var(--ink-soft);margin:4px 0 0;line-height:1.65}
 /* 操作の説明。読まない人がちょっと読めればいいので、小さめ */
-.note-sm{font-size:.78rem;color:var(--ink-soft);margin:0 0 10px;line-height:1.6}
+.note-sm{font-size:.76rem;color:var(--ink-soft);margin:0 0 10px;line-height:1.6}
 
 /* ボタン */
 button{
@@ -68,18 +113,68 @@ button:hover{background:var(--pink-pale)}
   background:var(--pink);border-color:var(--pink);color:#fff;
   font-size:1.1rem;font-weight:bold;padding:14px 30px;border-radius:999px;
 }
-.primary:hover{background:#d97a9c}
+/* ⚠ 色を直接書かない（席次表でも桜色になってしまう）。
+   ⭐ 押したときは少し濃くする＝ページの色（桜／緑）のまま暗くする。
+   ⚠ 枠線も同じ色にしないと、縁だけ元の色が残る（本人の指摘） */
+.primary:hover{background:var(--pink);border-color:var(--pink);filter:brightness(.92)}
+.primary:active{filter:brightness(.85)}
 .mini{padding:4px 10px;font-size:.85rem}
 
 /* 折りたたみ */
-details.opt{border:1px solid var(--line);border-radius:var(--radius);background:#fff;margin-bottom:14px}
-details.opt > summary{
-  cursor:pointer;padding:14px 16px;font-weight:bold;list-style:none;
+/* 🔴 ①②のカードとまったく同じ形にする（本人「全部そろえたほうがすっきり」）。
+   ⚠ 前は帯がカードの外枠に貼りついていて、①②の縦棒（カードの内側）と位置がずれていた。
+     .card と同じ余白を持たせて、中の見出しを h2 と同じ形にすると、きれいにそろう */
+/* ⚠ 余白は details に付けない。帯と中身がそれぞれ持つ。
+   こうしないと、押したときの色がカードの端まで届かず、白いすき間が残る（本人の指摘） */
+details.opt{
+  border:1px solid var(--line);border-radius:var(--radius);background:#fff;
+  margin-bottom:18px;
 }
+/* 🔴 開け閉めする帯は、うすい色を敷いて「押せる」と分かるようにする。
+   中身は白のまま＝帯だけが操作するところ、と見分けられる */
+/* 見出し（h2）と同じ見た目。押せることは右端のしるしが言う。
+   🔴 上下に余白を入れて、押せる範囲を広くする。
+   ⚠ 余白が無いと文字の高さぶんしか反応せず、少し上や下を押すと開かない（本人の指摘） */
+details.opt > summary{
+  cursor:pointer;list-style:none;margin:0;
+  padding:20px 18px 20px 33px;
+  font-size:1.15rem;font-weight:bold;
+  display:flex;align-items:center;gap:8px;
+  border-radius:var(--radius);
+}
+details.opt > summary::before{left:18px}
+/* 開いたときは、見出しと中身のあいだに見切りの線を入れる（本人の希望で復活）。
+   ⚠ 見出しがカードの内側に入ったので、線も内側から内側まで */
+details.opt[open] > summary{
+  margin-bottom:0;border-bottom:1px solid var(--line);
+  border-radius:var(--radius) var(--radius) 0 0;
+}
+details.opt[open] > .body{padding-top:16px}
+/* 押したときだけ、うっすら反応させる（面はいつも出さない） */
+/* 🔴 マウスを乗せたら色を変える。押したらもう少し濃く。
+   ⚠ hover:hover ＝マウスがある機器だけ。
+     これを付けないと、スマホやタブレットで触ったあと色が残り続ける */
+@media (hover:hover){
+  details.opt > summary:hover{background:var(--pink-pale)}
+}
+details.opt > summary:active{background:var(--pink-light)}
+/* ⚠ キーボードで操作している人に「いまここ」を伝える枠線。消さない。
+   既定の黒は浮くので、色だけテーマに合わせる */
+/* ⚠ 離すと二重に見える。要素の縁にぴったり重ねる（本人の希望） */
+:focus-visible{outline:2px solid var(--pink);outline-offset:0}
 details.opt > summary::-webkit-details-marker{display:none}
-details.opt > summary::before{content:"▶ ";color:var(--pink)}
-details.opt[open] > summary::before{content:"▼ "}
-details.opt > .body{padding:0 16px 16px}
+/* ⚠ ▶ は「進む」に見える。下向きのしるしのほうが「開く・閉じる」に見える。
+   🔴 文字の「⌄」は角が鋭い（本人の指摘）ので、
+     線の端が丸い形をSVGで描いて、色は --pink で塗る */
+details.opt > summary::after{
+  content:"";margin-left:auto;flex:0 0 auto;
+  width:.7em;height:.7em;background:var(--pink);
+  -webkit-mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M5 9l7 7 7-7'/></svg>") center/contain no-repeat;
+  mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M5 9l7 7 7-7'/></svg>") center/contain no-repeat;
+  transition:transform .15s;
+}
+details.opt[open] > summary::after{transform:rotate(180deg)}
+details.opt > .body{padding:0 18px 20px}
 
 .pair{display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap}
 .pair select{max-width:11em}
@@ -174,10 +269,14 @@ body.screen .seat .gno.dim{display:none}
 .tools small{color:var(--ink-soft)}
 .tools .soon{opacity:.55}
 
-footer{margin-top:40px;padding:20px 0;border-top:1px solid var(--line);font-size:.85rem;color:var(--ink-soft)}
-.fnav{display:block;margin-top:8px}
+/* 🔴 フッターは「終わり」の合図。中央にそろえて、閉じた感じを出す */
+footer{
+  margin-top:28px;padding:24px 0;border-top:1px solid var(--line);
+  font-size:.85rem;color:var(--ink-soft);text-align:center;
+}
+.fnav{display:block;margin-top:10px}
 .fnav a{color:var(--ink-soft)}
-.copy{display:block;margin-top:6px;font-size:.8rem;color:#a89aa0}
+.copy{display:block;margin-top:10px;font-size:.8rem;color:#a89aa0}
 
 @media (max-width:600px){
   .wrap{padding:12px}
@@ -241,16 +340,16 @@ select.ph option{color:var(--ink)}
 /* 〇にi の説明 */
 .tip-btn{
   position:relative;padding:0;margin-left:6px;border:0;background:none;
-  /* 小さくしたぶん、色は濃いめにして見えるようにする */
-  color:#c2557e;font-size:.78rem;line-height:1;
+  /* 🔴 桜色だと主張が強い。押せることは形（ⓘ）で分かるので、色はグレーでいい */
+  color:var(--ink-soft);font-size:.78rem;line-height:1;
   vertical-align:middle;cursor:pointer;
 }
 .tip-btn::before{content:"ⓘ"}
 .tip-btn::after{content:"";position:absolute;inset:-8px}  /* 見えないが押せる範囲 */
-.tip-btn:hover,.tip-btn[aria-expanded="true"]{color:#9c3d63}
+.tip-btn:hover,.tip-btn[aria-expanded="true"]{color:var(--ink)}
 .tip-body{
   background:var(--pink-pale);border:1px solid var(--pink-light);
-  border-radius:8px;padding:10px 14px;margin:8px 0 12px;font-size:.9rem;
+  border-radius:8px;padding:10px 14px;margin:8px 0 12px;font-size:.84rem;
 }
 .tip-body p{margin:0 0 6px}
 .tip-body p:last-child{margin:0}
