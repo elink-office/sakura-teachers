@@ -25,7 +25,7 @@
 <meta name="google-site-verification" content="PfjmCGxUaN1hzuj_dRw3e4PTY6xepghfXM_CrU_sO-A" />
 <title>教室の座席表メーカー｜席替えを簡単に・30人40人・4列〜8列対応</title>
 <meta name="description" content="教室の座席表の作り方は簡単。名簿を貼るだけで席替えができるフリーツールです。新年度の出席番号順にも対応。30人・35人・40人のクラス、4列・5列・6列・8列の教室席配置に対応。掲示用と教師用に上下反転もでき、班分けと色分けもそのまま印刷・PDFにできます。Excelテンプレートは不要です。名簿はブラウザの中だけで処理し、AIの学習にも使われません。">
-<link rel="stylesheet" href="../style.css?v=68">
+<link rel="stylesheet" href="../style.css?v=74">
 <link rel="stylesheet" href="seat.css?v=1">
 <link rel="stylesheet" href="../print.css?v=54" media="print">
 </head>
@@ -35,8 +35,9 @@
   <div class="wrap">
     <a class="logo" href="../">🌸 さくら先生の座席表</a>
     <nav>
-      <a class="l" href="../seat/" aria-current="page">座席表</a>
-      <a class="r" href="../seki/">席次表</a>
+      <a href="../">トップ</a>
+      <a href="../seat/" aria-current="page">座席表</a>
+      <a href="../seki/">席次表</a>
     </nav>
   </div>
 </header>
@@ -46,7 +47,6 @@
   <p class="catch">8列でも、40人でも、隣同士の組み合わせも自由自在</p>
   <p class="lead">名簿を貼ってボタンひとつ。もうテンプレートは不要です。「この2人は離す」「この子は前のほうに」を入れたまま席替えできて、そのまま印刷・PDFにできます。</p>
 
-  <div class="two-col">
     <section class="card noprint">
       <h2><span class="step">1</span>名簿を入力&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h2>
       <div class="tip-body" hidden>
@@ -55,7 +55,11 @@
         <p><strong>いま出ている座席表はサンプルです。</strong>名簿を入れると、自分のクラスに変わります。入れる前でも、席を動かしたり班に分けたりして試せます。</p>
       </div>
       <p class="safe">🔒 <strong>使ってる機器の中だけで完結できます。</strong>名簿はネット上に流れません。外に送っていないので、AIの学習に使われることも、個人情報が漏れることもありません。安心して使えます。</p>
-      <textarea id="names" placeholder="1行に1人ずつ（Excelから貼り付けてもOK）&#10;&#10;やまだ たろう&#10;さとう はなこ&#10;すずき いちろう&#10;&#10;空のままだと、サンプルのままです"></textarea>
+      <div class="in-col">
+        <div>
+      <textarea id="names" placeholder="1行に1人ずつ（Excelから貼り付けてもOK）&#10;&#10;やまだ たろう&#10;さとう はなこ&#10;すずき いちろう&#10;&#10;空の場合、サンプルで確認できます"></textarea>
+        </div>
+        <div>
       <div class="row tight" style="margin-top:10px">
         <div><label>人数</label><div class="bignum" id="count">0人</div></div>
         <div><label for="grade">学年</label>
@@ -68,6 +72,8 @@
         <input id="clsFree" type="text" placeholder="ひまわり組／さくら高校 英語 火3" style="width:100%">
       </div>
       <p class="hint">「自分で書く」は「組」の代わりです。学年を選んでいれば「3年 さくら組」のように出力されます。</p>
+        </div>
+      </div>
     </section>
 
     <section class="card noprint">
@@ -76,8 +82,7 @@
         <div><label for="cols">横のならび</label><span class="ctl"><input id="cols" type="number" min="1" max="14" value="6"><span class="unit">席</span></span></div>
         <div><label for="rows">縦のならび</label><span class="ctl"><input id="rows" type="number" min="1" max="14" value="6"><span class="unit">段</span></span></div>
         <div><label>座席数</label><div class="bignum" id="seatcount">36</div></div>
-      </div>
-      <div class="row">
+        <div id="seatinfo" class="hint" style="align-self:flex-end;padding-bottom:6px"></div>
         <div><label for="board">黒板の位置</label>
           <select id="board">
             <option value="top">上（画面の上が前）</option>
@@ -85,7 +90,6 @@
           </select>
         </div>
       </div>
-      <p class="hint" id="seatinfo"></p>
       <div class="row tight" style="margin-top:6px">
         <div><label for="order">並べ方</label>
           <select id="order">
@@ -101,37 +105,36 @@
           </select></div>
       </div>
       <p class="hint" id="orderNote"></p>
+    <details class="opt sub noprint" id="condBlock">
+      <summary>詳しい条件（離す・隣にする・席を決める）</summary>
+      <div class="body">
+        <h3>「隣」の考え方&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h3>
+        <div class="tip-body" hidden>
+          <p>「離す」「隣にする」で、<strong>どこまでを“隣”とみなすか</strong>を決めます。</p>
+          <p>きつくするほど、条件を満たす配置が見つかりにくくなります。作れないときは、ここをゆるくしてみてください。</p>
+        </div>
+        <div class="radios">
+          <label><input type="radio" name="mode" value="lr"> 左右だけ</label>
+          <label><input type="radio" name="mode" value="cross" checked> 前後左右</label>
+          <label><input type="radio" name="mode" value="king"> まわり全部（ななめも）</label>
+        </div>
+
+        <h3>離す組み合わせ</h3>
+        <div id="sepList"></div>
+        <button class="mini" id="addSep" type="button">＋ 組を追加</button>
+
+        <h3>隣にする組み合わせ</h3>
+        <div id="adjList"></div>
+        <button class="mini" id="addAdj" type="button">＋ 組を追加</button>
+
+        <h3>席を決める人</h3>
+        <div id="fixList"></div>
+        <button class="mini" id="addFix" type="button">＋ 人を追加</button>
+        <p class="hint">視力などの配慮は<strong>「前のほう」がおすすめ</strong>です。席をぴったり決めると、毎回まったく同じ席になります。</p>
+      </div>
+    </details>
     </section>
-  </div>
 
-  <details class="opt noprint">
-    <summary>詳しい条件（離す・隣にする・席を決める）</summary>
-    <div class="body">
-      <h3>「隣」の考え方&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h3>
-      <div class="tip-body" hidden>
-        <p>「離す」「隣にする」で、<strong>どこまでを“隣”とみなすか</strong>を決めます。</p>
-        <p>きつくするほど、条件を満たす配置が見つかりにくくなります。作れないときは、ここをゆるくしてみてください。</p>
-      </div>
-      <div class="radios">
-        <label><input type="radio" name="mode" value="lr"> 左右だけ</label>
-        <label><input type="radio" name="mode" value="cross" checked> 前後左右</label>
-        <label><input type="radio" name="mode" value="king"> まわり全部（ななめも）</label>
-      </div>
-
-      <h3>離す組み合わせ</h3>
-      <div id="sepList"></div>
-      <button class="mini" id="addSep" type="button">＋ 組を追加</button>
-
-      <h3>隣にする組み合わせ</h3>
-      <div id="adjList"></div>
-      <button class="mini" id="addAdj" type="button">＋ 組を追加</button>
-
-      <h3>席を決める人</h3>
-      <div id="fixList"></div>
-      <button class="mini" id="addFix" type="button">＋ 人を追加</button>
-      <p class="hint">視力などの配慮は<strong>「前のほう」がおすすめ</strong>です。席をぴったり決めると、毎回まったく同じ席になります。</p>
-    </div>
-  </details>
 
   <p class="noprint" style="text-align:center;margin:24px 0">
     <button class="primary" id="go" type="button">席替えする</button>
@@ -400,11 +403,11 @@
 </main>
 
 <footer class="noprint">
-  <div class="wrap">🌸 さくら先生の座席表　席替えも班分けも、名簿を貼るだけで簡単作成<span class="fnav"><a href="../contact/">お問い合わせ</a>　<a href="../privacy/">プライバシーポリシー</a></span>
+  <div class="wrap"><span class="fnav"><a href="../contact/">お問い合わせ</a>　<a href="../privacy/">プライバシーポリシー</a></span>
     <span class="copy">© 2026 さくら先生の座席表</span></div>
 </footer>
 
 <script src="../seating.js?v=54"></script>
-<script src="seat.js?v=57"></script>
+<script src="seat.js?v=59"></script>
 </body>
 </html>

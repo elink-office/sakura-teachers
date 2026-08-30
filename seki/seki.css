@@ -217,3 +217,7 @@ body.screen #prevSheet{ display: none !important; }
   padding: 4px 10px;
   color: #8a5a3a !important;
 }
+
+/* 名簿欄：例が6行あるので、スマホで最後の1行が切れないように少し高く
+   （⚠共通の textarea{min-height:170px} だと「列の順番は…」が隠れる） */
+#names{min-height:200px}

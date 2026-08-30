@@ -229,6 +229,9 @@
   function refreshNames() {
     buildPeople();
     $('count').textContent = (state.sample ? 'サンプル ' : '') + state.names.length + '人';
+    // サンプルで動いている間だけ案内を出す（自分の名簿を貼ったら消す）
+    // ⚠ id は sampleNote にしない（座席表の下に出す案内が同じ id を使っていて、消し合う）
+    var sn = $('emptyNote'); if (sn) sn.style.display = state.sample ? '' : 'none';
     refreshSeatInfo();
     document.querySelectorAll('select.nameSel').forEach(fillNames);
   }
@@ -242,7 +245,7 @@
       el.innerHTML = '⚠ 席が足りません。横か縦をふやしてください。';
       el.style.color = '#d8453f';
     } else {
-      el.textContent = n ? '空席は ' + (total - n) + '。' : '';
+      el.textContent = n ? '空席は ' + (total - n) : '';
       el.style.color = '';
     }
   }
@@ -1399,8 +1402,11 @@
     $('dir').disabled = !byNumber;
     $('dirWrap').classList.toggle('off', !byNumber);
     $('orderNote').textContent = byNumber
-      ? '名簿の順にならべます。「離す」「隣にする」「席を決める」の条件は使いません。'
+      ? '下の「詳しい条件」は不要です。'
       : 'ランダムに並べます。3つの案が出るので、見比べて選べます。';
+    // 名簿順のときは条件が捨てられる（generate の手前で空にしている）。
+    // 消さずに薄くする＝「あること」は見せて、触っても効かない誤解だけ防ぐ
+    var cond = $('condBlock'); if (cond) cond.classList.toggle('off', byNumber);
     if ($('save').checked && !state.sample) save();
   }
 

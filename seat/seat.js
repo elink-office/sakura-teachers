@@ -71,7 +71,7 @@
       el.innerHTML = '⚠ 席が足りません。横か縦をふやしてください。';
       el.style.color = '#d8453f';
     } else {
-      el.textContent = n ? '空席は ' + (total - n) + '。' : '';
+      el.textContent = n ? '空席は ' + (total - n) : '';
       el.style.color = '';
     }
   }
@@ -1038,8 +1038,11 @@
     $('dir').disabled = !byNumber;
     $('dirWrap').classList.toggle('off', !byNumber);
     $('orderNote').textContent = byNumber
-      ? '入力した順にならべます。「離す」「隣にする」「席を決める」の条件は使いません。'
+      ? '入力した順にならべます。下の「詳しい条件」は不要です。'
       : '';
+    // 出席番号順のときは条件が捨てられる（generate の手前で空にしている）。
+    // 消さずに薄くする＝「あること」は見せて、触っても効かない誤解だけ防ぐ
+    var cond = $('condBlock'); if (cond) cond.classList.toggle('off', byNumber);
     if ($('save').checked && !state.sample) save();
   }
 
