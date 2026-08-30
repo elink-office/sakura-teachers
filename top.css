@@ -57,6 +57,11 @@
 /* サンプルから「← トップにもどる」で戻ってきたときの着地点。
    ⚠ 上の帯が居座るので、少し余裕を取らないと見出しが隠れる */
 .t-col{scroll-margin-top:84px}
+/* 🔴 2つのカードで横線（準備中の上の線）の高さをそろえる（2026-08-30 本人）。
+   ⚠原因＝説明の行数が違う（左3行・右2行）ので、下にあるものが24pxずれていた。
+   カードを縦のflexにして、説明の入れものに余りを吸わせると、その下が自動でそろう */
+.t-col{display:flex;flex-direction:column}
+.t-tool{flex:1 1 auto}
 .t-col.l h2{color:var(--pink)}
 .t-col.r h2{color:var(--midori)}
 .t-col .who{font-size:.8rem;color:var(--ink-soft);margin:0 0 22px}
