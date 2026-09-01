@@ -680,12 +680,12 @@
     if (state.sample) { /* サンプルは保存しない */ }
     else if ($('save').checked) save();
     else {
-      msg.innerHTML = '<div class="notice">名簿の保存は<strong>オフ</strong>です。' +
+      // 🔴 ボタンは置かない（2026-09-01 本人）。
+      //   ⚠ここで押したことが⑦とつながっていると分かるのは、作った側だけ。
+      //     場所を教えるだけにして、切り替えは⑦でしてもらう
+      msg.innerHTML = '<div class="notice">いまは<strong>画面の保存がオフ</strong>です。' +
         'ページを閉じたり読み込み直すと、入れた名簿は消えます。' +
-        ' <button type="button" class="mini" id="saveNow">この機器に保存する</button></div>';
-      $('saveNow').onclick = function () {
-        $('save').checked = true; save(); msg.innerHTML = '';
-      };
+        '残したいときは、下の<strong>⑦ 画面の保存</strong>でチェックを入れてください。</div>';
     }
   }
 
@@ -1152,7 +1152,11 @@
     document.body.classList.toggle('landscape', $('paper').value === 'landscape');
   }
 
+  var printScrollY = 0;
   function doPrint() {
+    // 🔴 印刷の画面を閉じたあと、ページの先頭に飛ばない（2026-09-01 本人・タブレット）。
+    //   ⚠印刷のあいだ中身をいったん隠すので、そのまま戻すと位置を見失う
+    printScrollY = window.scrollY || window.pageYOffset || 0;
     setPaper();
     // 🔴 紙だけ先生の向きにする（画面は変えない）。2026-08-31 本人「印刷の時にそうしたい」
     // ⚠ 紙が終わったら必ず戻す（afterprint）。戻さないと画面が回ったままになる
@@ -1189,6 +1193,9 @@
     if ($('printImg')) $('printImg').removeAttribute('src');
     $('printAll').innerHTML = '';
     if (printKeepBoard) { state.board = printKeepBoard; printKeepBoard = null; drawSheet(); }
+    // ⚠ 描き直しが終わってから戻す。すぐ戻すと、まだ高さが足りずに効かない
+    setTimeout(function () { window.scrollTo(0, printScrollY); }, 0);
+    setTimeout(function () { window.scrollTo(0, printScrollY); }, 250);
   });
 
   // ---- PNGで保存（自分で描くので外部の部品は使わない）----
