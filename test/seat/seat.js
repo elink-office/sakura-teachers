@@ -839,10 +839,21 @@
     // 🔴 モニターでは班番号と★も名前に合わせて大きくする（2026-08-31 本人「小さすぎる」）。
     //   ⚠決め打ちの大きさにすると、マスが小さいときに番号のほうが名前より大きくなる
     $('sheet').style.setProperty('--markSize', Math.max(11, Math.round(base * 0.34)) + 'px');
+    // 🔴 マスごとに大きさを決めると、名前の長さでばらつく（2026-09-01 本人）。
+    //   ⚠**いちばん小さくなったものに全部そろえる。**
+    //     一覧して名前を探す表なので、大きさがちがうと目が迷う
+    var nms = [], minPx = 9999, minMm = 9999;
     g.querySelectorAll('.seat .nm').forEach(function (sp) {
       fitText(sp.parentNode, sp, base);
-      sp.style.setProperty('--nmPrint',
-        fitPrintSize(sp.textContent, cellWmm - 7, mm - 5, $('bold').checked) + 'mm');
+      var px = parseFloat(sp.style.fontSize) || base;
+      if (px < minPx) minPx = px;
+      var pm = fitPrintSize(sp.textContent, cellWmm - 7, mm - 5, $('bold').checked);
+      if (pm < minMm) minMm = pm;
+      nms.push(sp);
+    });
+    nms.forEach(function (sp) {
+      sp.style.fontSize = minPx + 'px';
+      sp.style.setProperty('--nmPrint', minMm + 'mm');
     });
     var note = document.querySelector('.drag-note');
     if (note) {
@@ -1257,6 +1268,21 @@
       x.fillText(boardWord(), pad + cols * cw / 2, y + 3);
       x.textAlign = 'left';
     }
+    // ⚠先に全員ぶんを測って、いちばん小さい大きさにそろえる（画面と同じ考え方）
+    var weight0 = $('bold').checked ? 'bold ' : '';
+    var nameSize = $('bold').checked ? 34 : 28;
+    (state.seats || []).forEach(function (nm) {
+      if (!nm) return;
+      var ls = displayName(nm).split(NL), sz = nameSize;
+      while (sz > 9) {
+        x.font = weight0 + sz + 'px ' + fontStack();
+        var over = ls.some(function (tx) { return x.measureText(tx).width > cw - 20; });
+        if (!over && ls.length * sz * 1.25 < ch - 16) break;
+        sz -= 1;
+      }
+      if (sz < nameSize) nameSize = sz;
+    });
+
     var gy = top + (state.board === 'top' ? boardH : 0);
     if (state.board === 'top') board(top); else board(top + rows * ch + 6);
 
@@ -1290,13 +1316,7 @@
         if (!name) continue;
         var lines = displayName(name).split(NL);
         var weight = $('bold').checked ? 'bold ' : '';
-        var size = $('bold').checked ? 34 : 28;
-        while (size > 9) {
-          x.font = weight + size + 'px ' + fontStack();
-          var wide = lines.some(function (t) { return x.measureText(t).width > cw - 20; });
-          if (!wide && lines.length * size * 1.25 < ch - 16) break;
-          size -= 1;
-        }
+        var size = nameSize;              // ⚠全員そろえる（先に測ってある）
         // ⚠印刷だけ黒にしたいときがある（画面は色つきのまま）。2026-09-01 本人
         x.fillStyle = ((!printBW && $('sexPrint').checked) ? sexColor(name) : null) || '#333';
         x.font = weight + size + 'px ' + fontStack();
