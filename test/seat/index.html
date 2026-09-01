@@ -289,8 +289,6 @@ body.screen .seat.dup .nm{text-decoration:none}
     </div>
 
     <div id="printAll"></div>
-  <!-- 🔴 印刷用の1枚絵の置き場（2026-09-01）。画面には出ない -->
-  <div id="printImgWrap"><img id="printImg" alt=""></div>
 
     <p class="hint noprint">条件に反したところは赤くなりますが、そのままでも印刷できます。<strong>決めるのは先生です。</strong></p>
     <div id="vio" class="noprint"></div>
@@ -443,7 +441,8 @@ body.screen .seat.dup .nm{text-decoration:none}
       <h2><span class="step">6</span>印刷・画像で保存&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h2>
       <div class="tip-body" hidden>
         <p><strong>PDFにするとき</strong>は、印刷画面で「送信先」（または「プリンター」）を <strong>PDFに保存</strong> に変えてください。</p>
-        <p><strong>印刷のしかた</strong>＝「画面と同じ絵にする」なら、紙に収まる大きさをブラウザが決めるので、<strong>はみ出さずに1ページ</strong>に入ります。文字を細かく出したいときは「文字のまま」にしてください。</p>
+        <p><strong>1ページに収める</strong>＝画面に出ているものを1枚の絵にしてから印刷します。<strong>紙に収まる大きさをブラウザが決める</strong>ので、はみ出しません。タブレットでも1ページです。</p>
+        <p><strong>文字のまま出す</strong>＝絵にせず、文字のまま印刷します。<strong>拡大してもぼやけません</strong>が、紙に入りきらないと2ページに分かれます。そのときは「印刷の大きさ」で小さくしてください。</p>
         <p><strong>印刷の大きさ</strong>＝「文字のまま」ではみ出すときに使います。タブレットは印刷画面で倍率を変えられないので、ここで小さくします。</p>
         <p><strong>たて向きで出てしまうとき</strong>（スマホ・タブレットに多いです）は、印刷画面の設定で用紙の向きを「横」に変えてください。機器によっては、こちらの指定より端末の設定が優先されます。</p>
       </div>
@@ -459,8 +458,8 @@ body.screen .seat.dup .nm{text-decoration:none}
         </div>
         <div><label for="printWay">印刷のしかた</label>
           <select id="printWay">
-            <option value="img">画面と同じ絵にする</option>
-            <option value="text">文字のまま</option>
+            <option value="img">1ページに収める（おすすめ）</option>
+            <option value="text">文字のまま出す</option>
           </select>
         </div>
         <div><label for="printScale">印刷の大きさ</label>
@@ -645,6 +644,9 @@ body.screen .seat.dup .nm{text-decoration:none}
 </footer>
 
 <script src="../seating.js?v=54"></script>
-<script src="seat.js?v=107"></script>
+<script src="seat.js?v=108"></script>
+<!-- 🔴 印刷用の1枚絵の置き場（2026-09-01）。画面には出ない。
+     ⚠**body の直下に置くこと。**中に入れると、印刷のときに親ごと隠されて白紙になる -->
+<div id="printImgWrap"><img id="printImg" alt=""></div>
 </body>
 </html>

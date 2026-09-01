@@ -1166,9 +1166,17 @@
     else if ($('printWay') && $('printWay').value === 'img' && state.seats) {
       // 🔴 画面と同じ絵を1枚作って、それだけを印刷する。
       //   ⚠3案まとめて印刷のときは、今までどおり文字のまま
+      //   ⚠**絵ができるのを待ってから印刷する。**待たずに呼ぶと白紙になる（2026-09-01）
       try {
-        $('printImg').src = buildSheetCanvas(2).toDataURL('image/png');
-        document.body.classList.add('print-img');
+        var im = $('printImg');
+        im.onload = function () {
+          im.onload = null;
+          document.body.classList.add('print-img');
+          window.print();
+        };
+        im.onerror = function () { im.onerror = null; window.print(); };
+        im.src = buildSheetCanvas(2).toDataURL('image/png');
+        return;
       } catch (e) { }
     }
     window.print();
