@@ -458,7 +458,7 @@ body.screen .seat.dup .nm{text-decoration:none}
         </div>
         <div><label for="printWay">印刷のしかた</label>
           <select id="printWay">
-            <option value="img">1ページに収める（おすすめ）</option>
+            <option value="img">1ページに収める</option>
             <option value="text">文字のまま出す</option>
           </select>
         </div>
@@ -480,8 +480,9 @@ body.screen .seat.dup .nm{text-decoration:none}
   </div>
 
 
-  <section class="card noprint">
-    <h2><span class="step">7</span>画面の保存&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h2>
+  <details class="opt noprint" id="saveCard">
+    <summary><span class="step">7</span>画面の保存&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></summary>
+    <div class="body">
     <div class="tip-body" hidden>
       <ul>
         <li><strong>いま開いている画面をそのまま残します。</strong>名簿・教室の形・条件・男女の指定・座席表まで、次に開いたときそのまま出ます。</li>
@@ -495,10 +496,12 @@ body.screen .seat.dup .nm{text-decoration:none}
     </label>
     <p class="hint">チェックを入れると次回もこのまま表示されます。外すと次回は最初からの設定になります。サーバーには送信されません。</p>
     <p><span class="saving" id="savingLabel"></span></p>
-  </section>
+    </div>
+  </details>
 
-  <section class="card noprint">
-    <h2><span class="step">8</span>保存した名簿の利用&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h2>
+  <details class="opt noprint" id="rosterCard">
+    <summary><span class="step">8</span>保存した名簿の利用&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></summary>
+    <div class="body">
     <div class="tip-body" hidden>
       <ul>
         <li><strong>名前を付けて、いくつも保存できます。</strong>ボタンを押したときだけ増えます。</li>
@@ -557,7 +560,8 @@ body.screen .seat.dup .nm{text-decoration:none}
       <p class="hint">ボタンを押すと、この機器から名簿と記録が消えます。<strong>もとには戻せません。</strong></p>
       <p><button class="mini" id="clsClearAll" type="button">名簿と記録の全削除</button></p>
     </div>
-  </section>
+    </div>
+  </details>
 
   <section class="read">
     <h2>使い方</h2>
@@ -644,7 +648,7 @@ body.screen .seat.dup .nm{text-decoration:none}
 </footer>
 
 <script src="../seating.js?v=54"></script>
-<script src="seat.js?v=108"></script>
+<script src="seat.js?v=109"></script>
 <!-- 🔴 印刷用の1枚絵の置き場（2026-09-01）。画面には出ない。
      ⚠**body の直下に置くこと。**中に入れると、印刷のときに親ごと隠されて白紙になる -->
 <div id="printImgWrap"><img id="printImg" alt=""></div>
