@@ -30,7 +30,7 @@
 <link rel="stylesheet" href="../print.css?v=54" media="print">
 </head>
 <body>
-<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/01 18:05</div>
+<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/01 18:23</div>
 
 <header class="site-head noprint">
   <div class="wrap">
@@ -91,6 +91,10 @@
       <div style="margin-top:12px">
         <label for="clsFree">会議名・研修名（自由記入）</label>
         <input id="clsFree" type="text" placeholder="第3回 定例会議／新任研修 A班／経営学入門 火3" style="width:100%">
+        <!-- 🔴 自由記入だけを見出しにしたいときがある（2026-09-01 本人）-->
+        <div style="margin-top:8px"><label class="chk-inline">
+          <input type="checkbox" id="kindOn" checked> うしろに「席次表」と出す
+        </label></div>
       </div>
         </div>
       </div>
@@ -540,7 +544,7 @@
 </footer>
 
 <script src="../seating.js?v=54"></script>
-<script src="seki.js?v=40"></script>
+<script src="seki.js?v=41"></script>
 <!-- 🔴 印刷用の1枚絵の置き場。⚠body の直下に置くこと -->
 <div id="printImgWrap"></div>
 </body>

@@ -514,6 +514,10 @@
   }
   function sheetTitle() {
     var c = className();
+    // 🔴 自由記入だけを見出しにしたいときがある（2026-09-01 本人）
+    //    ⚠両方が空だと見出しが消えるので、そのときは「席次表」を出す
+    var e = $('kindOn');
+    if (e && !e.checked) return c || '席次表';
     return (c ? c + ' ' : '') + '席次表';
   }
 
@@ -1598,6 +1602,7 @@
         bold: $('bold').checked, showCredit: $('showCredit').checked,
         order: $('order').value, dir: $('dir').value,
         honor: $('honor').value, numPos: $('numPos').value,
+        kindOn: $('kindOn') ? $('kindOn').checked : true,
         kanaStyle: $('kanaStyle').value,
         font: $('font').value, ink: $('ink').value, deco: $('deco').value,
         sizes: {
@@ -1649,6 +1654,7 @@
       if (d.order) $('order').value = d.order;
       if (d.dir) $('dir').value = d.dir;
       if (d.honor !== undefined) $('honor').value = d.honor;
+      if (d.kindOn !== undefined && $('kindOn')) $('kindOn').checked = !!d.kindOn;
       // ⚠ 前は「見せ方」に「なし」が入っていた。そのころ保存した人は、位置の「なし」に読みかえる
       if (d.numPos) $('numPos').value = d.numPos;
       else if (d.numStyle === 'none') $('numPos').value = 'none';
@@ -1805,6 +1811,11 @@
       if ($('save').checked && !state.sample) save();
     });
     $('clsFree').addEventListener('input', function () {
+      showSaving();
+      if (state.seats) drawSheet();
+      if ($('save').checked && !state.sample) save();
+    });
+    if ($('kindOn')) $('kindOn').addEventListener('change', function () {
       showSaving();
       if (state.seats) drawSheet();
       if ($('save').checked && !state.sample) save();
