@@ -383,7 +383,7 @@ body.screen .seat.dup .nm{text-decoration:none}
     </details>
 
     <details class="opt noprint" id="printCard">
-      <summary><span class="step">5</span>見た目と用紙&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></summary>
+      <summary><span class="step">5</span>見た目&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></summary>
       <div class="body">
       <div class="tip-body" hidden>
         <p><strong>印刷できないとき</strong></p>
@@ -398,29 +398,6 @@ body.screen .seat.dup .nm{text-decoration:none}
         <p class="hint">紙は<strong>教卓から見た向き</strong>（180度まわした形）で出ます。画面はそのままです。</p>
       </div>
       <div class="row">
-        <div><label for="printWhat">印刷するもの</label>
-          <select id="printWhat">
-            <option value="one">いま表示している案</option>
-            <option value="all">3案すべて（3ページ）</option>
-          </select>
-        </div>
-        <div><label for="paper">用紙の向き</label>
-          <select id="paper"><option value="landscape">横</option><option value="portrait">縦</option></select>
-        </div>
-        <div><label for="printWay">印刷のしかた</label>
-          <select id="printWay">
-            <option value="img">画面と同じ絵にする</option>
-            <option value="text">文字のまま</option>
-          </select>
-        </div>
-        <div><label for="printScale">印刷の大きさ</label>
-          <select id="printScale">
-            <option value="1">ふつう</option>
-            <option value="0.88">小さめ</option>
-            <option value="0.78">もっと小さめ</option>
-          </select>
-        </div>
-        <div style="flex-basis:100%"><p class="hint" style="margin:0">PDFにするときは、印刷画面の<strong>「送信先」（または「プリンター」）を PDF に変更</strong>してください。<strong>「画面と同じ絵にする」なら、はみ出さずに1ページに収まります。</strong>文字を細かく出したいときは「文字のまま」にして、はみ出す場合は「印刷の大きさ」で調整してください。</p></div>
         <div><label for="font">書体</label>
           <select id="font">
             <option value="gothic" selected>ゴシック体</option>
@@ -463,12 +440,43 @@ body.screen .seat.dup .nm{text-decoration:none}
     </details>
 
     <section class="card noprint">
-      <h2><span class="step">6</span>印刷・画像で保存</h2>
-      <p style="margin:4px 0 0">
+      <h2><span class="step">6</span>印刷・画像で保存&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h2>
+      <div class="tip-body" hidden>
+        <p><strong>PDFにするとき</strong>は、印刷画面で「送信先」（または「プリンター」）を <strong>PDFに保存</strong> に変えてください。</p>
+        <p><strong>印刷のしかた</strong>＝「画面と同じ絵にする」なら、紙に収まる大きさをブラウザが決めるので、<strong>はみ出さずに1ページ</strong>に入ります。文字を細かく出したいときは「文字のまま」にしてください。</p>
+        <p><strong>印刷の大きさ</strong>＝「文字のまま」ではみ出すときに使います。タブレットは印刷画面で倍率を変えられないので、ここで小さくします。</p>
+        <p><strong>たて向きで出てしまうとき</strong>（スマホ・タブレットに多いです）は、印刷画面の設定で用紙の向きを「横」に変えてください。機器によっては、こちらの指定より端末の設定が優先されます。</p>
+      </div>
+      <div class="row tight">
+        <div><label for="printWhat">印刷するもの</label>
+          <select id="printWhat">
+            <option value="one">いま表示している案</option>
+            <option value="all">3案すべて（3ページ）</option>
+          </select>
+        </div>
+        <div><label for="paper">用紙の向き</label>
+          <select id="paper"><option value="landscape">横</option><option value="portrait">縦</option></select>
+        </div>
+        <div><label for="printWay">印刷のしかた</label>
+          <select id="printWay">
+            <option value="img">画面と同じ絵にする</option>
+            <option value="text">文字のまま</option>
+          </select>
+        </div>
+        <div><label for="printScale">印刷の大きさ</label>
+          <select id="printScale">
+            <option value="1">ふつう</option>
+            <option value="0.88">小さめ</option>
+            <option value="0.78">もっと小さめ</option>
+          </select>
+        </div>
+      </div>
+      <p style="margin:12px 0 0">
         <button id="doPrint" type="button">🖨 印刷（PDF作成）</button>
         <button id="doPng" type="button">🖼 画像で保存（PNG）</button>
       </p>
       <p class="hint" id="printNote"></p>
+      <p class="hint">PDFにするときは、印刷画面の<strong>「送信先」（または「プリンター」）を PDF に変更</strong>してください。</p>
     </section>
   </div>
 
@@ -637,6 +645,6 @@ body.screen .seat.dup .nm{text-decoration:none}
 </footer>
 
 <script src="../seating.js?v=54"></script>
-<script src="seat.js?v=106"></script>
+<script src="seat.js?v=107"></script>
 </body>
 </html>
