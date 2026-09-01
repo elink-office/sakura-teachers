@@ -392,7 +392,14 @@ body.screen .seat.dup .nm{text-decoration:none}
         <div><label for="paper">用紙の向き</label>
           <select id="paper"><option value="landscape">横</option><option value="portrait">縦</option></select>
         </div>
-        <div style="flex-basis:100%"><p class="hint" style="margin:0">PDFにするときは、印刷画面の<strong>「送信先」（または「プリンター」）を PDF に変更</strong>してください。</p></div>
+        <div><label for="printScale">印刷の大きさ</label>
+          <select id="printScale">
+            <option value="1">ふつう</option>
+            <option value="0.88">小さめ</option>
+            <option value="0.78">もっと小さめ</option>
+          </select>
+        </div>
+        <div style="flex-basis:100%"><p class="hint" style="margin:0">PDFにするときは、印刷画面の<strong>「送信先」（または「プリンター」）を PDF に変更</strong>してください。<strong>2ページに分かれてしまうときは「印刷の大きさ」を小さめに</strong>してください（タブレットは倍率を変えられないため）。</p></div>
         <div><label for="font">書体</label>
           <select id="font">
             <option value="gothic" selected>ゴシック体</option>
@@ -609,6 +616,6 @@ body.screen .seat.dup .nm{text-decoration:none}
 </footer>
 
 <script src="../seating.js?v=54"></script>
-<script src="seat.js?v=104"></script>
+<script src="seat.js?v=105"></script>
 </body>
 </html>

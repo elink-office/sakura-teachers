@@ -801,9 +801,14 @@
     // 紙で座席に使える高さ(mm)と、1マスの上限(mm)。
     // ⚠A4横なら「210 − 余白24 − 見出しや黒板ぶん24」で約162mm使える。
     //   前は140mmしか割り当てず、22mmあまらせていた（紙だけ縮こまって見えた原因）
-    var avail = wide ? 154 : 242;
-    var cap = wide ? 36 : 46;
+    // 🔴 端末によって紙の余白がちがう（とくにタブレットは倍率を指定できない）。
+    //   ⚠こちらで正解を決められないので、⑤で「印刷の大きさ」を選べるようにした（2026-09-01）
+    var sc = $('printScale') ? (+$('printScale').value || 1) : 1;
+    var avail = (wide ? 154 : 242) * sc;
+    var cap = (wide ? 36 : 46) * sc;
     var mm = Math.max(11, Math.min(cap, Math.round(avail / rows)));
+    // 紙の高さいっぱいに広げるための下限（mm）。⚠vh は使わない（タブレットで紙からはみ出す）
+    $('sheet').style.setProperty('--sheetMin', Math.round((wide ? 170 : 255) * sc) + 'mm');
     $('sheet').style.setProperty('--seatH', mm + 'mm');
     // 印刷したときの1マスの大きさ（用紙の幅から逆算）
     var pageW = ($('paper').value === 'landscape' ? 297 : 210) - 24;
@@ -1290,6 +1295,7 @@
         font: $('font').value, bold: $('bold').checked,
         showCredit: $('showCredit').checked,
         printTeacher: $('printTeacher') ? $('printTeacher').checked : true,
+        printScale: $('printScale') ? $('printScale').value : '1',
         // 🔴 座席表もいっしょに残す（2026-08-31 本人「⑦は画面の保存」）。
         //   ⚠サンプルは残さない。名簿を入れていない人の画面が、次に開いたとき居座ってしまう
         seats: (state.sample || !state.seats) ? null : state.seats.slice(),
@@ -1343,6 +1349,7 @@
       // ⚠前に保存した人はこの項目を持っていない。そのときは既定（オン）のまま
       if (d.printTeacher !== undefined && $('printTeacher'))
         $('printTeacher').checked = !!d.printTeacher;
+      if (d.printScale && $('printScale')) $('printScale').value = d.printScale;
       if (d.order) $('order').value = d.order;
       if (d.dir) $('dir').value = d.dir;
       if (d.colM) $('colM').value = d.colM;
@@ -1489,7 +1496,7 @@
   }
   function doClsSave() {
     var st = loadStore(), c = curClass(st);
-    if (!c) { alert('上書きするクラスをえらんでください。はじめて残すときは「新しく保存」です。'); return; }
+    if (!c) { alert('先に、保存した名簿をえらんでください。はじめて残すときは「新しく保存」です。'); return; }
     c.names = $('names').value;
     c.seat = snapshot();
     if (!saveStore(st)) return;
@@ -1497,7 +1504,7 @@
   }
   function doClsLoad() {
     var c = curClass();
-    if (!c) { alert('呼び出す名簿をえらんでください。'); return; }
+    if (!c) { alert('先に、保存した名簿をえらんでください。'); return; }
     if (!confirm('「' + c.label + '」を入れます。' +
       'いま画面にある名簿と座席表は消えます。よろしいですか。')) return;
     // ⚠席次表だけで保存したものは seat が空。そのときも名簿だけは入れる
@@ -1509,7 +1516,7 @@
   }
   function doClsDel() {
     var st = loadStore(), c = curClass(st);
-    if (!c) { alert('消すクラスをえらんでください。'); return; }
+    if (!c) { alert('先に、消したい保存した名簿をえらんでください。'); return; }
     if (!confirm('「' + c.label + '」を消します。' +
       'その中の記録と、席次表で使っている設定も一緒に消えます。よろしいですか。')) return;
     st.classes = st.classes.filter(function (x) { return x.id !== c.id; });
@@ -1521,7 +1528,7 @@
 
   function doRecSave() {
     var st = loadStore(), c = curClass(st);
-    if (!c) { alert('先にクラスをえらんでください。'); return; }
+    if (!c) { alert('先に、保存した名簿をえらんでください。'); return; }
     if (!state.seats) { alert('先に席替えをしてください。'); return; }
     if (state.sample) { alert('サンプルは記録できません。名簿を入れてから席替えしてください。'); return; }
     c.recs = c.recs || [];
@@ -1656,6 +1663,10 @@
       if ($('save').checked) save();
     });
     if ($('hideSheet')) $('hideSheet').onclick = toggleMask;
+    if ($('printScale')) $('printScale').addEventListener('change', function () {
+      if (state.seats) drawSheet();
+      if ($('save').checked && !state.sample) save();
+    });
     if ($('nameAlign')) $('nameAlign').addEventListener('change', function () {
       if (state.seats) drawSheet();
       if ($('save').checked && !state.sample) save();
