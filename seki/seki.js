@@ -1777,6 +1777,18 @@
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') { closeGroupPick(); screenOff(); }
     });
+
+    // 🔴 書体が読み込まれてから、文字の大きさを測り直す（2026-09-01 本人「安定しない」）。
+    //   ⚠読み込み前に測ると、代わりの書体の幅で計算してしまい、マスごとにばらつく。
+    //     「何か操作するとそろう」のは、そのとき測り直しているから
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(function () {
+        if (state.seats) { try { drawSheet(); } catch (e) { } }
+      });
+    }
+    window.addEventListener('load', function () {
+      if (state.seats) { try { drawSheet(); } catch (e) { } }
+    });
     window.addEventListener('resize', function () {
       if (document.body.classList.contains('screen') && state.seats) drawSheet();
       else fitSheet();
