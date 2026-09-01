@@ -104,6 +104,7 @@ body.screen .seat.dup .nm{text-decoration:none}
 </style>
 </head>
 <body>
+<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/01 11:42</div>
 
 <header class="site-head noprint">
   <div class="wrap">
@@ -392,6 +393,7 @@ body.screen .seat.dup .nm{text-decoration:none}
         <p>お使いの機器がプリンターとつながっているか確認してください。つながっていれば、スマホからでも印刷できます。</p>
         <p><strong>PDFにしたいとき</strong>は、印刷画面で「送信先」を「PDFに保存」にしてください。</p>
         <p><strong>たて向きで出てしまうとき</strong>（スマホ・タブレットに多いです）は、印刷画面の設定で用紙の向きを「横」に変えてください。機器によっては、こちらの指定より端末の設定が優先されます。</p>
+        <p><strong>タブレット・スマホで2ページに分かれてしまうとき</strong>は、印刷画面の<strong>「サイズ調整」を80%</strong>くらいにしてください。画像で保存してから、写真アプリで印刷する方法もあります。</p>
         <p><strong>丸文字はWindowsとiPadだけ。</strong>ほかの機器ではゴシック体になりますが、崩れません。</p>
         <p><strong>印刷（PDF）は先生の向きで出す</strong>にすると、紙は教卓から見た向きになります。生徒に見せるのは画面で足りるので、紙は先生の向きだけで済みます。</p>
       </div>
@@ -472,6 +474,7 @@ body.screen .seat.dup .nm{text-decoration:none}
       </p>
       <p class="hint" id="printNote"></p>
       <p class="hint">PDFにするときは、印刷画面の<strong>「送信先」（または「プリンター」）を PDF に変更</strong>してください。</p>
+      <p class="hint">📱 タブレット・スマホの方 → <strong>「🖼 画像で保存（PNG）」がおすすめです。</strong>PDFで保存したい場合は、印刷画面の<strong>倍率（サイズ調整）</strong>で調整してください。</p>
     </section>
   </div>
 
@@ -644,7 +647,7 @@ body.screen .seat.dup .nm{text-decoration:none}
 </footer>
 
 <script src="../seating.js?v=54"></script>
-<script src="seat.js?v=115"></script>
+<script src="seat.js?v=117"></script>
 <!-- 🔴 印刷用の1枚絵の置き場（2026-09-01）。画面には出ない。
      ⚠**body の直下に置くこと。**中に入れると、印刷のときに親ごと隠されて白紙になる -->
 <div id="printImgWrap"></div>
