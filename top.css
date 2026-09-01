@@ -59,6 +59,16 @@
 .t-col .who{font-size:.8rem;color:var(--ink-soft);margin:0 0 22px}
 
 .t-tool{display:block;text-decoration:none;color:var(--ink);margin-bottom:20px}
+/* 🔴 カードの中の完成画像（2026-09-01）。
+   ⚠2枚の縦横比が少し違う（座席表1.293／席次表1.320）ので、枠を1.3:1に固定して中に収める。
+     こうすると、あとで撮り直しても2つのカードは同じ形のまま
+   ⚠height:auto が要る。<img height="758"> の属性が高さを決めてしまい、
+     これが無いと aspect-ratio が効かない（2026-09-01 実測） */
+.t-shot{
+  display:block;width:100%;height:auto;aspect-ratio:1.3 / 1;
+  object-fit:contain;background:#fff;
+  border:1px solid var(--line);border-radius:10px;margin:0 0 12px;
+}
 .t-tool .nm{font-size:1.08rem;font-weight:700;display:block;margin-bottom:5px}
 .t-tool .ds{font-size:.86rem;color:var(--ink-soft);display:block;line-height:1.7}
 
