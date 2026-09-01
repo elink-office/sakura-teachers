@@ -86,7 +86,9 @@ body.screen .sheet.masked .grid{display:grid}
 .tip-body ul{margin:0 0 6px;padding-left:1.3em}
 .tip-body li{margin-bottom:3px}
 .print-row{align-items:flex-end}
-.print-row button{margin-right:8px}
+/* ⚠2つのボタンは横に並べたまま。折り返さない */
+.print-btns{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.print-btns label{width:100%}
 .btn-row{margin:8px 0 6px}
 .btn-row .mini{margin:0 8px 6px 0}
 .pick{max-width:24em}
@@ -106,7 +108,7 @@ body.screen .seat.dup .nm{text-decoration:none}
 </style>
 </head>
 <body>
-<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/01 11:56</div>
+<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/01 12:03</div>
 
 <header class="site-head noprint">
   <div class="wrap">
@@ -456,15 +458,16 @@ body.screen .seat.dup .nm{text-decoration:none}
         <div><label for="paper">用紙の向き</label>
           <select id="paper"><option value="landscape">横</option><option value="portrait">縦</option></select>
         </div>
-        <div><label>&nbsp;</label>
-          <button id="doPrint" type="button">🖨 印刷（PDF作成）</button>
-          <button id="doPng" type="button">🖼 画像で保存（PNG）</button>
+        <div class="print-btns"><label>&nbsp;</label>
+          <button id="doPrint" type="button">印刷（PDF作成）</button>
+          <button id="doPng" type="button">画像で保存（PNG）</button>
         </div>
       </div>
-      <details class="opt sub noprint" style="margin-top:10px">
-        <summary>📱 タブレット・スマホの方へ</summary>
+      <details class="opt sub noprint" style="margin-top:14px">
+        <summary>タブレット・スマホの方へ</summary>
         <div class="body">
-          <p class="hint" style="margin:0"><strong>「🖼 画像で保存（PNG）」がおすすめです。</strong>PDFで保存したい場合は、印刷画面の<strong>倍率（サイズ調整）</strong>で調整してください。</p>
+          <p><strong>「画像で保存（PNG）」がおすすめです。</strong></p>
+          <p>PDFで保存する場合は、1ページに収まらないことがあります。その場合、印刷画面の<strong>倍率（サイズ調整）</strong>で調節してください。</p>
         </div>
       </details>
     </section>
@@ -639,7 +642,7 @@ body.screen .seat.dup .nm{text-decoration:none}
 </footer>
 
 <script src="../seating.js?v=54"></script>
-<script src="seat.js?v=120"></script>
+<script src="seat.js?v=121"></script>
 <!-- 🔴 印刷用の1枚絵の置き場（2026-09-01）。画面には出ない。
      ⚠**body の直下に置くこと。**中に入れると、印刷のときに親ごと隠されて白紙になる -->
 <div id="printImgWrap"></div>
