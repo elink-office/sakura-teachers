@@ -47,7 +47,8 @@
   align-items: center;
   justify-content: center;
   gap: .12em;
-  width: 100%;
+  /* 🔴 枠に対して左右の余白を取る（2026-09-01 本人「名前が大きすぎる」）*/
+  width: 88%;
   line-height: 1.15;
   color: var(--ink);
 }
@@ -57,7 +58,10 @@
 .seat .ln.ttl { font-size: calc(1em * var(--sTtl)); }
 .seat .ln.kana{ font-size: calc(1em * var(--sKana)); opacity: .8; letter-spacing: .04em; }
 /* 🔴 日本の席札は名前がいちばん下・いちばん大きい */
-.seat .ln.nam { font-size: 1em; font-weight: 600; }
+/* 🔴 名前の字間を少し空ける。詰まって見えると言われた（2026-09-01 本人）*/
+.seat .ln.nam { font-size: 1em; font-weight: 600; letter-spacing: .06em; }
+/* 🔴 敬称は名前より一回り小さく（2026-09-01 本人）*/
+.seat .ln.nam .hon{ font-size: .78em; letter-spacing: normal; margin-left: .34em; }
 .sheet.bold .seat .ln.nam{ font-weight: bold; }
 
 /* 🔴 会社名も折り返さない。折り返すと1マスの高さが人によって変わって、

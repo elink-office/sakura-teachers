@@ -393,7 +393,8 @@
     //    紙で名前の大きさと色が上書きされてしまう
     // 🔴 名前は必ず1行。姓と名のあいだで切ると、席札として不自然に見える（本人の判断）。
     //    横幅に入りきらないときは、折り返さずに文字を小さくして収める
-    out.push({ k: 'nam', t: nameWithHonor(p), m: 1, b: true });
+    // 🔴 敬称は名前より一回り小さくするので、同じ行の中で別に持つ（2026-09-01 本人）
+    out.push({ k: 'nam', t: p.name, hon: honor(), m: 1, b: true });
     return out;
   }
   function buildCellP(p) {
@@ -403,6 +404,13 @@
       var s = document.createElement('span');
       s.className = 'ln ' + L.k;
       s.textContent = L.t;
+      // 敬称は同じ行の中に、一回り小さい字で足す
+      if (L.hon) {
+        var hs = document.createElement('span');
+        hs.className = 'hon';
+        hs.textContent = L.hon;
+        s.appendChild(hs);
+      }
       box.appendChild(s);
     });
     return box;
@@ -844,7 +852,8 @@
       Math.max(58, Math.min(150, 32 + 22 * (lineCount() - 1))) + 'px');
     var one = g.querySelector('.seat');
     var seatHpx = one ? one.clientHeight : 60;
-    var base = Math.max(7, Math.floor((seatHpx - 8) / lineEm));
+    // 🔴 枠に対して余白を取る（2026-09-01 本人「名前が大きすぎる」）。8 → 18
+    var base = Math.max(7, Math.floor((seatHpx - 18) / lineEm));
     var minSize = base;
     var cells = g.querySelectorAll('.seat .cell');
     // ⚠ 幅の判定から所属だけ外す。所属は下で別に詰めるので、
@@ -1209,6 +1218,86 @@
 
   // 🔴 席次表を1枚の絵にする（2026-09-01。座席表と同じ作り）。
   //   k を大きくすると解像度が上がる（描き方は同じ。ものさしを拡大するだけ）
+  // ---- 1マスの中の字（2026-09-01 本人の指摘で作った）----
+  //   ・敬称は名前より一回り小さく
+  //   ・名前の字間を少し空ける（詰まって見えるため）
+  //   ・枠に対して余白を取る（名前が大きすぎるため）
+  var HON_R = .78;      // 敬称の大きさ（名前に対する比）
+  var HON_GAP = .38;    // 名前と敬称のあいだ（半角スペース1つぶん）
+  var NAM_LS = .06;     // 名前の字間（1文字ぶんに対する比）
+  var CELL_PADH = 44;   // 1マスの左右の余白（前は20）
+  var CELL_PADV = 34;   // 1マスの上下の余白（前は20）
+  // ⚠ letterSpacing に対応していないブラウザでは、効かないだけで落ちない
+  function setLS(x, v) { try { x.letterSpacing = (v || 0) + 'px'; } catch (e) { } }
+  function cellFont(x, L, fs, bold) {
+    x.font = (L.b && bold ? 'bold ' : '') + fs + 'px ' + fontStack();
+  }
+  // 1行の幅（敬称のぶんも足す）
+  function lineW(x, L, size, bold) {
+    var fs = Math.round(size * L.m);
+    cellFont(x, L, fs, bold);
+    var sp = (L.k === 'nam') ? fs * NAM_LS : 0;
+    setLS(x, sp);
+    var w = x.measureText(L.t).width - sp;   // 最後の1文字のうしろに付くぶんを引く
+    setLS(x, 0);
+    if (L.hon) {
+      cellFont(x, L, Math.round(fs * HON_R), bold);
+      w += fs * HON_GAP + x.measureText(L.hon).width;
+    }
+    return w;
+  }
+  // 1マスに収まる大きさを返す（描かずに測るだけ）
+  function cellFit(x, ls, cw, ch, bold) {
+    var em = 0;
+    ls.forEach(function (L) { em += L.m * 1.25; });
+    var size = Math.min((ch - CELL_PADV) / em, 40);
+    while (size > 8) {
+      var over = ls.some(function (L) { return lineW(x, L, size, bold) > cw - CELL_PADH; });
+      if (!over) break;
+      size -= 1;
+    }
+    return size;
+  }
+  // 1マスぶんを描く（大きさは呼ぶ側でそろえてから渡す）
+  function drawCellLines(x, ls, px, py, cw, ch, size, bold) {
+    x.textBaseline = 'middle';
+    var totH = 0;
+    ls.forEach(function (L) { totH += size * L.m * 1.25; });
+    var yy = py + ch / 2 - totH / 2;
+    ls.forEach(function (L) {
+      var fs = Math.round(size * L.m);
+      var cy = yy + size * L.m * 1.25 / 2;
+      x.fillStyle = L.dim ? '#666666' : inkColor();
+      if (L.hon) {
+        // 名前と敬称を、ひとかたまりとして中央に置く
+        var hs = Math.round(fs * HON_R), gap = fs * HON_GAP, sp = fs * NAM_LS;
+        cellFont(x, L, fs, bold);
+        setLS(x, sp);
+        var w1 = x.measureText(L.t).width - sp;
+        setLS(x, 0);
+        cellFont(x, L, hs, bold);
+        var w2 = x.measureText(L.hon).width;
+        var left = px + cw / 2 - (w1 + gap + w2) / 2;
+        x.textAlign = 'left';
+        cellFont(x, L, fs, bold);
+        setLS(x, sp);
+        x.fillText(L.t, left, cy);
+        setLS(x, 0);
+        cellFont(x, L, hs, bold);
+        // 🔴 敬称は下ぞろえ（2026-09-01 本人）。小さいぶんだけ下げると、名前と足元がそろう
+        x.fillText(L.hon, left + w1 + gap, cy + (fs - hs) / 2);
+      } else {
+        x.textAlign = 'center';
+        cellFont(x, L, fs, bold);
+        setLS(x, L.k === 'nam' ? fs * NAM_LS : 0);
+        x.fillText(L.t, px + cw / 2, cy);
+        setLS(x, 0);
+      }
+      yy += size * L.m * 1.25;
+    });
+    x.textAlign = 'left'; x.textBaseline = 'top';
+  }
+
   function buildSheetCanvas(k) {
     k = k || 1;
     var o = state.opt, cols = o.cols, rows = o.rows;
@@ -1243,6 +1332,22 @@
     }
     var gy = top + (state.board === 'top' ? boardH : 0);
     if (frontWord()) { if (state.board === 'top') board(top); else board(top + rows * ch + 6); }
+
+    // 🔴 全部のマスで名前の大きさをそろえる（2026-09-01）。
+    //   ⚠ 座席表(seat.js)には入っていたのに、席次表に入っていなかった。
+    //     1マスずつ決めていたので、短い名前だけ大きく出ていた（本人の指摘）
+    var boldP = $('bold').checked;
+    var fitSize = 40;
+    if (state.seats) {
+      for (var q = 0; q < rows * cols; q++) {
+        var nq = state.seats[q];
+        if (!nq) continue;
+        var lq = cellLines(personOf(nq));
+        if (!lq.length) continue;
+        var sq = cellFit(x, lq, cw, ch, boldP);
+        if (sq < fitSize) fitSize = sq;
+      }
+    }
 
     var flipP = (state.board !== 'top');
     for (var dr = 0; dr < rows; dr++) {
@@ -1283,30 +1388,7 @@
         if (!name) continue;
         var ls = cellLines(personOf(name));
         if (!ls.length) continue;
-        var bold = $('bold').checked;
-        var em = 0;
-        ls.forEach(function (L) { em += L.m * 1.25; });
-        var size = Math.min((ch - 20) / em, 44);
-        while (size > 8) {
-          var over = ls.some(function (L) {
-            x.font = (L.b && bold ? 'bold ' : '') + Math.round(size * L.m) + 'px ' + fontStack();
-            return x.measureText(L.t).width > cw - 20;
-          });
-          if (!over) break;
-          size -= 1;
-        }
-        x.textAlign = 'center'; x.textBaseline = 'middle';
-        var totH = 0;
-        ls.forEach(function (L) { totH += size * L.m * 1.25; });
-        var yy = py + ch / 2 - totH / 2;
-        ls.forEach(function (L) {
-          var fs = Math.round(size * L.m);
-          x.font = (L.b && bold ? 'bold ' : '') + fs + 'px ' + fontStack();
-          x.fillStyle = L.dim ? '#666666' : inkColor();
-          x.fillText(L.t, px + cw / 2, yy + size * L.m * 1.25 / 2);
-          yy += size * L.m * 1.25;
-        });
-        x.textAlign = 'left'; x.textBaseline = 'top';
+        drawCellLines(x, ls, px, py, cw, ch, fitSize, boldP);
       }
     }
     if (credit) {
