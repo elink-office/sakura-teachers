@@ -30,7 +30,7 @@
 <link rel="stylesheet" href="../print.css?v=54" media="print">
 </head>
 <body>
-<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/01 12:27</div>
+<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/01 12:54</div>
 
 <header class="site-head noprint">
   <div class="wrap">
@@ -54,6 +54,9 @@
         <p><strong>Excelから、必要な列をまとめて選んで貼り付けてください。</strong>会社名・役職・名前が並んだ範囲をそのままコピーして、この欄に貼るだけです。</p>
         <p>貼り付けると、<strong>どの列が何なのかを自動で見分けます。</strong>数字だけの列は番号、カタカナだけの列はフリガナ、といった具合です。違っていたら、下のメニューで選び直せます。</p>
         <p><strong>名前だけでも作れます。</strong>1行に1人ずつ書けば、そのまま席次表になります。</p>
+        <p><strong>手で書くときは、カンマ（,）で区切ってください。</strong>Excelから貼るときのタブは、この欄に打てないためです。<br>
+        <span class="hint">株式会社さくら商事,部長,山田 太郎,ヤマダ タロウ</span></p>
+        <p>⚠ <strong>空白は区切りになりません。</strong>「山田 太郎」のように名前の中に空白が入るためです。</p>
       </div>
       <p class="safe">🔒 <strong>使ってる機器の中だけで完結できます。</strong>名簿はネット上に流れません。外に送っていないので、AIの学習に使われることも、個人情報が漏れることもありません。社員名簿でも、安心して使えます。</p>
       <!-- 🔴 保存した名簿の呼び出しは①に置く（⑧まで下がらなくていい）。
@@ -96,8 +99,8 @@
     <section class="card noprint">
       <h2><span class="step">2</span>会場の形</h2>
       <div class="row tight">
-        <div><label for="cols">横のならび</label><span class="ctl"><select id="cols" class="narrow"><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6" selected>6</option><option value="7">7</option><option value="8">8</option></select><span class="unit">席</span></span></div>
-        <div><label for="rows">縦のならび</label><span class="ctl"><select id="rows" class="narrow"><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5" selected>5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option></select><span class="unit">列</span></span></div>
+        <div><label for="cols">横のならび</label><span class="ctl"><input id="cols" type="number" min="1" max="20" value="6"><span class="unit">席</span></span></div>
+        <div><label for="rows">縦のならび</label><span class="ctl"><input id="rows" type="number" min="1" max="20" value="5"><span class="unit">列</span></span></div>
         <div><label>座席数</label><div class="bignum" id="seatcount">30</div></div>
         <div id="seatinfo" class="hint" style="align-self:flex-end;padding-bottom:6px"></div>
       </div>
@@ -342,7 +345,7 @@
       </div>
       <p style="margin-top:10px">
         <label style="font-weight:normal;display:inline;margin-right:18px">
-          <input type="checkbox" id="dtOff"> 日付を入れない
+          <input type="checkbox" id="dtOff"> 日付・自由記入を入れない
         </label>
         <label style="font-weight:normal;display:inline">
           <input type="checkbox" id="bold" checked> 名前を太く（モニター用）
@@ -538,7 +541,7 @@
 </footer>
 
 <script src="../seating.js?v=54"></script>
-<script src="seki.js?v=32"></script>
+<script src="seki.js?v=35"></script>
 <!-- 🔴 印刷用の1枚絵の置き場。⚠body の直下に置くこと -->
 <div id="printImgWrap"></div>
 </body>

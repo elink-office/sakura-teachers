@@ -81,7 +81,9 @@
   var LEAD_NUM = /^[0-9０-９]+[ 　]+/;
   var TAIL_SEX = /[ 　]+(男子|女子|男|女)$/;
   function parseLine(line) {
-    var cells = line.split('\t')
+    // ⚠タブは名簿の欄に打てないので、カンマでも列に分ける（2026-09-01 本人）。
+    //   ⚠空白は区切りにしない。名前に空白が入る（やまだ たろう）ため
+    var cells = line.split(/[\t,，]/)
       .map(function (x) { return x.replace(/^[\s　]+/, '').replace(/[\s　]+$/, ''); })
       .filter(function (x) { return x.length; });
     var out = { name: '', lead: false, sex: '' };
@@ -1182,8 +1184,10 @@
       try {
         var wrap = $('printImgWrap');
         var wideP = $('paper').value === 'landscape';
-        // A4よこ＝1.41、たて＝0.71。紙より横長にしておくと、幅で合わせたときに縦が余る
-        var cv = padToAspect(buildSheetCanvas(2), wideP ? 1.72 : 0.78);
+        // A4よこ＝1.41、たて＝0.71。紙より少し横長にしておくと、幅で合わせたときに縦が余る。
+        // ⚠横長にしすぎると左右の余白が増えて、本体が小さくなる（2026-09-01 本人「用紙いっぱいにしたかった」）。
+        //   1.55 は「紙いっぱいに近く、かつはみ出さない」ぎりぎりの値
+        var cv = padToAspect(buildSheetCanvas(2), wideP ? 1.55 : 0.72);
         wrap.innerHTML = '';
         wrap.appendChild(cv);
         document.body.classList.add('print-img');

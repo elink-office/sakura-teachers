@@ -81,7 +81,10 @@
     return $('names').value.split('\n')
       .filter(function (s) { return s.trim().length; })
       .map(function (s) {
-        return s.split('\t').map(function (c) { return c.trim(); });
+        // 🔴 タブのほかカンマでも列に分ける（2026-09-01 本人）。
+        //   ⚠タブは名簿の欄に打てない（押すと次の欄に移る）ので、手入力ではカンマを使う。
+        //     ⚠空白は区切りにしない。名前に空白が入る（山田 太郎）ため
+        return s.split(/[\t,，]/).map(function (c) { return c.trim(); });
       });
   }
   // 貼り付けた列が何なのか、自動で当たりをつける
@@ -1177,7 +1180,7 @@
       try {
         var wrap = $('printImgWrap');
         var wideP = $('paper').value === 'landscape';
-        var cv = padToAspect(buildSheetCanvas(2), wideP ? 1.72 : 0.78);
+        var cv = padToAspect(buildSheetCanvas(2), wideP ? 1.55 : 0.72);
         wrap.innerHTML = '';
         wrap.appendChild(cv);
         document.body.classList.add('print-img');
@@ -1551,7 +1554,8 @@
       $('names').value = d.names || '';
       $('clsFree').value = d.clsFree || '';
       if (d.colRoles && d.colRoles.length) state.colRoles = d.colRoles;
-      $('cols').value = clampNum(d.cols, 6); $('rows').value = clampNum(d.rows, 5);
+      // ⚠席次表は入力式のまま（大学は会場が広い。2026-09-01 本人）
+      $('cols').value = d.cols || 6; $('rows').value = d.rows || 5;
       $('board').value = d.board || 'top';
       if (d.frontWord !== undefined) $('frontWord').value = d.frontWord;
       if (d.paper) $('paper').value = d.paper;
