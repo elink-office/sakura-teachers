@@ -1161,7 +1161,9 @@
   }
 
   var printScrollY = 0;
+  var printBW = false;      // 紙だけ黒にするか（画面はそのまま）
   function doPrint() {
+    printBW = !!($('printBW') && $('printBW').checked);
     // 🔴 印刷の画面を閉じたあと、ページの先頭に飛ばない（2026-09-01 本人・タブレット）。
     //   ⚠印刷のあいだ中身をいったん隠すので、そのまま戻すと位置を見失う
     printScrollY = window.scrollY || window.pageYOffset || 0;
@@ -1187,7 +1189,7 @@
         // A4よこ＝1.41、たて＝0.71。紙より少し横長にしておくと、幅で合わせたときに縦が余る。
         // ⚠横長にしすぎると左右の余白が増えて、本体が小さくなる（2026-09-01 本人「用紙いっぱいにしたかった」）。
         //   1.55 は「紙いっぱいに近く、かつはみ出さない」ぎりぎりの値
-        var cv = padToAspect(buildSheetCanvas(2), wideP ? 1.55 : 0.72);
+        var cv = padToAspect(buildSheetCanvas(2), wideP ? 1.50 : 0.75);
         wrap.innerHTML = '';
         wrap.appendChild(cv);
         document.body.classList.add('print-img');
@@ -1199,6 +1201,7 @@
 
   window.addEventListener('afterprint', function () {
     document.body.classList.remove('print-all');
+    printBW = false;
     document.body.classList.remove('print-img');
     if ($('printImgWrap')) $('printImgWrap').innerHTML = '';
     $('printAll').innerHTML = '';
@@ -1294,7 +1297,8 @@
           if (!wide && lines.length * size * 1.25 < ch - 16) break;
           size -= 1;
         }
-        x.fillStyle = ($('sexPrint').checked ? sexColor(name) : null) || '#333';
+        // ⚠印刷だけ黒にしたいときがある（画面は色つきのまま）。2026-09-01 本人
+        x.fillStyle = ((!printBW && $('sexPrint').checked) ? sexColor(name) : null) || '#333';
         x.font = weight + size + 'px ' + fontStack();
         x.textAlign = 'center'; x.textBaseline = 'middle';
         var lh = size * 1.25, top0 = py + ch / 2 - (lines.length - 1) * lh / 2;
@@ -1355,6 +1359,7 @@
         font: $('font').value, bold: $('bold').checked,
         showCredit: $('showCredit').checked,
         printTeacher: $('printTeacher') ? $('printTeacher').checked : true,
+        printBW: $('printBW') ? $('printBW').checked : false,
         printScale: $('printScale') ? $('printScale').value : '1',
         printWay: $('printWay') ? $('printWay').value : 'img',
         // 🔴 座席表もいっしょに残す（2026-08-31 本人「⑦は画面の保存」）。
@@ -1411,6 +1416,7 @@
       // ⚠前に保存した人はこの項目を持っていない。そのときは既定（オン）のまま
       if (d.printTeacher !== undefined && $('printTeacher'))
         $('printTeacher').checked = !!d.printTeacher;
+      if (d.printBW !== undefined && $('printBW')) $('printBW').checked = !!d.printBW;
       if (d.printScale && $('printScale')) $('printScale').value = d.printScale;
       if (d.printWay && $('printWay')) $('printWay').value = d.printWay;
       if (d.order) $('order').value = d.order;

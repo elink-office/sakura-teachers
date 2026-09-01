@@ -1180,7 +1180,7 @@
       try {
         var wrap = $('printImgWrap');
         var wideP = $('paper').value === 'landscape';
-        var cv = padToAspect(buildSheetCanvas(2), wideP ? 1.55 : 0.72);
+        var cv = padToAspect(buildSheetCanvas(2), wideP ? 1.50 : 0.75);
         wrap.innerHTML = '';
         wrap.appendChild(cv);
         document.body.classList.add('print-img');

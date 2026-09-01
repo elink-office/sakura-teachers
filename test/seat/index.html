@@ -111,7 +111,7 @@ body.screen .seat.dup .nm{text-decoration:none}
 </style>
 </head>
 <body>
-<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/01 12:54</div>
+<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/01 16:12</div>
 
 <header class="site-head noprint">
   <div class="wrap">
@@ -313,7 +313,7 @@ body.screen .seat.dup .nm{text-decoration:none}
         <p><strong>赤と緑は、いちばん見分けにくい組み合わせ</strong>です。教室のモニターに映して子どもが自分の席を探すことを考えて、このツールでは青系と赤紫系のように系統が離れた色を、はじめの組み合わせにしています。明るさも変えてあるので、色が分かりにくい人でも濃さで見分けられます。</p>
         <p>色を付けたくないときは、両方とも「黒」を選んでください。</p>
       </div>
-      <p class="note-sm">下の名前を押すたびに <b>なし → 男 → 女</b> と変わります。<strong>指定していない人は黒のままです。</strong>名簿に書き足す必要はありません。</p>
+      <p class="note-sm">下の名前を押すたびに <b>なし → 男 → 女</b> と変わります。</p>
       <div class="row tight">
         <div><label for="colM">男の色</label><select id="colM"></select></div>
         <div><label for="colF">女の色</label><select id="colF"></select></div>
@@ -322,7 +322,7 @@ body.screen .seat.dup .nm{text-decoration:none}
         <label class="chk-inline">
           <input type="checkbox" id="sexPrint" checked> 男女で色を分ける
         </label>
-        <span class="hint" style="margin-left:8px">外すと<strong>文字は全部黒</strong>になります。男女の指定は消えません。</span>
+        <span class="hint" style="margin-left:8px">外すと<strong>画面上の文字が全部黒</strong>になります。<strong>⑥で、印刷のみ名前を黒に設定する</strong>こともできます。</span>
       </p>
 
       <div id="sexList" class="chips"></div>
@@ -454,9 +454,11 @@ body.screen .seat.dup .nm{text-decoration:none}
         <p><strong>印刷できないとき</strong>は、お使いの機器がプリンターとつながっているか確認してください。つながっていれば、スマホからでも印刷できます。</p>
         <p><strong>たて向きで出てしまうとき</strong>（スマホ・タブレットに多いです）は、印刷画面の設定で用紙の向きを「横」に変えてください。機器によっては、こちらの指定より端末の設定が優先されます。</p>
         <p><strong>「先生の向き」</strong>にすると、紙は教卓から見た向き（180度まわした形）で出ます。画面はそのままです。</p>
+        <p><strong>「男女の色を出さない」</strong>にすると、紙だけ黒で出ます。<strong>画面は色が付いたままです。</strong>③で色を消すと画面も黒くなるので、紙だけ黒にしたいときはこちらを使ってください。</p>
       </div>
       <p style="margin:0 0 10px">
         <label class="chk-inline"><input type="checkbox" id="printTeacher" checked> 印刷（PDF）は先生の向きで出す</label>
+        <label class="chk-inline gap"><input type="checkbox" id="printBW"> 印刷（PDF）は男女の色を出さない</label>
       </p>
       <div class="print-line">
         <label for="paper">用紙の向き</label>
@@ -467,8 +469,7 @@ body.screen .seat.dup .nm{text-decoration:none}
       <details class="opt sub noprint tips-sm" style="margin-top:14px">
         <summary>タブレット・スマホの方へ</summary>
         <div class="body">
-          <p><strong>「画像で保存（PNG）」がおすすめです。</strong></p>
-          <p>PDFで保存する場合は、1ページに収まらないことがあります。その場合、印刷画面の<strong>倍率（サイズ調整）</strong>で調節してください。</p>
+          <p>PDFで保存する場合は、用紙を横にしても1ページに収まらないことがあります。その場合、印刷画面の<strong>倍率（サイズ調整）</strong>で調節してください。（<strong>75〜80％</strong>くらいにすると1ページに収まりやすいです。）</p>
         </div>
       </details>
     </section>
@@ -582,7 +583,7 @@ body.screen .seat.dup .nm{text-decoration:none}
     <h2>よくある質問</h2>
     <dl>
       <dt>ネットにつながっているのに、本当に外に出ないのですか？</dt>
-      <dd><strong>普段お使いの機器で、名簿を開くのと同じです。</strong>ネットにつながっていても、このページは名簿を受け取っていません。ブラウザの中だけで処理して、そのまま印刷やPDFにしています。だから、外に晒されることも、漏れることも、AIの学習に使われることもありません。<strong>いつもの仕事と同じように、安心して使えます。</strong></dd>
+      <dd><strong>普段お使いの機器で、名簿を開くのと同じです。</strong>エクセルで名簿を開いても、書いた中身がネットに出ていかないのと同じことです。ネットにつながっていても、このページは名簿を受け取っていません。ブラウザの中だけで処理して、そのまま印刷やPDFにしています。だから、外に晒されることも、漏れることも、AIの学習に使われることもありません。<strong>いつもの仕事と同じように、安心して使えます。</strong></dd>
       <dt>名簿は外部に送られますか？</dt>
       <dd>送りません。すべて使ってる機器の中だけで処理しています。<strong>外に出ていないので、AIの学習に使われることもありません。</strong></dd>
       <dt>入力した名簿がAIの学習に使われるか心配です</dt>
@@ -643,7 +644,7 @@ body.screen .seat.dup .nm{text-decoration:none}
 </footer>
 
 <script src="../seating.js?v=54"></script>
-<script src="seat.js?v=124"></script>
+<script src="seat.js?v=129"></script>
 <!-- 🔴 印刷用の1枚絵の置き場（2026-09-01）。画面には出ない。
      ⚠**body の直下に置くこと。**中に入れると、印刷のときに親ごと隠されて白紙になる -->
 <div id="printImgWrap"></div>
