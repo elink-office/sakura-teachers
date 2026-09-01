@@ -53,12 +53,16 @@
   body.print-img > *:not(#printImgWrap){display:none !important}
   body.print-img #printImgWrap{display:block !important;text-align:center;background:#fff}
   body.print-img{margin:0;padding:0}
+  body.print-img #printImgWrap{padding:0;margin:0}
+  /* ⚠**幅も mm でおさえる。**100% にすると、紙ではなく画面の幅を見てしまい、
+     はみ出して切れる（2026-09-01 タブレットで発覚。80%に縮めないと入らなかった） */
   body.print-img #printImg{
-    display:inline-block;max-width:100%;width:auto;height:auto;
-    max-height:242mm;                 /* A4たて：297 − 余白ぶん（多めに引く） */
+    display:block;margin:0 auto;
+    max-width:180mm;max-height:240mm;      /* A4たて */
+    width:auto;height:auto;
   }
   /* ⚠クラスは landscape しか付かない（portrait は無い）。よこ向きはここで上書き */
-  body.landscape.print-img #printImg{max-height:158mm}
+  body.landscape.print-img #printImg{max-width:265mm;max-height:150mm}
 }
 /* 名前の位置（ひらがなだけのクラスは左のほうが読みやすい） */
 .sheet.al-left .seat{justify-content:flex-start;text-align:left}
@@ -443,7 +447,6 @@ body.screen .seat.dup .nm{text-decoration:none}
         <p><strong>PDFにするとき</strong>は、印刷画面で「送信先」（または「プリンター」）を <strong>PDFに保存</strong> に変えてください。</p>
         <p><strong>1ページに収める</strong>＝画面に出ているものを1枚の絵にしてから印刷します。<strong>紙に収まる大きさをブラウザが決める</strong>ので、はみ出しません。タブレットでも1ページです。</p>
         <p><strong>文字のまま出す</strong>＝絵にせず、文字のまま印刷します。<strong>拡大してもぼやけません</strong>が、紙に入りきらないと2ページに分かれます。そのときは「印刷の大きさ」で小さくしてください。</p>
-        <p><strong>印刷の大きさ</strong>＝「文字のまま」ではみ出すときに使います。タブレットは印刷画面で倍率を変えられないので、ここで小さくします。</p>
         <p><strong>たて向きで出てしまうとき</strong>（スマホ・タブレットに多いです）は、印刷画面の設定で用紙の向きを「横」に変えてください。機器によっては、こちらの指定より端末の設定が優先されます。</p>
       </div>
       <div class="row tight">
@@ -460,13 +463,6 @@ body.screen .seat.dup .nm{text-decoration:none}
           <select id="printWay">
             <option value="img">1ページに収める</option>
             <option value="text">文字のまま出す</option>
-          </select>
-        </div>
-        <div><label for="printScale">印刷の大きさ</label>
-          <select id="printScale">
-            <option value="1">ふつう</option>
-            <option value="0.88">小さめ</option>
-            <option value="0.78">もっと小さめ</option>
           </select>
         </div>
       </div>
@@ -652,7 +648,7 @@ body.screen .seat.dup .nm{text-decoration:none}
 </footer>
 
 <script src="../seating.js?v=54"></script>
-<script src="seat.js?v=112"></script>
+<script src="seat.js?v=113"></script>
 <!-- 🔴 印刷用の1枚絵の置き場（2026-09-01）。画面には出ない。
      ⚠**body の直下に置くこと。**中に入れると、印刷のときに親ごと隠されて白紙になる -->
 <div id="printImgWrap"><img id="printImg" alt=""></div>

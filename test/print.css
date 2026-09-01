@@ -94,6 +94,7 @@ body.landscape{}
     min-height:var(--sheetMin, 0);
     display:flex;flex-direction:column;
   }
+  .sheet{justify-content:flex-start}   /* ⚠上ぞろえ。上下中央にしない（2026-09-01 本人） */
   .sheet .grid{flex:0 0 auto}
   .sheet-credit{margin-top:auto;padding-top:4mm}
   .sheet-foot{display:none}
