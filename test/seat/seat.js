@@ -842,7 +842,11 @@
     // 🔴 マスごとに大きさを決めると、名前の長さでばらつく（2026-09-01 本人）。
     //   ⚠**いちばん小さくなったものに全部そろえる。**
     //     一覧して名前を探す表なので、大きさがちがうと目が迷う
+    // 🔴⚠かくしているあいだは測らない（2026-09-01 本人）。
+    //   マスの幅も高さもゼロになるので、極端に小さい大きさで決まってしまう。
+    //   見せたときに測り直す（toggleMask のほうで drawSheet を呼ぶ）
     var nms = [], minPx = 9999, minMm = 9999;
+    if (g.clientWidth >= 10) {
     g.querySelectorAll('.seat .nm').forEach(function (sp) {
       fitText(sp.parentNode, sp, base);
       var px = parseFloat(sp.style.fontSize) || base;
@@ -855,6 +859,7 @@
       sp.style.fontSize = minPx + 'px';
       sp.style.setProperty('--nmPrint', minMm + 'mm');
     });
+    }
     var note = document.querySelector('.drag-note');
     if (note) {
       note.innerHTML = state.grp.on
@@ -899,6 +904,8 @@
     var on = !sh.classList.contains('masked');
     sh.classList.toggle('masked', on);
     b.textContent = on ? '👀 座席表を見せる' : '🙈 座席表をかくす';
+    // ⚠見せたときに測り直す。かくしているあいだは幅がゼロで、正しく測れない
+    if (!on && state.seats) { try { drawSheet(); } catch (e) { } }
   }
 
   // ---- モニターに映す（教室の大きな画面に、座席表だけを出す）----
