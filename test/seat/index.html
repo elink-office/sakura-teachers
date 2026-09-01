@@ -85,6 +85,8 @@ body.screen .sheet.masked .grid{display:grid}
 .tip-body .tip-h{font-weight:bold;margin:10px 0 2px}
 .tip-body ul{margin:0 0 6px;padding-left:1.3em}
 .tip-body li{margin-bottom:3px}
+.print-row{align-items:flex-end}
+.print-row button{margin-right:8px}
 .btn-row{margin:8px 0 6px}
 .btn-row .mini{margin:0 8px 6px 0}
 .pick{max-width:24em}
@@ -104,7 +106,7 @@ body.screen .seat.dup .nm{text-decoration:none}
 </style>
 </head>
 <body>
-<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/01 11:42</div>
+<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/01 11:56</div>
 
 <header class="site-head noprint">
   <div class="wrap">
@@ -443,38 +445,28 @@ body.screen .seat.dup .nm{text-decoration:none}
       <h2><span class="step">6</span>印刷・画像で保存&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h2>
       <div class="tip-body" hidden>
         <p><strong>PDFにするとき</strong>は、印刷画面で「送信先」（または「プリンター」）を <strong>PDFに保存</strong> に変えてください。</p>
-        <p><strong>1ページに収める</strong>＝画面に出ているものを1枚の絵にしてから印刷します。<strong>紙に収まる大きさをブラウザが決める</strong>ので、はみ出しません。タブレットでも1ページです。</p>
-        <p><strong>文字のまま出す</strong>＝絵にせず、文字のまま印刷します。<strong>拡大してもぼやけません</strong>が、紙に入りきらないと2ページに分かれます。そのときは「印刷の大きさ」で小さくしてください。</p>
+        <p><strong>印刷できないとき</strong>は、お使いの機器がプリンターとつながっているか確認してください。つながっていれば、スマホからでも印刷できます。</p>
         <p><strong>たて向きで出てしまうとき</strong>（スマホ・タブレットに多いです）は、印刷画面の設定で用紙の向きを「横」に変えてください。機器によっては、こちらの指定より端末の設定が優先されます。</p>
+        <p><strong>「先生の向き」</strong>にすると、紙は教卓から見た向き（180度まわした形）で出ます。画面はそのままです。</p>
       </div>
-      <div class="row tight">
-        <div><label for="printWhat">印刷するもの</label>
-          <select id="printWhat">
-            <option value="one">いま表示している案</option>
-            <option value="all">3案すべて（3ページ）</option>
-          </select>
-        </div>
+      <p style="margin:0 0 10px">
+        <label class="chk-inline"><input type="checkbox" id="printTeacher" checked> 印刷（PDF）は先生の向きで出す</label>
+      </p>
+      <div class="row tight print-row">
         <div><label for="paper">用紙の向き</label>
           <select id="paper"><option value="landscape">横</option><option value="portrait">縦</option></select>
         </div>
-        <div><label for="printWay">印刷のしかた</label>
-          <select id="printWay">
-            <option value="img">1ページに収める</option>
-            <option value="text">文字のまま出す</option>
-          </select>
+        <div><label>&nbsp;</label>
+          <button id="doPrint" type="button">🖨 印刷（PDF作成）</button>
+          <button id="doPng" type="button">🖼 画像で保存（PNG）</button>
         </div>
       </div>
-      <p style="margin:10px 0 0">
-        <label class="chk-inline"><input type="checkbox" id="printTeacher" checked> 印刷（PDF）は先生の向きで出す</label>
-        <span class="hint" style="margin-left:8px">紙は<strong>教卓から見た向き</strong>（180度まわした形）で出ます。画面はそのままです。</span>
-      </p>
-      <p style="margin:12px 0 0">
-        <button id="doPrint" type="button">🖨 印刷（PDF作成）</button>
-        <button id="doPng" type="button">🖼 画像で保存（PNG）</button>
-      </p>
-      <p class="hint" id="printNote"></p>
-      <p class="hint">PDFにするときは、印刷画面の<strong>「送信先」（または「プリンター」）を PDF に変更</strong>してください。</p>
-      <p class="hint">📱 タブレット・スマホの方 → <strong>「🖼 画像で保存（PNG）」がおすすめです。</strong>PDFで保存したい場合は、印刷画面の<strong>倍率（サイズ調整）</strong>で調整してください。</p>
+      <details class="opt sub noprint" style="margin-top:10px">
+        <summary>📱 タブレット・スマホの方へ</summary>
+        <div class="body">
+          <p class="hint" style="margin:0"><strong>「🖼 画像で保存（PNG）」がおすすめです。</strong>PDFで保存したい場合は、印刷画面の<strong>倍率（サイズ調整）</strong>で調整してください。</p>
+        </div>
+      </details>
     </section>
   </div>
 
@@ -647,7 +639,7 @@ body.screen .seat.dup .nm{text-decoration:none}
 </footer>
 
 <script src="../seating.js?v=54"></script>
-<script src="seat.js?v=117"></script>
+<script src="seat.js?v=120"></script>
 <!-- 🔴 印刷用の1枚絵の置き場（2026-09-01）。画面には出ない。
      ⚠**body の直下に置くこと。**中に入れると、印刷のときに親ごと隠されて白紙になる -->
 <div id="printImgWrap"></div>

@@ -1124,11 +1124,12 @@
   }
 
   // ---- 印刷 ----
+  // ⚠「印刷するもの」は外した（2026-09-01 本人）。案は上のタブでえらぶ
   function printNote() {
     var el = $('printNote'); if (!el) return;
-    el.textContent = $('printWhat').value === 'all'
-      ? '3案すべて（3ページ）を印刷します'
-      : 'いま表示している 案' + (state.cur + 1) + ' を印刷します';
+    el.textContent = ($('printWhat') && $('printWhat').value === 'all')
+      ? ''
+      : '';
   }
 
   // 3案ぶんの座席表を作って、印刷用の入れ物に入れる
@@ -1171,8 +1172,8 @@
       state.board = 'bottom';
       drawSheet();
     }
-    if ($('printWhat').value === 'all' && state.plans.length) buildAll();
-    else if ($('printWay') && $('printWay').value === 'img' && state.seats) {
+    if ($('printWhat') && $('printWhat').value === 'all' && state.plans.length) buildAll();
+    else if ((!$('printWay') || $('printWay').value === 'img') && state.seats) {
       // 🔴 画面と同じ絵を1枚作って、それだけを印刷する。
       //   ⚠3案まとめて印刷のときは、今までどおり文字のまま
       //   🔴⚠**<img> を使わない。**画像の読み込みを待つと、そのあいだに
@@ -1822,7 +1823,7 @@
     // ⚠「べつの案を出す」は座席表を見ながら押すので、画面を動かさない
     $('again').onclick = function () { run(true); };
     $('doPrint').onclick = doPrint;
-    $('printWhat').addEventListener('change', printNote);
+    if ($('printWhat')) $('printWhat').addEventListener('change', printNote);
     // 🔴 用紙の向きで1マスの高さが変わる。描き直さないと、
     //    横で計算した高さのまま縦の紙に刷られてしまう
     $('paper').addEventListener('change', function () {
