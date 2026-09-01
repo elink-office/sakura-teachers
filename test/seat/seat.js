@@ -136,6 +136,12 @@
     refreshSeatInfo();
     document.querySelectorAll('select.nameSel').forEach(fillNames);
   }
+  function clampNum(v, dflt) {
+    var n = parseInt(v, 10);
+    if (!n || n < 2) n = dflt;
+    if (n > 8) n = 8;
+    return String(n);
+  }
   function refreshSeatInfo() {
     var c = +$('cols').value, r = +$('rows').value;
     state.cols = c; state.rows = r;
@@ -461,7 +467,7 @@
   function saveStore(st) {
     try { localStorage.setItem(KEYC, JSON.stringify(st)); return true; }
     catch (e) {
-      $('msg').innerHTML = '<div class="notice warn">保存できませんでした。' +
+      ($('msg2') || $('msg')).innerHTML = '<div class="notice warn">保存できませんでした。' +
         'ブラウザの空きが足りないようです。古い記録を消してから、もう一度お試しください。</div>';
       return false;
     }
@@ -683,8 +689,7 @@
       // 🔴 ボタンは置かない（2026-09-01 本人）。
       //   ⚠ここで押したことが⑦とつながっていると分かるのは、作った側だけ。
       //     場所を教えるだけにして、切り替えは⑦でしてもらう
-      msg.innerHTML = '<div class="notice">いまは<strong>画面の保存がオフ</strong>です。' +
-        'ページを閉じたり読み込み直すと、入れた名簿は消えます。' +
+      msg.innerHTML = '<div class="notice">ページを閉じたり読み込み直すと、入れた名簿は消えます。' +
         '残したいときは、下の<strong>⑦ 画面の保存</strong>でチェックを入れてください。</div>';
     }
   }
@@ -1373,7 +1378,8 @@
       $('grade').value = d.grade || ''; $('kumi').value = d.kumi || '';
       $('clsFree').value = d.clsFree || '';
       if ($('month')) $('month').value = d.month || '';
-      $('cols').value = d.cols || 6; $('rows').value = d.rows || 6;
+      // ⚠えらぶ形にしたので、前に保存した 9 以上は入らない。8 におさめる
+      $('cols').value = clampNum(d.cols, 6); $('rows').value = clampNum(d.rows, 6);
       $('board').value = d.board || 'top';
       var mr = document.querySelector('input[name=mode][value="' + (d.mode || 'cross') + '"]');
       if (mr) mr.checked = true;
@@ -1425,11 +1431,15 @@
   function clearSaved() {
     try { localStorage.removeItem(KEY); } catch (e) { }
     $('save').checked = false; showSaving();
-    $('msg').innerHTML = '<div class="notice">この機器に保存していた画面を消しました。</div>';
+    ($('msg2') || $('msg')).innerHTML = '<div class="notice">この機器に保存していた画面を消しました。</div>';
   }
 
   // ---- クラスと記録の画面まわり ----
-  function note(t) { $('msg').innerHTML = '<div class="notice">' + t + '</div>'; }
+  // 保存まわりの知らせは⑦と⑧のあいだに出す（席替えボタンの下だと何の話か分からない）
+  function note(t) {
+    var el = $('msg2') || $('msg');
+    el.innerHTML = '<div class="notice">' + t + '</div>';
+  }
 
   function refreshClsUI() {
     var st = loadStore(), sel = $('clsSel');

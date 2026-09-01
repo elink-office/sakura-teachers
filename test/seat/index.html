@@ -52,11 +52,13 @@
      高さの上限は mm で書く。mm は紙の上でも同じ長さになる */
   body.print-img > *:not(#printImgWrap){display:none !important}
   body.print-img #printImgWrap{display:block !important;text-align:center;background:#fff}
+  body.print-img{margin:0;padding:0}
   body.print-img #printImg{
     display:inline-block;max-width:100%;width:auto;height:auto;
-    max-height:174mm;                 /* A4横：210 − 余白と安全分 */
+    max-height:242mm;                 /* A4たて：297 − 余白ぶん（多めに引く） */
   }
-  body.portrait.print-img #printImg{max-height:258mm}   /* A4縦：297 − 余白と安全分 */
+  /* ⚠クラスは landscape しか付かない（portrait は無い）。よこ向きはここで上書き */
+  body.landscape.print-img #printImg{max-height:158mm}
 }
 /* 名前の位置（ひらがなだけのクラスは左のほうが読みやすい） */
 .sheet.al-left .seat{justify-content:flex-start;text-align:left}
@@ -202,8 +204,8 @@ body.screen .seat.dup .nm{text-decoration:none}
     <section class="card noprint">
       <h2><span class="step">2</span>教室の形</h2>
       <div class="row tight">
-        <div><label for="cols">横のならび</label><span class="ctl"><input id="cols" type="number" min="1" max="14" value="6"><span class="unit">席</span></span></div>
-        <div><label for="rows">縦のならび</label><span class="ctl"><input id="rows" type="number" min="1" max="14" value="6"><span class="unit">段</span></span></div>
+        <div><label for="cols">横のならび</label><span class="ctl"><select id="cols" class="narrow"><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6" selected>6</option><option value="7">7</option><option value="8">8</option></select><span class="unit">席</span></span></div>
+        <div><label for="rows">縦のならび</label><span class="ctl"><select id="rows" class="narrow"><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6" selected>6</option><option value="7">7</option><option value="8">8</option></select><span class="unit">段</span></span></div>
         <div><label>座席数</label><div class="bignum" id="seatcount">36</div></div>
         <div id="seatinfo" class="hint" style="align-self:flex-end;padding-bottom:6px"></div>
         <div><label for="board">黒板の位置</label>
@@ -499,6 +501,10 @@ body.screen .seat.dup .nm{text-decoration:none}
     <p><span class="saving" id="savingLabel"></span></p>
   </section>
 
+  <!-- 🔴 保存まわりの知らせはここ（2026-09-01 本人）。
+       ⚠席替えボタンの下に出すと、何の話か分からない -->
+  <div id="msg2" class="noprint"></div>
+
   <section class="card noprint">
     <h2><span class="step">8</span>保存した名簿の利用&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h2>
     <div class="tip-body" hidden>
@@ -646,7 +652,7 @@ body.screen .seat.dup .nm{text-decoration:none}
 </footer>
 
 <script src="../seating.js?v=54"></script>
-<script src="seat.js?v=111"></script>
+<script src="seat.js?v=112"></script>
 <!-- 🔴 印刷用の1枚絵の置き場（2026-09-01）。画面には出ない。
      ⚠**body の直下に置くこと。**中に入れると、印刷のときに親ごと隠されて白紙になる -->
 <div id="printImgWrap"><img id="printImg" alt=""></div>
