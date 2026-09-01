@@ -1175,19 +1175,17 @@
     else if ($('printWay') && $('printWay').value === 'img' && state.seats) {
       // 🔴 画面と同じ絵を1枚作って、それだけを印刷する。
       //   ⚠3案まとめて印刷のときは、今までどおり文字のまま
-      //   ⚠**絵ができるのを待ってから印刷する。**待たずに呼ぶと白紙になる（2026-09-01）
+      //   🔴⚠**<img> を使わない。**画像の読み込みを待つと、そのあいだに
+      //     「指で押した直後」という資格が切れて、iPadが印刷を受け付けない（2026-09-01）。
+      //     canvas をそのまま置けば読み込みが要らないので、押したその場で印刷できる
       try {
-        var im = $('printImg');
-        im.onload = function () {
-          im.onload = null;
-          document.body.classList.add('print-img');
-          window.print();
-        };
-        im.onerror = function () { im.onerror = null; window.print(); };
-        // A4よこ＝1.41、たて＝0.71。少し余裕をみて、紙より横長にしておく
+        var wrap = $('printImgWrap');
         var wideP = $('paper').value === 'landscape';
-        im.src = padToAspect(buildSheetCanvas(2), wideP ? 1.72 : 0.78).toDataURL('image/png');
-        return;
+        // A4よこ＝1.41、たて＝0.71。紙より横長にしておくと、幅で合わせたときに縦が余る
+        var cv = padToAspect(buildSheetCanvas(2), wideP ? 1.72 : 0.78);
+        wrap.innerHTML = '';
+        wrap.appendChild(cv);
+        document.body.classList.add('print-img');
       } catch (e) { }
     }
     window.print();
@@ -1197,7 +1195,7 @@
   window.addEventListener('afterprint', function () {
     document.body.classList.remove('print-all');
     document.body.classList.remove('print-img');
-    if ($('printImg')) $('printImg').removeAttribute('src');
+    if ($('printImgWrap')) $('printImgWrap').innerHTML = '';
     $('printAll').innerHTML = '';
     if (printKeepBoard) { state.board = printKeepBoard; printKeepBoard = null; drawSheet(); }
     // ⚠ 描き直しが終わってから戻す。すぐ戻すと、まだ高さが足りずに効かない

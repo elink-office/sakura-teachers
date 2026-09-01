@@ -58,7 +58,7 @@
      はみ出して切れる（2026-09-01 タブレットで発覚。80%に縮めないと入らなかった） */
   /* ⚠絵のほうを紙の形に合わせてあるので、ここは幅に合わせるだけでよい。
      iPadは max-height を見てくれない（2026-09-01） */
-  body.print-img #printImg{display:block;width:100%;max-width:100%;height:auto;margin:0}
+  body.print-img #printImgWrap canvas{display:block;width:100%;max-width:100%;height:auto;margin:0}
 }
 /* 名前の位置（ひらがなだけのクラスは左のほうが読みやすい） */
 .sheet.al-left .seat{justify-content:flex-start;text-align:left}
@@ -644,9 +644,9 @@ body.screen .seat.dup .nm{text-decoration:none}
 </footer>
 
 <script src="../seating.js?v=54"></script>
-<script src="seat.js?v=114"></script>
+<script src="seat.js?v=115"></script>
 <!-- 🔴 印刷用の1枚絵の置き場（2026-09-01）。画面には出ない。
      ⚠**body の直下に置くこと。**中に入れると、印刷のときに親ごと隠されて白紙になる -->
-<div id="printImgWrap"><img id="printImg" alt=""></div>
+<div id="printImgWrap"></div>
 </body>
 </html>
