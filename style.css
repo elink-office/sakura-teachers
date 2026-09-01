@@ -268,10 +268,14 @@ body.screen .seat .gno.dim{display:none}
 
 .notice{background:var(--pink-light);border-radius:8px;padding:10px 12px;font-size:.9rem;margin:10px 0}
 .notice.warn{background:#fdeceb;color:#8c2b27}
-.saving{font-size:.85rem;color:var(--ok);font-weight:bold}
+/* ⚠緑にしない。このサイトでここだけ色が浮く（2026-08-31 本人） */
+.saving{font-size:.85rem;color:var(--pink);font-weight:bold}
 
 /* 読み物 */
-.read h2{margin-top:36px}
+/* 🔴 ここまでが操作、ここからは読みもの、の区切り（2026-09-01 本人）。
+   ⚠タブレットは画面が縦に流れるので、線が無いとどこで終わったのか分からない */
+.read{border-top:1px solid var(--line);margin-top:34px;padding-top:6px}
+.read h2{margin-top:26px}
 .read dt{font-weight:bold;margin-top:12px}
 .read dd{margin:2px 0 0 1em;color:var(--ink-soft)}
 .tools{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;list-style:none;padding:0}

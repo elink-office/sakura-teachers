@@ -272,6 +272,7 @@
       for (var t = 0; t < rows; t++) {
         // 黒板が下のときは、後ろの段が画面の上に見える。
         // 班の番号が画面の上から1・2・3…になるように、走る向きを変える
+        // ⚠ 座席表（/seat/）は 'top' を固定で渡してくる（下を見よ）。ここは席次表むけに残す
         var rr = (board === 'bottom') ? rows - 1 - t : t;
         for (var cc = c0; cc < c0 + wide; cc++) {
           var ii = rr * cols + cc;

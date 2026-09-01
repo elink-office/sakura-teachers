@@ -85,11 +85,16 @@ body.landscape{}
 }
 
 @media print{
-  /* 紙の高さいっぱいに広げる。URLは紙の一番下に置く（下の余白が空かないように） */
+  /* 紙の高さいっぱいに広げる。URLは紙の一番下に置く（下の余白が空かないように）
+     🔴⚠ここで 100vh を使ってはいけない（2026-09-01 タブレットで発覚）。
+        パソコンでは紙の高さとほぼ一致するが、**タブレットは画面の高さ**が入ってきて、
+        紙からはみ出し、サイト名が2ページ目に流れる。
+        用紙の向きから mm で決めた値を JS が --sheetMin に入れる。入っていなければ広げない */
   .sheet{
-    min-height:calc(100vh - 24mm);
+    min-height:var(--sheetMin, 0);
     display:flex;flex-direction:column;
   }
+  .sheet{justify-content:flex-start}   /* ⚠上ぞろえ。上下中央にしない（2026-09-01 本人） */
   .sheet .grid{flex:0 0 auto}
   .sheet-credit{margin-top:auto;padding-top:4mm}
   .sheet-foot{display:none}

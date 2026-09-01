@@ -81,7 +81,10 @@
     return $('names').value.split('\n')
       .filter(function (s) { return s.trim().length; })
       .map(function (s) {
-        return s.split('\t').map(function (c) { return c.trim(); });
+        // 🔴 タブのほかカンマでも列に分ける（2026-09-01 本人）。
+        //   ⚠タブは名簿の欄に打てない（押すと次の欄に移る）ので、手入力ではカンマを使う。
+        //     ⚠空白は区切りにしない。名前に空白が入る（山田 太郎）ため
+        return s.split(/[\t,，]/).map(function (c) { return c.trim(); });
       });
   }
   // 貼り付けた列が何なのか、自動で当たりをつける
@@ -234,6 +237,12 @@
     var sn = $('emptyNote'); if (sn) sn.style.display = state.sample ? '' : 'none';
     refreshSeatInfo();
     document.querySelectorAll('select.nameSel').forEach(fillNames);
+  }
+  function clampNum(v, dflt) {
+    var n = parseInt(v, 10);
+    if (!n || n < 2) n = dflt;
+    if (n > 8) n = 8;
+    return String(n);
   }
   function refreshSeatInfo() {
     var c = +$('cols').value, r = +$('rows').value;
@@ -741,7 +750,10 @@
       var byField = { org: 'org', title: 'title' }[state.grp.style];
       var gr = byField
         ? groupsByField(byField)
-        : Seating.groups(state.seats, cols, rows, state.grp.size, state.grp.style, state.board);
+        : Seating.groups(state.seats, cols, rows, state.grp.size, state.grp.style, 'top');
+      // 🔴 グループは「前方が上」の向きで一度だけ作る（2026-08-31 本人）。
+      //   見えている向きで作り直すと、前方を下にしたとき中身が変わってしまう。
+      //   ⚠ 共通の seating.js は座席表も読んでいるので、あちらは変えない
       gm = gr.map; state.gcount = gr.count;
       // 先生が手で変えたぶんを上からかぶせる
       for (var fk in state.gfix) {
@@ -772,10 +784,15 @@
 
     state.orgFit = null;      // 所属の自動縮小は、毎回まっさらから決め直す
 
+    // 🔴 前方を下にする＝登壇者から見た向き＝紙を180度まわした形（2026-08-31 本人）
+    //   ⚠ 上下だけ返すと鏡になる。左右も入れ替える
+    //   ⭐ 受付は入口＝後ろにいて参加者と同じ向きなので、回った図が要るのは登壇者だけ
+    var flip = (state.board !== 'top');
     for (var dr = 0; dr < rows; dr++) {
-      var r = (state.board === 'top') ? dr : rows - 1 - dr;
+      var r = flip ? rows - 1 - dr : dr;
       for (var c = 0; c < cols; c++) {
-        var i = r * cols + c;
+        var sc = flip ? cols - 1 - c : c;
+        var i = r * cols + sc;
         var name = state.seats[i];
         var d = document.createElement('div');
         d.className = 'seat' + (name ? '' : ' empty') + (bad[i] ? ' bad' : '');
@@ -1143,10 +1160,42 @@
   }
 
   // 席次表は1枚出して終わり。いま見えているものをそのまま刷る
+  var printScrollY = 0;
   function doPrint() {
+    // 印刷の画面を閉じたあと、ページの先頭に飛ばない
+    printScrollY = window.scrollY || window.pageYOffset || 0;
     setPaper();
+    // 🔴 紙だけ登壇者の向きにする（画面は変えない）。2026-08-31 本人
+    // ⚠ 紙が終わったら必ず戻す（afterprint）。戻さないと画面が回ったままになる
+    var stage = $('printStage') && $('printStage').checked;
+    if (stage && state.board !== 'bottom') {
+      printKeepBoard = state.board;
+      state.board = 'bottom';
+      drawSheet();
+    }
+    // 🔴 画面と同じ絵を1枚作って、それだけを印刷する（2026-09-01。座席表と同じ）。
+    //   ⚠<img> は使わない。読み込みを待つと「指で押した直後」の資格が切れて、
+    //     iPadが印刷を受け付けない。canvas をそのまま置けば待たずに済む
+    if (state.seats) {
+      try {
+        var wrap = $('printImgWrap');
+        var wideP = $('paper').value === 'landscape';
+        var cv = padToAspect(buildSheetCanvas(2), wideP ? 1.50 : 0.75);
+        wrap.innerHTML = '';
+        wrap.appendChild(cv);
+        document.body.classList.add('print-img');
+      } catch (e) { }
+    }
     window.print();
   }
+  var printKeepBoard = null;
+  window.addEventListener('afterprint', function () {
+    document.body.classList.remove('print-img');
+    if ($('printImgWrap')) $('printImgWrap').innerHTML = '';
+    if (printKeepBoard) { state.board = printKeepBoard; printKeepBoard = null; drawSheet(); }
+    setTimeout(function () { window.scrollTo(0, printScrollY); }, 0);
+    setTimeout(function () { window.scrollTo(0, printScrollY); }, 250);
+  });
 
   // ---- PNGで保存（自分で描くので外部の部品は使わない）----
   function roundRect(x, l, t, w, h, r) {
@@ -1158,7 +1207,10 @@
     x.closePath();
   }
 
-  function doPng() {
+  // 🔴 席次表を1枚の絵にする（2026-09-01。座席表と同じ作り）。
+  //   k を大きくすると解像度が上がる（描き方は同じ。ものさしを拡大するだけ）
+  function buildSheetCanvas(k) {
+    k = k || 1;
     var o = state.opt, cols = o.cols, rows = o.rows;
     var icon = $('deco').value || '';
     var credit = $('showCredit').checked;
@@ -1166,8 +1218,9 @@
     var W = pad * 2 + cols * cw;
     var H = pad * 2 + head + boardH + rows * ch + (credit ? 28 : 0);
     var cv = document.createElement('canvas');
-    cv.width = W; cv.height = H;
+    cv.width = Math.round(W * k); cv.height = Math.round(H * k);
     var x = cv.getContext('2d');
+    x.scale(k, k);
     x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
 
     x.font = '18px sans-serif';
@@ -1191,12 +1244,14 @@
     var gy = top + (state.board === 'top' ? boardH : 0);
     if (frontWord()) { if (state.board === 'top') board(top); else board(top + rows * ch + 6); }
 
+    var flipP = (state.board !== 'top');
     for (var dr = 0; dr < rows; dr++) {
-      var r = (state.board === 'top') ? dr : rows - 1 - dr;
+      var r = flipP ? rows - 1 - dr : dr;
       for (var c = 0; c < cols; c++) {
-        var name = state.seats[r * cols + c];
+        var sc = flipP ? cols - 1 - c : c;
+        var name = state.seats[r * cols + sc];
         var px = pad + c * cw, py = gy + dr * ch;
-        var gi = state.gmap ? state.gmap[r * cols + c] : 0;
+        var gi = state.gmap ? state.gmap[r * cols + sc] : 0;
         roundRect(x, px + 4, py + 4, cw - 8, ch - 8, 10);
         var look = state.grp.look;
         if (gi && look !== 'none') {
@@ -1268,16 +1323,188 @@
       x.fillText('SAMPLE', 0, 0);
       x.restore();
     }
+    return cv;
+  }
+  // 🔴 絵を紙の形に合わせる。⚠iPadは印刷のとき幅だけを見るので、
+  //   絵のほうを紙より少し横長にしておく＝幅で合わせると縦が余る（2026-09-01）
+  function padToAspect(src, ratio) {
+    var w = src.width, h = src.height, W = w, H = h;
+    if (w / h < ratio) W = Math.round(h * ratio); else H = Math.round(w / ratio);
+    var cv = document.createElement('canvas');
+    cv.width = W; cv.height = H;
+    var x = cv.getContext('2d');
+    x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
+    x.drawImage(src, Math.round((W - w) / 2), 0);
+    return cv;
+  }
+  function doPng() {
+    var cv = buildSheetCanvas(1);
     var a = document.createElement('a');
     a.href = cv.toDataURL('image/png');
     a.download = (sheetTitle().replace(/\s/g, '') || '席次表') + '.png';
     a.click();
   }
 
-  // ---- 保存（このパソコンの中だけ）----
-  function save() {
+  // ---- 保存（使ってる機器の中だけ）----
+  // ============================================================
+  //  名簿の保存（座席表と共通の置き場）2026-08-31
+  //  ⚠置き場はドメイン単位。/seat/ で保存した名簿をここからも読める。
+  //    名簿は1つ。設定だけツールごとに分けて持つ
+  //      { id, label, names, seat:{設定}, seki:{設定}, recs:[座席表の記録] }
+  //  ⚠席次表は「1枚出して終わり」なので、決まった座席の記録はここには置かない
+  // ============================================================
+  var KEYC = 'sakura-teachers-rosters-v1';
+  var KEYOLD = 'sakura-seat-classes-v1';
+  var MAXC = 10;
+
+  function loadStore() {
     try {
-      localStorage.setItem(KEY, JSON.stringify({
+      var d = JSON.parse(localStorage.getItem(KEYC) || 'null');
+      if (d && d.classes) return d;
+      var old = JSON.parse(localStorage.getItem(KEYOLD) || 'null');
+      if (old && old.classes && old.classes.length) {
+        var st = {
+          v: 2, classes: old.classes.map(function (c) {
+            return {
+              id: c.id, label: c.label,
+              names: (c.d && c.d.names) || '',
+              seat: c.d || null, seki: null, recs: c.recs || []
+            };
+          })
+        };
+        saveStore(st);
+        return st;
+      }
+      return { v: 2, classes: [] };
+    } catch (e) { return { v: 2, classes: [] }; }
+  }
+  function saveStore(st) {
+    try { localStorage.setItem(KEYC, JSON.stringify(st)); return true; }
+    catch (e) {
+      $('msg').innerHTML = '<div class="notice warn">保存できませんでした。' +
+        'ブラウザの空きが足りないようです。いらない名簿を消してから、もう一度お試しください。</div>';
+      return false;
+    }
+  }
+  function curClass(st) {
+    st = st || loadStore();
+    var id = ($('clsSel') && $('clsSel').value) ||
+      ($('clsSel2') ? $('clsSel2').value : '') || '';
+    if (!id) return null;
+    for (var i = 0; i < st.classes.length; i++) if (st.classes[i].id === id) return st.classes[i];
+    return null;
+  }
+  function setCls(id) {
+    [$('clsSel'), $('clsSel2')].forEach(function (el) { if (el) el.value = id; });
+  }
+  function note(x) { $('msg').innerHTML = '<div class="notice">' + x + '</div>'; }
+
+  function refreshClsUI() {
+    var st = loadStore(), sel = $('clsSel');
+    if (!sel) return;
+    var keep = sel.value;
+    [sel, $('clsSel2')].forEach(function (el) {
+      if (!el) return;
+      el.innerHTML = '<option value="">－</option>';
+      st.classes.forEach(function (c) {
+        var o = document.createElement('option');
+        o.value = c.id; o.textContent = c.label;
+        el.appendChild(o);
+      });
+      el.value = keep;
+      if (el.selectedIndex < 0) el.value = '';
+    });
+    if ($('quickLoad')) $('quickLoad').hidden = !st.classes.length;
+    $('clsCount').textContent = st.classes.length
+      ? st.classes.length + '／' + MAXC + '件'
+      : '0／' + MAXC + '件・まだ保存していません';
+  }
+
+  // 呼び出したあと、画面を組み直す
+  function afterRestore() {
+    state.sample = false;
+    state.seats = null;
+    refreshNames();
+    state.board = $('board').value;
+    numStyleChanged();
+    grpStyleChanged();
+    orderChanged();
+    drawPreview();
+    $('result').hidden = true;
+    state.plans = [];
+    showSaving();
+  }
+
+  function doClsNew() {
+    var st = loadStore();
+    var name = prompt('名簿の名前を入れてください', className() || '名簿');
+    if (name === null) return;
+    name = (name || '').replace(/^[\s　]+|[\s　]+$/g, '');
+    if (!name) return;
+    for (var i = 0; i < st.classes.length; i++) {
+      if (st.classes[i].label === name) {
+        if (!confirm('「' + name + '」はすでにあります。上書きしますか。')) return;
+        st.classes[i].names = $('names').value;
+        st.classes[i].seki = snapshot();
+        if (!saveStore(st)) return;
+        refreshClsUI(); setCls(st.classes[i].id);
+        note('「' + name + '」を上書きしました。');
+        return;
+      }
+    }
+    if (st.classes.length >= MAXC) {
+      alert('名簿は' + MAXC + '件までです。いらないものを消してから保存してください。');
+      return;
+    }
+    var id = 'c' + (new Date().getTime());
+    st.classes.push({
+      id: id, label: name, names: $('names').value,
+      seat: null, seki: snapshot(), recs: []
+    });
+    if (!saveStore(st)) return;
+    refreshClsUI(); setCls(id);
+    note('「' + name + '」として保存しました。');
+  }
+  function doClsSave() {
+    var st = loadStore(), c = curClass(st);
+    if (!c) { alert('上書きする名簿をえらんでください。はじめて残すときは「新しく保存」です。'); return; }
+    c.names = $('names').value;
+    c.seki = snapshot();
+    if (!saveStore(st)) return;
+    note('「' + c.label + '」を今の内容で上書きしました。');
+  }
+  function doClsLoad() {
+    var c = curClass();
+    if (!c) { alert('呼び出す名簿をえらんでください。'); return; }
+    if (!confirm('「' + c.label + '」を入れます。' +
+      'いま画面にある名簿と席次表は消えます。よろしいですか。')) return;
+    // ⚠座席表だけで保存したものは seki が空。そのときも名簿だけは入れる
+    var d = c.seki ? JSON.parse(JSON.stringify(c.seki)) : {};
+    d.names = c.names || d.names || '';
+    applySnap(d);
+    afterRestore();
+    note('「' + c.label + '」を入れました。<strong>「席次表を作る」を押してください。</strong>');
+  }
+  function doClsDel() {
+    var st = loadStore(), c = curClass(st);
+    if (!c) { alert('消す名簿をえらんでください。'); return; }
+    if (!confirm('「' + c.label + '」を消します。' +
+      '座席表で使っている記録も一緒に消えます。よろしいですか。')) return;
+    st.classes = st.classes.filter(function (x) { return x.id !== c.id; });
+    if (!saveStore(st)) return;
+    setCls(''); refreshClsUI();
+    note('「' + c.label + '」を消しました。');
+  }
+  function clearAllCls() {
+    if (!confirm('保存した名簿を全部消します。もとには戻せません。よろしいですか。')) return;
+    try { localStorage.removeItem(KEYC); } catch (e) { }
+    setCls(''); refreshClsUI();
+    note('保存した名簿を全部消しました。');
+  }
+
+  // 保存する一式。⑦（前回のつづき）と⑧（名前を付けて保存）で同じものを使う
+  function snapshot() {
+    return {
         names: $('names').value,
         clsFree: $('clsFree').value,
         colRoles: state.colRoles,
@@ -1296,10 +1523,15 @@
           ttl: $('szTtl').value, kana: $('szKana').value
         },
         dt: $('dt').value, dtOff: $('dtOff').checked,
-        grp: state.grp
-      }));
-      showSaving();
-    } catch (e) { }
+        grp: state.grp,
+        // 🔴 席次表そのものも残す（2026-08-31 本人「⑦は画面の保存でいい」）。
+        //   ⚠これが無いと、開くたびに作り直しになる＝ランダムだと並びが変わる
+        //   ⚠サンプルは残さない。名簿を入れていない人の画面が次に居座る
+        seats: (state.sample || !state.seats) ? null : state.seats.slice()
+    };
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(snapshot())); showSaving(); } catch (e) { }
   }
   function showSaving() {
     var n = state.names.length;
@@ -1310,9 +1542,19 @@
     try {
       var d = JSON.parse(localStorage.getItem(KEY) || 'null');
       if (!d) return;
+      applySnap(d);
+      // 席次表は画面の組み立てが終わってから出す（init のいちばん最後）
+      state.pendingSeats = (d.seats && d.seats.length) ? d.seats : null;
+      $('save').checked = true;
+    } catch (e) { }
+  }
+  // 保存した一式を画面に戻す（⑦・⑧で共通）
+  function applySnap(d) {
+    try {
       $('names').value = d.names || '';
       $('clsFree').value = d.clsFree || '';
       if (d.colRoles && d.colRoles.length) state.colRoles = d.colRoles;
+      // ⚠席次表は入力式のまま（大学は会場が広い。2026-09-01 本人）
       $('cols').value = d.cols || 6; $('rows').value = d.rows || 5;
       $('board').value = d.board || 'top';
       if (d.frontWord !== undefined) $('frontWord').value = d.frontWord;
@@ -1361,13 +1603,12 @@
         $('grpLook').value = state.grp.look;
         $('grpNum').checked = state.grp.num;
       }
-      $('save').checked = true;
     } catch (e) { }
   }
   function clearSaved() {
     try { localStorage.removeItem(KEY); } catch (e) { }
     $('save').checked = false; showSaving();
-    $('msg').innerHTML = '<div class="notice">このパソコンに保存していた名簿を消しました。</div>';
+    $('msg').innerHTML = '<div class="notice">この機器に保存していた名簿を消しました。</div>';
   }
 
   // ---- 起動 ----
@@ -1408,6 +1649,13 @@
     // 消さずに薄くする＝「あること」は見せて、触っても効かない誤解だけ防ぐ
     var cond = $('condBlock'); if (cond) cond.classList.toggle('off', byNumber);
     if ($('save').checked && !state.sample) save();
+    // 🔴 選んだ瞬間に並べ直す（2026-08-31 本人）。
+    //   ⚠以前は「作る」を押すまで反映されず、本人でも「効いていない」と勘違いした。
+    //     人数・列数・グループは選んだ瞬間に変わるのに、ここだけ押し直しが要るのが原因。
+    //   ⚠ドラッグで手を加えた並びは消えるが、向きを変えるのは作り始めの段階なので、
+    //     順番が逆になることは少ないと判断した（本人の判断）
+    //   ⚠ run(true) にすると画面が飛ばない（run() だと結果まで一気にスクロールする）
+    if (state.seats) { try { run(true); } catch (e) { } }
   }
 
   function init() {
@@ -1503,7 +1751,20 @@
     $('save').addEventListener('change', function () {
       if ($('save').checked) save(); else { try { localStorage.removeItem(KEY); } catch (e) { } showSaving(); }
     });
-    $('clear').onclick = clearSaved;
+    if ($('clear')) $('clear').onclick = clearSaved;
+    if ($('clsSel')) {
+      var syncCls = function (from, to) {
+        return function () { if ($(to)) $(to).value = $(from).value; };
+      };
+      $('clsSel').addEventListener('change', syncCls('clsSel', 'clsSel2'));
+      if ($('clsSel2')) $('clsSel2').addEventListener('change', syncCls('clsSel2', 'clsSel'));
+      if ($('clsLoad2')) $('clsLoad2').onclick = doClsLoad;
+      $('clsNew').onclick = doClsNew;
+      $('clsSave').onclick = doClsSave;
+      $('clsDel').onclick = doClsDel;
+      $('clsClearAll').onclick = clearAllCls;
+      refreshClsUI();
+    }
     document.addEventListener('click', function (e) {
       if (pick && !pick.contains(e.target)) closeGroupPick();
     });
@@ -1540,7 +1801,25 @@
     // 「このアプリ何？」と思った人は、まずスクロールする（とくにスマホ）。
     // 押す前に現物が見えていれば、それだけで伝わる。
     // ⚠名簿を保存している先生には、サンプルではなく自分の名簿で出す
-    try { run(true); } catch (e) { }
+    // 🔴 保存してあった席次表があれば、作り直さずにそのまま出す（2026-08-31）。
+    //   ⚠作り直すと、ランダムのときに前と違う並びになる
+    if (state.pendingSeats) {
+      var ps = state.pendingSeats; state.pendingSeats = null;
+      try {
+        state.sample = false;
+        var opt = collect();
+        if (ps.length === opt.cols * opt.rows) {
+          state.opt = opt; state.plans = [ps.slice()]; state.cur = 0; state.seats = ps.slice();
+          $('result').hidden = false;
+          drawTabs(); drawSheet(); showSample();
+          // 🔴 組み立ての途中で「席がない状態」がいったん保存されてしまう。
+          //   ⚠書き戻さないと、2回目に開いたときに作り直しになる（2026-08-31 検証で見つけた）
+          if ($('save').checked) { try { save(); } catch (e3) { } }
+        } else run(true);
+      } catch (e) { try { run(true); } catch (e2) { } }
+    } else {
+      try { run(true); } catch (e) { }
+    }
 
     // ---- 「完成サンプルを見る」から来たとき ----
     // ⚠ #result は最初 hidden なので、ブラウザの目印飛び（#result）が効かない。自分で送る
