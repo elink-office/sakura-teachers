@@ -1184,7 +1184,9 @@
           window.print();
         };
         im.onerror = function () { im.onerror = null; window.print(); };
-        im.src = buildSheetCanvas(2).toDataURL('image/png');
+        // A4よこ＝1.41、たて＝0.71。少し余裕をみて、紙より横長にしておく
+        var wideP = $('paper').value === 'landscape';
+        im.src = padToAspect(buildSheetCanvas(2), wideP ? 1.72 : 0.78).toDataURL('image/png');
         return;
       } catch (e) { }
     }
@@ -1311,6 +1313,21 @@
       x.fillText('SAMPLE', 0, 0);
       x.restore();
     }
+    return cv;
+  }
+  // 🔴 絵を紙の形に合わせる（2026-09-01）。
+  //   ⚠iPadは印刷のとき**幅だけを見て縮める**。高さの指定（max-height）は効かない。
+  //     なので**絵のほうを、紙より少し横長にしておく**。
+  //     そうすれば幅で合わせたときに、縦は自然に余る＝はみ出さない
+  //   ⚠白い余白は左右に付ける。上下には付けない（紙の上ぞろえにするため）
+  function padToAspect(src, ratio) {
+    var w = src.width, h = src.height, W = w, H = h;
+    if (w / h < ratio) W = Math.round(h * ratio); else H = Math.round(w / ratio);
+    var cv = document.createElement('canvas');
+    cv.width = W; cv.height = H;
+    var x = cv.getContext('2d');
+    x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
+    x.drawImage(src, Math.round((W - w) / 2), 0);
     return cv;
   }
   function doPng() {
