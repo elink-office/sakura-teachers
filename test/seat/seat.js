@@ -1163,12 +1163,22 @@
       drawSheet();
     }
     if ($('printWhat').value === 'all' && state.plans.length) buildAll();
+    else if ($('printWay') && $('printWay').value === 'img' && state.seats) {
+      // 🔴 画面と同じ絵を1枚作って、それだけを印刷する。
+      //   ⚠3案まとめて印刷のときは、今までどおり文字のまま
+      try {
+        $('printImg').src = buildSheetCanvas(2).toDataURL('image/png');
+        document.body.classList.add('print-img');
+      } catch (e) { }
+    }
     window.print();
   }
   var printKeepBoard = null;
 
   window.addEventListener('afterprint', function () {
     document.body.classList.remove('print-all');
+    document.body.classList.remove('print-img');
+    if ($('printImg')) $('printImg').removeAttribute('src');
     $('printAll').innerHTML = '';
     if (printKeepBoard) { state.board = printKeepBoard; printKeepBoard = null; drawSheet(); }
   });
@@ -1183,7 +1193,12 @@
     x.closePath();
   }
 
-  function doPng() {
+  // 🔴 座席表を1枚の絵にする（2026-09-01）。
+  //   k を大きくすると解像度が上がる（描き方は同じ。ものさしを拡大するだけ）
+  //   ⚠印刷はこの絵でおこなう＝**紙に収める計算をブラウザにまかせられる**。
+  //     端末ごとの余白がわからなくても、必ず1ページに収まる
+  function buildSheetCanvas(k) {
+    k = k || 1;
     var o = state.opt, cols = o.cols, rows = o.rows;
     var icon = $('deco').value || '';
     var credit = $('showCredit').checked;
@@ -1191,8 +1206,9 @@
     var W = pad * 2 + cols * cw;
     var H = pad * 2 + head + boardH + rows * ch + (credit ? 28 : 0);
     var cv = document.createElement('canvas');
-    cv.width = W; cv.height = H;
+    cv.width = Math.round(W * k); cv.height = Math.round(H * k);
     var x = cv.getContext('2d');
+    x.scale(k, k);                     // ⭐これだけで、以下の描き方は一切変えずに済む
     x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
 
     x.font = '18px sans-serif';
@@ -1275,6 +1291,10 @@
       x.fillText('SAMPLE', 0, 0);
       x.restore();
     }
+    return cv;
+  }
+  function doPng() {
+    var cv = buildSheetCanvas(1);
     var a = document.createElement('a');
     a.href = cv.toDataURL('image/png');
     a.download = (sheetTitle().replace(/\s/g, '') || '座席表') + '.png';
@@ -1296,6 +1316,7 @@
         showCredit: $('showCredit').checked,
         printTeacher: $('printTeacher') ? $('printTeacher').checked : true,
         printScale: $('printScale') ? $('printScale').value : '1',
+        printWay: $('printWay') ? $('printWay').value : 'img',
         // 🔴 座席表もいっしょに残す（2026-08-31 本人「⑦は画面の保存」）。
         //   ⚠サンプルは残さない。名簿を入れていない人の画面が、次に開いたとき居座ってしまう
         seats: (state.sample || !state.seats) ? null : state.seats.slice(),
@@ -1350,6 +1371,7 @@
       if (d.printTeacher !== undefined && $('printTeacher'))
         $('printTeacher').checked = !!d.printTeacher;
       if (d.printScale && $('printScale')) $('printScale').value = d.printScale;
+      if (d.printWay && $('printWay')) $('printWay').value = d.printWay;
       if (d.order) $('order').value = d.order;
       if (d.dir) $('dir').value = d.dir;
       if (d.colM) $('colM').value = d.colM;

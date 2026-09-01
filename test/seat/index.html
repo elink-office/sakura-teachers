@@ -26,7 +26,7 @@
 <meta name="google-site-verification" content="PfjmCGxUaN1hzuj_dRw3e4PTY6xepghfXM_CrU_sO-A" />
 <title>【テスト】教室の座席表メーカー｜席替えを簡単に・30人40人・4列〜8列対応</title>
 <meta name="description" content="教室の座席表の作り方は簡単。名簿を貼るだけで席替えができるフリーツールです。新年度の出席番号順にも対応。小学校・中学校・高校のどのクラスでも、30人・35人・40人、4列・5列・6列・8列の教室席配置に対応。生徒に見せる向きと、先生が教卓から見る向きを切り替えられます。班分けと色分けもそのまま印刷・PDFにできます。Excelテンプレートは不要です。名簿はブラウザの中だけで処理し、AIの学習にも使われません。">
-<link rel="stylesheet" href="../style.css?v=100">
+<link rel="stylesheet" href="../style.css?v=101">
 <link rel="stylesheet" href="seat.css?v=1">
 <link rel="stylesheet" href="../print.css?v=54" media="print">
 <style>
@@ -43,6 +43,19 @@
    ⚠これまでは印刷とモニターだけ黒で、画面は色のままだった＝外しても何も起きないように見えた。
      style.css は席次表とも共通なので、このページだけここで足す */
 .sheet:not(.sexprint) .seat .nm{color:#111 !important}
+/* 🔴 印刷用の1枚絵（2026-09-01）。
+   ⚠ max-width/max-height を 100% にして、**紙に収める計算はブラウザにまかせる**。
+     こちらで mm を計算すると、端末ごとの余白が分からず、はみ出す */
+#printImgWrap{display:none}
+@media print{
+  html,body{height:100%}
+  body.print-img > *:not(#printImgWrap){display:none !important}
+  body.print-img #printImgWrap{
+    display:flex !important;position:fixed;inset:0;
+    align-items:center;justify-content:center;background:#fff;
+  }
+  body.print-img #printImg{max-width:100%;max-height:100%;width:auto;height:auto}
+}
 /* 名前の位置（ひらがなだけのクラスは左のほうが読みやすい） */
 .sheet.al-left .seat{justify-content:flex-start;text-align:left}
 .sheet.al-left .seat .nm{padding-left:2px}
@@ -276,6 +289,8 @@ body.screen .seat.dup .nm{text-decoration:none}
     </div>
 
     <div id="printAll"></div>
+  <!-- 🔴 印刷用の1枚絵の置き場（2026-09-01）。画面には出ない -->
+  <div id="printImgWrap"><img id="printImg" alt=""></div>
 
     <p class="hint noprint">条件に反したところは赤くなりますが、そのままでも印刷できます。<strong>決めるのは先生です。</strong></p>
     <div id="vio" class="noprint"></div>
@@ -392,6 +407,12 @@ body.screen .seat.dup .nm{text-decoration:none}
         <div><label for="paper">用紙の向き</label>
           <select id="paper"><option value="landscape">横</option><option value="portrait">縦</option></select>
         </div>
+        <div><label for="printWay">印刷のしかた</label>
+          <select id="printWay">
+            <option value="img">画面と同じ絵にする</option>
+            <option value="text">文字のまま</option>
+          </select>
+        </div>
         <div><label for="printScale">印刷の大きさ</label>
           <select id="printScale">
             <option value="1">ふつう</option>
@@ -399,7 +420,7 @@ body.screen .seat.dup .nm{text-decoration:none}
             <option value="0.78">もっと小さめ</option>
           </select>
         </div>
-        <div style="flex-basis:100%"><p class="hint" style="margin:0">PDFにするときは、印刷画面の<strong>「送信先」（または「プリンター」）を PDF に変更</strong>してください。<strong>2ページに分かれてしまうときは「印刷の大きさ」を小さめに</strong>してください（タブレットは倍率を変えられないため）。</p></div>
+        <div style="flex-basis:100%"><p class="hint" style="margin:0">PDFにするときは、印刷画面の<strong>「送信先」（または「プリンター」）を PDF に変更</strong>してください。<strong>「画面と同じ絵にする」なら、はみ出さずに1ページに収まります。</strong>文字を細かく出したいときは「文字のまま」にして、はみ出す場合は「印刷の大きさ」で調整してください。</p></div>
         <div><label for="font">書体</label>
           <select id="font">
             <option value="gothic" selected>ゴシック体</option>
@@ -616,6 +637,6 @@ body.screen .seat.dup .nm{text-decoration:none}
 </footer>
 
 <script src="../seating.js?v=54"></script>
-<script src="seat.js?v=105"></script>
+<script src="seat.js?v=106"></script>
 </body>
 </html>
