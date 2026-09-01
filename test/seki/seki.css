@@ -1,0 +1,236 @@
+/* 席次表メーカー専用の見た目
+   ⚠ 座席表（/seat/）には読み込まれない。ここを直しても座席表は影響を受けない。
+   1マスの中身が「1行の名前」ではなく「番号・所属・役職・フリガナ・名前」の積み重ねになるのが違い。 */
+
+/* ============================================================
+   🔴 見た目の引っ越し（2026-08-29）＝トップページの「薄いグレー」案をここで試す
+   ⚠ 席次表はまだ公開していないので、ここを実験場にしている。
+     良ければ、この値をそのまま共通の style.css に昇格させて全ページをそろえる。
+   ⚠ 色は全部 style.css の変数を通っているので、変数を上書きするだけで丸ごと変わる。
+     HTMLにも style.css にも触っていない。
+   ============================================================ */
+:root{
+  /* 🔴 席次表は「右＝仕事＝緑」。ベースの色は共通（style.css）から受け取り、
+     アクセントだけ緑に差し替える。
+     ⚠ 変数名は --pink のまま。名前を変えると style.css を全部直すことになる */
+  --pink:#3f7a68;
+  --pink-light:#e4efeb;
+  --pink-pale:#f1f7f4;
+}
+/* ⚠ ここにあった色・余白・帯・iボタン・補足の大きさは、
+   2026-08-29 に共通の style.css へ移した（全ページでそろえるため）。
+   ここに残すのは「席次表だけのもの」だけ。 */
+
+.read h2{margin-top:40px}
+
+/* 🔴 スマホで「グループに分ける」と「グループ記号を印刷する」がずれて見えるのを直す。
+   2つしかないので、同じ高さに並べる */
+.chk-inline.gap{ margin-left: 0; }
+#grpNumWrap{ display: block; margin-top: 6px; }
+
+/* 🔴 前方の帯は太字に（線が細くて読みにくい・本人） */
+.board.front{ font-weight: bold; }
+
+/* ---- 1マスの中身 ---- */
+/* 名前を基準(1em)にして、ほかの行は倍率で決める。
+   倍率は画面の「文字の大きさ」で変えられる（--sNo などを書き換える）。 */
+.sheet{
+  --sNo: .52;
+  --sOrg: .50;
+  --sTtl: .50;
+  --sKana: .44;
+  --ink: #222;
+}
+.seat .cell{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .12em;
+  width: 100%;
+  line-height: 1.15;
+  color: var(--ink);
+}
+.seat .ln{ display: block; white-space: nowrap; }
+.seat .ln.no  { font-size: calc(1em * var(--sNo));  opacity: .75; }
+.seat .ln.org { font-size: calc(1em * var(--sOrg)); }
+.seat .ln.ttl { font-size: calc(1em * var(--sTtl)); }
+.seat .ln.kana{ font-size: calc(1em * var(--sKana)); opacity: .8; letter-spacing: .04em; }
+/* 🔴 日本の席札は名前がいちばん下・いちばん大きい */
+.seat .ln.nam { font-size: 1em; font-weight: 600; }
+.sheet.bold .seat .ln.nam{ font-weight: bold; }
+
+/* 🔴 会社名も折り返さない。折り返すと1マスの高さが人によって変わって、
+   名前の高さがそろわなくなる。長いときは、所属の行だけを小さくして収める（seki.js 側） */
+.seat .ln.org{ white-space: nowrap; }
+
+/* 名簿にその項目が無い人は、行を空けたまま場所を残す＝名前の高さがそろう */
+.seat .ln:empty::after{ content: "\00a0"; }
+
+/* 1マスの高さ。座席表は名前1行なので58px固定だが、席次表は行の数で変わる。
+   ⚠ モニター表示（body.screen）は style.css 側で height:auto になる（そちらが優先） */
+.seat{ height: var(--seatScreenH, 76px); }
+
+/* ---- 番号（右上に置いたとき） ---- */
+/* 左上のグループ記号（.gno）と逆サイドに置く。
+   ⚠ クラス名を .gno と分けているのは、押せる／押せないの違いがあるため
+     （グループ記号は押すと変えられる。通し番号はただのしるし） */
+.seat{ position: relative; }
+.seat .sno{
+  position: absolute; top: 0; right: 0;
+  padding: 2px 5px 4px 7px;
+  font-size: var(--snoSize, 12px);
+  line-height: 1.3;
+  color: #777;
+  user-select: none; -webkit-user-select: none;
+  pointer-events: none;
+}
+
+/* ---- 書体 ---- */
+/* ⚠ 丸文字はWindowsだけ。無い環境ではゴシックになる（崩れはしない） */
+.sheet.f-mincho .cell{
+  font-family: "Yu Mincho", YuMincho, "Hiragino Mincho ProN", "MS PMincho", serif;
+}
+.sheet.f-gothic .cell{
+  font-family: "Yu Gothic", YuGothic, "Hiragino Sans", "Meiryo", sans-serif;
+}
+/* ⚠ 丸文字はWindows（HG丸ｺﾞｼｯｸM-PRO）とiPad・Mac（ヒラギノ丸ゴ ProN）だけ。
+   AndroidとChromebookには入っていないので、静かにゴシックになる（崩れはしない） */
+.sheet.f-maru .cell{
+  font-family: "HG丸ｺﾞｼｯｸM-PRO", HGMaruGothicMPRO,
+               "Hiragino Maru Gothic ProN", "Yu Gothic", sans-serif;
+}
+
+/* ---- 前方の帯（座席表の「黒板」にあたるところ） ---- */
+.board.front{ letter-spacing: .3em; }
+/* 🔴 会社で使う紙なので、緑ではなくグレー。
+   まちがってカラーで刷っても浮かない（本人の判断）。
+   ⚠ 共通の print.css が緑を !important で指定しているので、詳しさを上げて上書きする */
+.sheet .board.front{ background: #5b5b5b; }
+@media print{
+  .sheet .board.front{ background: #5b5b5b !important; }
+}
+/* ⚠ 自分で書いたときは字間を広げない。
+   「入口　　　ホワイトボード　　　入口」のように、書いた空白の間隔をそのまま出すため */
+.board.front.free{ letter-spacing: 0; white-space: pre-wrap; }
+
+/* ---- 印刷 ---- */
+/* 画面用の文字サイズは要素に直接ついているので、紙では上書きする */
+@media print{
+  .seat .cell{ font-size: var(--cellPrint, 4mm) !important; }
+  .seat .ln.no{ opacity: 1; color: #555 !important; }
+  .seat .ln.kana{ opacity: 1; color: #555 !important; }
+  .seat .sno{ font-size: var(--snoPrint, 3.2mm) !important; color: #555 !important; }
+  /* ⚠ 共通の print.css が .seat に min-height:14mm を指定している。
+     行が多いとこれが下限になって、計算した高さを無視して紙からはみ出す。
+     高さはこちらで紙から計算しているので、下限は外す */
+  .sheet .seat{ min-height: 0; }
+  /* 通し番号を出さないときは、紙にも出さない */
+  /* 席次表は1枚出して終わり。空席は枠だけ残す */
+  .seat.empty{ background: #fff !important; }
+}
+
+/* ---- 貼り付けた列の役割をえらぶ欄 ---- */
+.colmap{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+.colcell{
+  flex: 1 1 8em;
+  min-width: 8em;
+  background: #faf7f8;
+  border: 1px solid var(--line, #e3dde0);
+  border-radius: 8px;
+  padding: 6px 8px;
+}
+/* 貼り付けた1行目を見本として出す。長いときは切る（枠を崩さない） */
+.colhead{
+  font-size: .78rem;
+  color: #8a7a80;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.colcell select{ width: 100%; }
+
+/* ---- 1マスの中身の設定（行ごとの出し入れと大きさ） ---- */
+.lines{ margin-top: 8px; }
+.lrow{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+  border-bottom: 1px dashed var(--line, #e9e3e6);
+}
+.lrow:last-child{ border-bottom: none; }
+.lrow .chk-inline{ flex: 1 1 auto; margin: 0; }
+.lrow select{ flex: 0 0 auto; width: 5.5em; }
+
+/* ---- 1マスの中身：左に設定、右に見本 ---- */
+.cellcfg{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  align-items: flex-start;
+  margin-top: 12px;
+}
+.cellcfg-set{ flex: 1 1 20em; min-width: 17em; }
+.cellcfg-prev{ flex: 0 0 auto; }
+.prevlabel{
+  font-size: .8rem;
+  color: #8a7a80;
+  margin-bottom: 6px;
+}
+/* 見本は本物と同じ .sheet / .seat を使う（見え方がずれないように） */
+#prevSheet{ padding: 10px; display: inline-block; }
+#prevSeat{
+  width: 190px;
+  height: auto;
+  min-height: 118px;
+  cursor: default;
+  padding: 10px 8px;
+}
+
+/* ⚠ 大中小は、ラベルのすぐ隣に置く。
+   右端にそろえると、押すまでの距離が遠くて選びにくい（本人の指摘） */
+.lrow label{ flex: 0 1 auto; margin: 0; font-weight: normal; }
+.lrow{ justify-content: flex-start; }
+
+/* ---- モニターに映すとき ---- */
+/* ⚠ 共通の style.css にある body.screen .sheet が、設定欄の「見本」にも当たってしまう
+   （見本も .sheet を使っているため）。結果、モニター表示に見本が重なって出ていた。
+   共通ファイルは触らない方針なので、こちら側で見本ごと隠す */
+body.screen .cellcfg-prev{ display: none !important; }
+body.screen #prevSheet{ display: none !important; }
+
+/* ---- 紙で小さくなりすぎたときの知らせ ---- */
+/* ⚠ 人数で警告を出さない。同じ100人でも、用紙の向きと列の数で読めるかどうかが変わる。
+   実際に計算した文字の大きさで判断する */
+.warn-note{
+  display: inline-block;
+  background: #fdf3ef;
+  border: 1px solid #e8c4b4;
+  border-radius: 8px;
+  padding: 4px 10px;
+  color: #8a5a3a !important;
+}
+
+/* 名簿欄：例が6行あるので、スマホで最後の1行が切れないように少し高く
+   （⚠共通の textarea{min-height:170px} だと「列の順番は…」が隠れる） */
+#names{min-height:200px}
+
+/* 🔴 保存した名簿の利用（2026-08-31）。座席表と同じ見た目にそろえる */
+.btn-row{margin:8px 0 6px}
+.btn-row .mini{margin:0 8px 6px 0}
+.pick{max-width:24em}
+.pick select{width:100%}
+.cls-box{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+.cls-box h3{margin:0 0 4px;font-size:1rem}
+.del-box{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+.del-box h3{margin:0 0 4px;font-size:1rem}
+.tip-body .tip-h{font-weight:bold;margin:10px 0 2px}
+.tip-body ul{margin:0 0 6px;padding-left:1.3em}
+.tip-body li{margin-bottom:3px}

@@ -1,0 +1,96 @@
+/* トップページ専用の見た目
+   ⚠ 共通の style.css に .hero / .catch / .tools / .soon が既にあって、
+     中身がちがう（座席表のページで使っている）。ぶつからないように、
+     トップ側のクラスには t- を付けてある。
+   🔴 2026-08-29 決定＝ベースは薄いグレー、左＝学校（桜色）／右＝仕事（緑）。
+     色は「面で塗らない」。枠の上の線だけを色にする。 */
+
+:root{
+  --midori:#3f7a68;        /* 右＝仕事 */
+  --midori-pale:#eef4f2;   /* 薄いほうのボタン（完成サンプルを見る） */
+  --pink-deep:#a84a72;     /* ⚠薄いピンクの上に --pink をのせると薄すぎる（読みやすさ 3.2 → 4.9） */
+}
+/* ⚠ トップだけ薄くしていたが、2026-08-30 に全ページへ広げた（本人の希望）。
+   いまは共通の style.css で #f8f9fa。ここでの上書きは不要 */
+
+/* ---- 上のあいさつ ---- */
+/* ⚠ ヘッダーとの間が空きすぎていた（本人の指摘）。44px → 24px */
+.t-hero{padding:24px 0 8px}
+.t-eyebrow{
+  font-size:.74rem;letter-spacing:.18em;color:var(--ink-soft);margin:0 0 14px;
+}
+/* ⚠ スマホでも1行に収める。画面幅から逆算した大きさにする */
+.t-hero h1{
+  font-size:clamp(12px,4vw,22px);font-weight:700;margin:0 0 18px;
+  line-height:1.5;white-space:nowrap;color:var(--ink-soft);
+}
+.t-catch{
+  font-size:clamp(1.5rem,4vw,2.2rem);font-weight:700;line-height:1.45;
+  margin:0 0 18px;letter-spacing:-.01em;
+}
+/* ⚠ 直下の span だけブロックにする。中に入れた span まで改行させないため */
+.t-catch > span{display:block}
+.t-hero .lead{font-size:.88rem;margin:0 0 30px;max-width:44em}
+.t-hero .more{color:var(--midori);text-decoration:none;white-space:nowrap;margin-left:4px}
+.t-hero .more:hover{text-decoration:underline}
+
+/* ⚠ ここには「名簿の送信なし／登録不要／インストール不要／すべて無料」の行があったが、
+   2026-08-30 に消した。理由＝**ほとんどが上のリード文と重複していた**（本人の指摘）。
+   新しかったのは「すべて無料」だけなので、それをリード文に入れた。
+   そのぶん上が短くなって、2枠が上がった */
+
+/* ---- 2枠：左＝学校、右＝仕事 ---- */
+.t-two{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:48px}
+.t-col{
+  background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+  padding:26px 24px 22px;
+}
+.t-col.l{border-top:3px solid var(--pink)}
+.t-col.r{border-top:3px solid var(--midori)}
+.t-col h2{
+  font-size:.88rem;letter-spacing:.06em;margin:0 0 4px;font-weight:700;
+  padding-left:0;
+}
+/* ⚠ 共通CSSの h2 には縦棒が付く。トップの見出しは文字に色を付ける作りなので、
+   縦棒は消す（付いたままだと文字と重なるうえ、右側までピンクになる） */
+.t-col h2::before,.t-about h2::before{content:none}
+.t-col.l h2{color:var(--pink)}
+.t-col.r h2{color:var(--midori)}
+.t-col .who{font-size:.8rem;color:var(--ink-soft);margin:0 0 22px}
+
+.t-tool{display:block;text-decoration:none;color:var(--ink);margin-bottom:20px}
+.t-tool .nm{font-size:1.08rem;font-weight:700;display:block;margin-bottom:5px}
+.t-tool .ds{font-size:.86rem;color:var(--ink-soft);display:block;line-height:1.7}
+
+
+
+/* 「使ってみる →」のボタン。太字は 2026-08-30 に本人の希望で追加 */
+.t-tool .go{
+  display:inline-block;margin-top:11px;font-size:.85rem;padding:8px 18px;
+  border-radius:999px;color:#fff;font-weight:700;
+}
+.t-col.l .t-tool .go{background:var(--pink)}
+.t-col.r .t-tool .go{background:var(--midori)}
+.t-tool:hover .go{opacity:.88}
+
+/* じゅんび中は、枠を作らず文字だけ。できているものと見分けがつくように */
+.t-soon{border-top:1px solid var(--line);margin-top:22px;padding-top:16px}
+.t-soon p{margin:0 0 6px;font-size:.83rem;color:var(--ink-soft)}
+.t-soon .lbl{
+  font-size:.72rem;letter-spacing:.1em;color:var(--ink-soft);
+  opacity:.75;margin-bottom:9px;
+}
+
+/* ---- 読み物 ---- */
+.t-about{max-width:44em;margin-bottom:32px}
+.t-about h2{font-size:1rem;margin:0 0 10px;padding-left:0}
+.t-about p{color:var(--ink-soft);font-size:.9rem;margin:0}
+
+@media(max-width:720px){
+  /* 🔴 スマホだけ「だから安心」を次の行に落とす。読点も消す */
+  .t-catch .cm{display:none}
+  .t-catch .nl{display:block}
+  .t-two{grid-template-columns:1fr}
+  .t-hero{padding:18px 0 4px}
+  .t-col{padding:22px 18px 18px}
+}

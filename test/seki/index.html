@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta name="robots" content="noindex,nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="さくら先生の座席表">
+<meta property="og:title" content="席次表メーカー｜会議・研修・大学の席次表を無料で自動作成">
+<meta property="og:description" content="名簿を貼るだけで席次表ができる無料ツール。用紙に合わせて自動で調整し、A4の1枚に収めます。会社名・役職・フリガナ・名前に対応。Excelから複数の列をそのまま貼り付けられます。">
+<meta property="og:url" content="https://sakura-teachers.com/seki/">
+<meta property="og:image" content="https://sakura-teachers.com/ogp.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5047272666003169" crossorigin="anonymous"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GCK29PTKBG"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GCK29PTKBG');
+</script>
+<title>【テスト】席次表メーカー｜会議・研修・大学の席次表を無料で自動作成</title>
+<meta name="description" content="席次表の作り方は簡単。名簿を貼るだけで、会議・研修・セミナー・大学の席次表が自動で作れる無料ツールです。前を向いて並ぶスクール形式で、席順は名簿順とランダムから選べます。用紙に合わせて自動で調整し、A4の1枚に収めるので、2ページに分かれません。会社名・役職（肩書き）・フリガナ・名前を1マスに並べ、敬称は様・さん・先生から選べます。Excelの名簿から複数の列をそのまま貼り付けでき、通し番号の向きも指定できます。印刷とPDFもこのページから。名簿はブラウザの中だけで処理し、AIの学習にも使われません。">
+<link rel="stylesheet" href="../style.css?v=100">
+<link rel="stylesheet" href="seki.css?v=18">
+<link rel="stylesheet" href="../print.css?v=54" media="print">
+</head>
+<body>
+
+<header class="site-head noprint">
+  <div class="wrap">
+    <a class="logo" href="../">🌸 さくら先生の座席表</a>
+    <nav>
+      <a href="../">トップ</a>
+      <a href="../seat/">座席表</a>
+      <a href="../seki/" aria-current="page">席次表</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>席次表メーカー</h1>
+  <p class="catch">会議も研修も、名簿を貼るだけ</p>
+  <p class="lead"><strong>用紙に合わせて自動で調整し、A4の1枚に収めます。</strong>会社名・役職・フリガナ・名前を並べた席次表が、そのまま印刷できます。Excelの名簿から複数の列をまとめて貼り付けられるので、打ち直しはいりません。</p>
+
+    <section class="card noprint">
+      <h2><span class="step">1</span>Excelの名簿の貼り付け&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h2>
+      <div class="tip-body" hidden>
+        <p><strong>Excelから、必要な列をまとめて選んで貼り付けてください。</strong>会社名・役職・名前が並んだ範囲をそのままコピーして、この欄に貼るだけです。</p>
+        <p>貼り付けると、<strong>どの列が何なのかを自動で見分けます。</strong>数字だけの列は番号、カタカナだけの列はフリガナ、といった具合です。違っていたら、下のメニューで選び直せます。</p>
+        <p><strong>名前だけでも作れます。</strong>1行に1人ずつ書けば、そのまま席次表になります。</p>
+      </div>
+      <p class="safe">🔒 <strong>使ってる機器の中だけで完結できます。</strong>名簿はネット上に流れません。外に送っていないので、AIの学習に使われることも、個人情報が漏れることもありません。社員名簿でも、安心して使えます。</p>
+      <!-- 🔴 保存した名簿の呼び出しは①に置く（⑧まで下がらなくていい）。
+           ⚠1件も無いうちは出さない。座席表と共通の置き場なので、
+             /seat/ で保存したものもここに出る -->
+      <div class="row tight" id="quickLoad" hidden style="margin-bottom:12px">
+        <div class="pick"><label for="clsSel2">保存した名簿</label>
+          <select id="clsSel2"><option value="">－</option></select></div>
+        <div><label>&nbsp;</label>
+          <button class="mini" id="clsLoad2" type="button">この名簿を自動入力</button></div>
+      </div>
+      <div class="in-col">
+        <div>
+      <textarea id="names" placeholder="ここをクリック → Excelからコピペ&#10;&#10;会社 ▸ 株式会社さくら商事　部長　山田 太郎&#10;大学 ▸ 1001　山田 太郎　ヤマダ タロウ　経営学科&#10;個人 ▸ 山田 太郎&#10;&#10;列の順番は気にしなくて大丈夫"></textarea>
+        </div>
+        <div>
+      <div class="row tight" style="margin-top:10px">
+        <div><label>人数</label><div class="bignum" id="count">0人</div></div>
+        <div id="emptyNote" class="hint" style="align-self:flex-end;padding-bottom:6px">空の場合、サンプルで確認できます</div>
+      </div>
+
+      <div id="colMapWrap" hidden style="margin-top:12px">
+        <label>貼り付けた列の役割&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></label>
+        <div class="tip-body" hidden>
+          <p>自動で当たりをつけています。<strong>違っていたら選び直してください。</strong>使わない列は「使わない」にします。</p>
+          <p>メニューは<strong>席次表に出てくる上からの順</strong>に並んでいます。名前は出るときも下なので、いちばん下です。</p>
+          <p>同じ役割を2つの列には選べません。選び直すと、もう一方は「使わない」に変わります。</p>
+        </div>
+        <div id="colMap" class="colmap"></div>
+      </div>
+
+      <div style="margin-top:12px">
+        <label for="clsFree">会議名・研修名（自由記入）</label>
+        <input id="clsFree" type="text" placeholder="第3回 定例会議／新任研修 A班／経営学入門 火3" style="width:100%">
+      </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card noprint">
+      <h2><span class="step">2</span>会場の形</h2>
+      <div class="row tight">
+        <div><label for="cols">横のならび</label><span class="ctl"><input id="cols" type="number" min="1" max="14" value="6"><span class="unit">席</span></span></div>
+        <div><label for="rows">縦のならび</label><span class="ctl"><input id="rows" type="number" min="1" max="14" value="5"><span class="unit">列</span></span></div>
+        <div><label>座席数</label><div class="bignum" id="seatcount">30</div></div>
+        <div id="seatinfo" class="hint" style="align-self:flex-end;padding-bottom:6px"></div>
+      </div>
+      <div class="row">
+        <div><label for="frontWord">前方にあるもの</label>
+          <select id="frontWord">
+            <option value="スクリーン">スクリーン</option>
+            <option value="ホワイトボード">ホワイトボード</option>
+            <option value="演台">演台</option>
+            <option value="上座">上座</option>
+            <option value="黒板">黒板</option>
+            <option value="">出さない</option>
+          </select>
+        </div>
+        <div><label for="board">前方の位置</label>
+          <select id="board">
+            <option value="top">上（画面の上が前）</option>
+            <option value="bottom">下（画面の下が前）</option>
+          </select>
+        </div>
+        <div class="grow"><label for="frontFree">帯の文字を自分で書く</label>
+          <input id="frontFree" type="text" placeholder="←窓　　ホワイトボード　　出入口→" style="width:100%">
+        </div>
+      </div>
+      <p class="hint">「前方にあるもの」より優先されます。</p>
+      <div class="row tight" style="margin-top:6px">
+        <div><label for="order">並べ方</label>
+          <select id="order">
+            <option value="number">名簿順</option>
+            <option value="random">ランダム（条件つき）</option>
+          </select></div>
+        <div id="dirWrap"><label for="dir">ならぶ向き&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></label>
+          <select id="dir">
+            <option value="v">縦・左の列から</option>
+            <option value="vr">縦・右の列から</option>
+            <option value="h">横・左から</option>
+            <option value="hr">横・右から</option>
+          </select></div>
+      </div>
+      <div class="tip-body" hidden>
+        <p>会場によって、受付のご案内が「前から順に」「右奥から順に」と違います。<strong>ご案内する向きに合わせてください。</strong></p>
+      </div>
+      <p class="hint" id="orderNote"></p>
+    <details class="opt sub noprint" id="condBlock">
+      <summary>詳しい条件（離す・隣にする・席を決める）</summary>
+      <div class="body">
+        <h3>「隣」の考え方&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h3>
+        <div class="tip-body" hidden>
+          <p>「離す」「隣にする」で、<strong>どこまでを“隣”とみなすか</strong>を決めます。</p>
+          <p>きつくするほど、条件を満たす配置が見つかりにくくなります。作れないときは、ここをゆるくしてみてください。</p>
+        </div>
+        <div class="radios">
+          <label><input type="radio" name="mode" value="lr"> 左右だけ</label>
+          <label><input type="radio" name="mode" value="cross" checked> 前後左右</label>
+          <label><input type="radio" name="mode" value="king"> まわり全部（ななめも）</label>
+        </div>
+
+        <h3>離す組み合わせ</h3>
+        <div id="sepList"></div>
+        <button class="mini" id="addSep" type="button">＋ 組を追加</button>
+
+        <h3>隣にする組み合わせ</h3>
+        <div id="adjList"></div>
+        <button class="mini" id="addAdj" type="button">＋ 組を追加</button>
+
+        <h3>席を決める人</h3>
+        <div id="fixList"></div>
+        <button class="mini" id="addFix" type="button">＋ 人を追加</button>
+        <p class="hint">来賓や進行役の席を先に決めておくときに使います。「前のほう」を選べば、席をぴったり決めなくても前方に配置されます。</p>
+      </div>
+    </details>
+    </section>
+
+
+  <p class="noprint" style="text-align:center;margin:24px 0">
+    <button class="primary" id="go" type="button">席次表を作る</button>
+  </p>
+  <div id="msg"></div>
+
+  <div id="result" hidden>
+    <div class="tabs-row noprint">
+      <div class="plan-tabs" id="tabs"></div>
+      <button id="again" type="button">もう一度 作り直す</button>
+      <button id="screenOn" type="button">📺 モニターに映す</button>
+    </div>
+    <p class="hint drag-note noprint">席は自由に動かせます</p>
+
+    <div id="sheetBox">
+    <div class="sheet" id="sheet">
+      <div class="sheet-head">
+        <span id="decoLeft" class="deco-mark"></span>
+        <div class="sheet-title" id="shTitle">席次表</div>
+        <div class="sheet-date" id="shDate"></div>
+      </div>
+      <div class="board front" id="boardTop">スクリーン</div>
+      <div class="grid" id="grid"></div>
+      <div class="board front" id="boardBottom" hidden>スクリーン</div>
+      <div class="sheet-credit" id="credit">さくら先生の座席表　sakura-teachers.com</div>
+      <button type="button" id="screenOff" class="noprint">✕ とじる</button>
+    </div>
+    </div>
+
+
+
+    <p class="hint noprint">条件に反したところは赤くなりますが、そのままでも印刷できます。<strong>決めるのはあなたです。</strong></p>
+    <div id="vio" class="noprint"></div>
+
+    <details class="opt noprint" id="cellCard">
+      <summary><span class="step">3</span>1マスの中身&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></summary>
+      <div class="body">
+      <div class="tip-body" hidden>
+        <p><strong>そのままでも整って出ます。</strong>直したいところだけ触ってください。</p>
+        <p>日本の席札は<strong>名前がいちばん下で、いちばん大きい</strong>のがふつうです。この形を初期値にしてあります。</p>
+        <p>出したくない行は<strong>「なし」</strong>を選んでください。名簿に入っていない項目は、大きさを選んでも出ません。</p>
+        <p><strong>役職のある人と無い人が並んでも、名前の高さはそろいます。</strong>役職の無い人は、そこを空けたまま並べるためです。</p>
+        <p><strong>会社名が長いときは、所属の行だけが小さくなります。</strong>名前は大きいままです。</p>
+      </div>
+      <div class="row tight">
+        <div><label for="honor">敬称</label>
+          <select id="honor">
+            <option value="様">様</option>
+            <option value="さん">さん</option>
+            <option value="先生">先生</option>
+            <option value="">なし</option>
+          </select></div>
+        <div><label for="numPos">番号の位置</label>
+          <select id="numPos">
+            <option value="corner" selected>右上</option>
+            <option value="line">いちばん上の行</option>
+            <option value="none">なし</option>
+          </select></div>
+        <div id="szNoWrap"><label for="szNo">番号の大きさ</label>
+          <select id="szNo"><option value=".66">大</option><option value=".52" selected>中</option><option value=".42">小</option></select></div>
+        <div><label for="kanaStyle">フリガナの文字</label>
+          <select id="kanaStyle">
+            <option value="kata">カタカナ</option>
+            <option value="hira">ひらがな</option>
+          </select></div>
+      </div>
+      <div class="cellcfg">
+        <div class="cellcfg-set">
+          <p class="note-sm">上から <b>番号 → 会社名・大学名 → 役職・学部・学科 → フリガナ → 名前</b> の順に並びます。<b>中身のある人と無い人が並んでも、名前の高さはそろいます。</b></p>
+          <div class="lines">
+            <div class="lrow">
+              <label for="szOrg">会社名・大学名</label>
+              <select id="szOrg"><option value=".62">大</option><option value=".50" selected>中</option><option value=".40">小</option><option value="none">なし</option></select>
+            </div>
+            <div class="lrow">
+              <label for="szTtl">役職・学部・学科</label>
+              <select id="szTtl"><option value=".62">大</option><option value=".50" selected>中</option><option value=".40">小</option><option value="none">なし</option></select>
+            </div>
+            <div class="lrow">
+              <label for="szKana">フリガナ</label>
+              <select id="szKana"><option value=".56">大</option><option value=".44" selected>中</option><option value=".36">小</option><option value="none">なし</option></select>
+            </div>
+          </div>
+        </div>
+        <div class="cellcfg-prev">
+          <div class="prevlabel">見本</div>
+          <div class="sheet" id="prevSheet">
+            <div class="seat" id="prevSeat"></div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </details>
+
+    <details class="opt noprint" id="grpCard">
+      <summary><span class="step">4</span>グループ分け&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></summary>
+      <div class="body">
+      <div class="tip-body" hidden>
+        <p><strong>行の中身が同じ人に、同じ色が付きます。</strong>部署ごと・学科ごとに分けたいときは、これがいちばん早いです。色は人に付くので、席を動かすと色もついて動きます。</p>
+        <p><strong>分け方は、その言葉をどの行に入れたかで選びます。</strong>学科を「役職・学部・学科」の行に入れたなら「役職・学部・学科ごと」、「会社名・大学名」の行に入れたなら「会社名・大学名ごと」です。</p>
+        <p><strong>「机のかたまり」「縦の列ごと」</strong>は、席のかたまりに色が付きます。グループ討議で使うときは、こちらです。席を動かして人を入れ替えると、色はその席に残ります。</p>
+        <p><strong>グループ記号（A・B・C…）を押すと、その席のグループと色を変えられます。</strong>もう一度作り直すと、手で直したぶんは元にもどります。</p>
+        <p>色は印刷にも画像にもそのまま出ます。</p>
+      </div>
+      <p class="note-sm">
+        席は<strong>ドラッグで動かせます</strong>。グループ記号を押すと、その席のグループと色を変えられます。
+      </p>
+      <label class="chk-inline">
+        <input type="checkbox" id="grpOn"> グループに分ける
+      </label>
+      <label class="chk-inline gap" id="grpNumWrap" hidden>
+        <input type="checkbox" id="grpNum" checked> グループ記号を印刷する
+      </label>
+      <div id="grpOpts" hidden style="margin-top:12px">
+        <div class="row">
+          <div><label for="grpStyle">分け方</label>
+            <select id="grpStyle">
+              <option value="org">会社名・大学名ごと</option>
+              <option value="title">役職・学部・学科ごと</option>
+              <option value="block">机のかたまり</option>
+              <option value="col">縦の列ごと</option>
+            </select></div>
+          <div id="grpSizeWrap" hidden><label for="grpSize">1グループの人数</label>
+            <span class="ctl"><input id="grpSize" type="number" min="2" max="8" value="4"><span class="unit">人</span></span></div>
+          <div><label for="grpLook">色の付け方</label>
+            <select id="grpLook">
+              <option value="both">枠線＋うすい色</option>
+              <option value="edge">枠線だけ</option>
+              <option value="fill">ぬりつぶし</option>
+              <option value="none">色なし（番号だけ）</option>
+            </select></div>
+        </div>
+      </div>
+      </div>
+    </details>
+
+    <details class="opt noprint" id="printCard">
+      <summary><span class="step">5</span>見た目と用紙&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></summary>
+      <div class="body">
+      <div class="tip-body" hidden>
+        <p><strong>印刷できないとき</strong></p>
+        <p>お使いの機器がプリンターとつながっているか確認してください。つながっていれば、スマホからでも印刷できます。</p>
+        <p><strong>PDFにしたいとき</strong>は、印刷画面で「送信先」を「PDFに保存」にしてください。</p>
+        <p><strong>たて向きで出てしまうとき</strong>（スマホ・タブレットに多いです）は、印刷画面の設定で用紙の向きを「横」に変えてください。機器によっては、こちらの指定より端末の設定が優先されます。</p>
+        <p><strong>丸文字はWindowsとiPadだけ。</strong>ほかの機器ではゴシック体になりますが、崩れません。</p>
+      </div>
+      <div class="row" style="display:block;margin-bottom:10px">
+        <label class="chk-inline"><input type="checkbox" id="printStage"> 印刷（PDF）は登壇者からの向きで出す</label>
+        <p class="hint">紙は<strong>前に立って客席を向いた向き</strong>（180度まわした形）で出ます。画面はそのままです。受付は参加者と同じ向きで見るので、回すのは登壇者のぶんだけです。</p>
+      </div>
+      <div class="row">
+        <div><label for="paper">用紙の向き</label>
+          <select id="paper"><option value="landscape">横</option><option value="portrait">縦</option></select>
+        </div>
+        <div><label for="font">書体</label>
+          <select id="font">
+            <option value="mincho">明朝体</option>
+            <option value="gothic" selected>ゴシック体</option>
+            <option value="maru">丸文字（Windows・iPadのみ）</option>
+          </select>
+        </div>
+        <div><label for="ink">文字の色</label>
+          <select id="ink"></select>
+        </div>
+        <div><label for="deco">アイコン</label>
+          <select id="deco">
+            <option value="">なし</option>
+            <option value="🌸">🌸</option>
+            <option value="⭐">⭐</option>
+            <option value="🍀">🍀</option>
+            <option value="✏️">✏️</option>
+          </select>
+        </div>
+        <div style="min-width:15em"><label for="dt">日付・自由記入</label>
+          <input id="dt" type="text" placeholder="2026年4月10日 / 第1会議室 など" style="width:100%"></div>
+      </div>
+      <p style="margin-top:10px">
+        <label style="font-weight:normal;display:inline;margin-right:18px">
+          <input type="checkbox" id="dtOff"> 日付を入れない
+        </label>
+        <label style="font-weight:normal;display:inline">
+          <input type="checkbox" id="bold" checked> 名前を太く（モニター用）
+        </label>
+        <label style="font-weight:normal;display:inline;margin-left:18px">
+          <input type="checkbox" id="showCredit" checked> 右下にサイト名を入れる
+        </label>
+      </p>
+      <p class="hint">PDFにしたいときは、印刷画面で「送信先」を <strong>PDFに保存</strong> にしてください。</p>
+      <p class="hint" style="margin-top:6px">印刷の向きや大きさは、お使いの機器・プリンターの設定によります。うまく収まらないときは、印刷画面の<strong>拡大・縮小</strong>で調整してください。</p>
+      </div>
+    </details>
+
+    <section class="card noprint">
+      <h2><span class="step">6</span>印刷・画像で保存</h2>
+      <p style="margin:4px 0 0">
+        <button id="doPrint" type="button">🖨 印刷（PDF作成）</button>
+        <button id="doPng" type="button">🖼 画像で保存（PNG）</button>
+      </p>
+      <p class="hint" id="printNote"></p>
+    </section>
+  </div>
+
+
+  <section class="card noprint">
+    <h2><span class="step">7</span>画面の保存&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h2>
+    <div class="tip-body" hidden>
+      <ul>
+        <li><strong>いま開いている画面をそのまま残します。</strong>名簿・会場の形・条件・見た目の設定・席次表まで、次に開いたときそのまま出ます。</li>
+        <li><strong>残るのは1つだけ</strong>です。名簿を入れかえると、前のものは上書きされます。</li>
+        <li><strong>チェックを外すと、保存していたものは消えます。</strong>次に開いたときは最初からの設定になります。いま見ている画面はそのままです。</li>
+        <li>残るのは<strong>使ってる機器のブラウザの中だけ</strong>です。<strong>どこにも送信されません。</strong></li>
+      </ul>
+    </div>
+    <label style="font-weight:normal">
+      <input type="checkbox" id="save"> この機器に画面を保存する
+    </label>
+    <p class="hint">チェックを入れると次回もこのまま表示されます。外すと次回は最初からの設定になります。サーバーには送信されません。</p>
+    <p><span class="saving" id="savingLabel"></span></p>
+  </section>
+
+  <section class="card noprint">
+    <h2><span class="step">8</span>保存した名簿の利用&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h2>
+    <div class="tip-body" hidden>
+      <ul>
+        <li><strong>名前を付けて、いくつも保存できます。</strong>ボタンを押したときだけ増えます。</li>
+        <li>残るのは<strong>使ってる機器のブラウザの中だけ</strong>です。<strong>どこにも送信されません。</strong></li>
+      </ul>
+      <p class="tip-h">座席表と共通です</p>
+      <ul>
+        <li><strong>「さくら先生の座席表」で保存した名簿も、ここに出ます。</strong>逆もできます。同じ機器なら、名簿を貼り直す必要はありません。</li>
+        <li>名簿は共通ですが、<strong>見た目や会場の形はツールごと</strong>に覚えます。席次表で決めた敬称やふりがなが、座席表に混ざることはありません。</li>
+      </ul>
+      <p class="tip-h">呼び出し方</p>
+      <ul>
+        <li><strong>①の「この名簿を自動入力」</strong>から呼び出します。あとは「席次表を作る」を押すだけです。</li>
+      </ul>
+    </div>
+
+    <p class="safe">🔒 <strong>使ってる機器の中だけで完結します。</strong>保存したものはネット上に流れません。</p>
+
+    <div class="cls-box">
+      <h3>名簿に名前を付けて保存（<span id="clsCount">0／10件</span>）</h3>
+      <p class="hint">名簿・会場の形・条件・見た目の設定を、まとめて残すときに使います。</p>
+      <p class="btn-row">
+        <button class="mini" id="clsNew" type="button">新しく保存</button>
+        <button class="mini" id="clsSave" type="button">上書き</button>
+        <button class="mini" id="clsDel" type="button">削除</button>
+      </p>
+      <div class="pick"><label for="clsSel">保存した名簿</label>
+        <select id="clsSel"><option value="">－</option></select></div>
+
+      <p class="hint" style="margin-top:14px">⚠ <strong>共用の機器で使ったときは、使い終わったら下の「削除」を押してください。</strong></p>
+    </div>
+
+    <div class="del-box">
+      <h3>削除</h3>
+      <p class="hint">ボタンを押すと、この機器から名簿が消えます。<strong>もとには戻せません。</strong></p>
+      <p><button class="mini" id="clsClearAll" type="button">名簿の全削除</button></p>
+    </div>
+  </section>
+
+  <section class="read">
+    <h2>使い方</h2>
+    <ol>
+      <li><strong>Excelの名簿から、必要な列をまとめてコピーして貼り付けます。</strong>会社名・役職・名前が並んだ範囲をそのまま選んで大丈夫です。</li>
+      <li>どの列が何なのかを<strong>自動で見分けます</strong>。違っていたらメニューで選び直します。</li>
+      <li>横と縦の席の数と、前方にあるもの（スクリーン・ホワイトボード・演台）を選びます。</li>
+      <li>「席次表を作る」を押すと、名簿順に並んだ席次表ができます。</li>
+      <li>気になるところは<strong>ドラッグで入れ替えて</strong>、印刷します。</li>
+    </ol>
+
+    <h2>できること</h2>
+    <ul class="can">
+      <li><b>Excelの名簿をそのまま貼り付け</b><small>会社名・役職・フリガナ・名前を、複数の列のままコピーできます。打ち直しはいりません</small></li>
+      <li><b>スクール形式の並び</b><small>前を向いて座る形です。スクリーン・ホワイトボード・演台の位置に合わせて、前を上にも下にもできます</small></li>
+      <li><b>1マスに4つまで並ぶ</b><small>所属・役職（肩書き）・フリガナ・名前。名前がいちばん下で、いちばん大きく出ます</small></li>
+      <li><b>敬称を選べる</b><small>様・さん・先生・なし。全員にまとめて付きます</small></li>
+      <li><b>通し番号の向きを選べる</b><small>縦・横、左から・右から。受付のご案内に合わせられます</small></li>
+      <li><b>A4の1枚に自動で収まる</b><small>人数と列の数から、1マスの大きさと文字の大きさを計算します。2ページに割れません</small></li>
+      <li><b>印刷・PDF</b><small>紙にもPDFにも、このページから出せます。A4の横でも縦でも、紙いっぱいに大きく出ます</small></li>
+      <li><b>モニター表示</b><small>会場の画面に大きく映せます</small></li>
+    </ul>
+
+    <h2>よくある質問</h2>
+    <dl>
+      <dt>ネットにつながっているのに、本当に外に出ないのですか？</dt>
+      <dd><strong>普段お使いのパソコンで、名簿を開くのと同じです。</strong>ネットにつながっていても、このページは名簿を受け取っていません。ブラウザの中だけで処理して、そのまま印刷やPDFにしています。だから、外に晒されることも、漏れることも、AIの学習に使われることもありません。<strong>いつものパソコン仕事と同じように、安心して使えます。</strong></dd>
+      <dt>名簿は外部に送られますか？</dt>
+      <dd>送りません。すべて使ってる機器の中だけで処理しています。<strong>外に出ていないので、AIの学習に使われることも、個人情報が漏れることもありません。</strong></dd>
+      <dt>個人情報が漏れないか心配です</dt>
+      <dd><strong>漏れません。</strong>貼り付けた名簿は、お使いの機器の中だけで処理しています。こちらのサーバーには届いていませんので、こちらから漏れることも、AIの学習に使われることもありません。</dd>
+      <dt>社員名簿をクラウドに上げてはいけない決まりがあります</dt>
+      <dd><strong>問題ありません。</strong>このページは名簿を受け取っていません。貼り付けた内容はお使いの機器の中だけで処理していて、外に送っていないためです。社外にデータを出さない決まりのある会社でもお使いいただけます。</dd>
+      <dt>席次表の作り方を教えてください</dt>
+      <dd>名簿を貼り付けて「席次表を作る」を押すだけです。会社名・役職・名前が並んだ席次表になります。<strong>Excelやパワーポイントで枠を作る必要はありません。</strong></dd>
+      <dt>敬称は「様」以外にもできますか？</dt>
+      <dd>できます。<strong>様・さん・先生・なし</strong>から選べます。全員にまとめて付きます。</dd>
+      <dt>フリガナを入れたいのですが</dt>
+      <dd>名簿にフリガナの列があれば出せます。「1マスの中身」の<strong>フリガナ</strong>で大きさを選んでください。名前の1つ上に入ります。</dd>
+      <dt>フリガナをひらがなで出せますか？</dt>
+      <dd>できます。「1マスの中身」の<strong>フリガナの文字</strong>でひらがなを選んでください。名簿がカタカナで書かれていても、ひらがなに直して出します。</dd>
+      <dt>部署ごと・学科ごとに色を分けたい</dt>
+      <dd>できます。「グループに分ける」の分け方を、<strong>その言葉を入れた行と同じ名前</strong>にしてください。学科を「会社名・大学名」の行に入れたなら「会社名・大学名ごと」、「役職・学部・学科」の行に入れたなら「役職・学部・学科ごと」です。人数を数える必要はありません。</dd>
+      <dt>学籍番号・社員番号を名前の上に出したい</dt>
+      <dd>「1マスの中身」の<strong>番号の位置</strong>を「いちばん上の行」にしてください。右上の小さなしるしではなく、会社名・大学名の上に1行として入ります。</dd>
+      <dt>通し番号を前から順に振りたい</dt>
+      <dd>「ならぶ向き」で<strong>縦・左の列から／縦・右の列から／横・左から／横・右から</strong>を選べます。受付でご案内する向きに合わせてください。</dd>
+      <dt>「前」や「入口」など、好きな言葉を入れたい</dt>
+      <dd>「会場の形」の<strong>帯の文字を自分で書く</strong>に入力してください。選んだものより優先されます。「←窓　　ホワイトボード　　出入口→」のように空白を入れれば、その間隔のまま出ます。</dd>
+      <dt>会議室・オフィスの座席表にも使えますか？</dt>
+      <dd>使えます。横と縦の数を変えるだけで、会議室・研修会場・オフィスの座席表になります。<strong>Excelのテンプレートを探して直す必要はありません。</strong></dd>
+      <dt>大学の授業でも使えますか？</dt>
+      <dd>使えます。学籍番号・氏名・フリガナ・学科の並んだ名簿をそのまま貼り付ければ、そのまま座席表になります。</dd>
+      <dt>役職だけ大きくしたいのですが</dt>
+      <dd>「1マスの中身」で、行ごとに<strong>大・中・小・なし</strong>を選べます。名前を基準にした大きさなので、役職を大きくすると名前とのバランスが変わります。出したくない行は「なし」を選んでください。</dd>
+      <dt>役職のある人と無い人で、名前の高さがずれませんか？</dt>
+      <dd><strong>ずれません。</strong>役職の無い人は、そこを空けたまま並べます。名前はどのマスでも同じ高さに出ます。</dd>
+      <dt>会社名が長くて入りきりません</dt>
+      <dd><strong>所属の行だけが自動で小さくなります。</strong>名前まで小さくなることはありません。</dd>
+      <dt>Excelの列は、並べ替えてから貼り付けるのですか？</dt>
+      <dd><strong>そのままで大丈夫です。</strong>どの列が何なのかを自動で見分けます。列の順番は自由です。違っていたときだけ、「貼り付けた列の中身」で選び直してください。</dd>
+      <dt>宴会や懇親会の席次表にも使えますか？</dt>
+      <dd>並んだ席の形であれば使えます。<strong>円卓（丸テーブル）の席次表は準備中</strong>です。</dd>
+      <dt>2ページに分かれてしまいませんか？</dt>
+      <dd><strong>分かれません。</strong>人数と列の数、用紙の向きから、1マスの大きさと文字の大きさを計算して、A4の1枚に収めます。Excelのテンプレートのように、はみ出したぶんが次のページに送られることはありません。</dd>
+      <dt>印刷したら小さくなってしまいます</dt>
+      <dd>用紙の向きを<strong>横</strong>にすると、多くの場合は大きく収まります。それでも小さいときは、印刷画面の拡大・縮小で調整してください。</dd>
+    </dl>
+
+    <h2>こんなときに</h2>
+    <ul>
+      <li>社内会議・取引先との打ち合わせで、席次表を用意するとき</li>
+      <li>新任研修・社外研修で、受付に貼る座席一覧が要るとき</li>
+      <li>セミナー・説明会で、受付に貼る席順表を作るとき</li>
+      <li>大学の授業で、学籍番号順の座席表を作るとき</li>
+      <li>大学や専門学校の授業で、学生の座席を指定しておくとき</li>
+      <li>懇親会のあとの着席で、席を決めておきたいとき</li>
+    </ul>
+
+    <h2>ほかのツール</h2>
+    <ul class="tools">
+      <li><a href="../seat/"><b>🪑 教室の座席表</b><small>席替え・班分け・色分けまで。小中高・大学の教室用</small></a></li>
+      <li><span class="soon"><b>⭕ 円卓の上座・下座</b><small>宴会・結婚式の席次のマナー（準備中）</small></span></li>
+      <li><span class="soon"><b>🏢 会議室・応接室の上座</b><small>入口からの位置で分かる早見表（準備中）</small></span></li>
+    </ul>
+
+    <h2>このツールについて</h2>
+    <p><strong>使ってる機器の中だけで完結できます。</strong>使った名簿がネット上に流れることはありません。外に送っていないので、AIの学習に使われることも、個人情報が漏れることもありません。社員名簿や学生名簿でも、安心して使えます。「名簿の保存」をオンにしたときだけ、いま使っている機器の中に残ります。オフのままなら、ページを閉じた時点で消えます。インストールも会員登録もいりません。</p>
+  </section>
+</main>
+
+<div class="rotate-tip noprint">横向きにすると大きく見えます</div>
+
+<footer class="noprint">
+  <div class="wrap"><span class="fnav"><a href="../contact/">お問い合わせ</a>　<a href="../privacy/">プライバシーポリシー</a></span>
+    <span class="copy">© 2026 さくら先生の座席表</span></div>
+</footer>
+
+<script src="../seating.js?v=54"></script>
+<script src="seki.js?v=31"></script>
+</body>
+</html>

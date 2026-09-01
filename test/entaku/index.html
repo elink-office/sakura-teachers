@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta name="robots" content="noindex,nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="さくら先生の座席表">
+<meta property="og:title" content="円卓の上座・下座｜入口を動かすと席順が分かる早見表">
+<meta property="og:description" content="円卓の上座・下座を図で確かめられます。入口の位置と、高砂やステージの位置を選ぶと、席の順番が①②③で出ます。名前の入力はいりません。そのまま印刷とPDFにできます。">
+<meta property="og:url" content="https://sakura-teachers.com/entaku/">
+<meta property="og:image" content="https://sakura-teachers.com/ogp.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5047272666003169" crossorigin="anonymous"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GCK29PTKBG"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GCK29PTKBG');
+</script>
+<title>【テスト】円卓の上座・下座｜入口の位置で席順が分かる早見表</title>
+<meta name="description" content="円卓の上座・下座がどこか、図で確かめられます。入口の位置と、高砂・ステージ・主賓席の位置を選ぶと、席の順番が①②③で出ます。結婚式・披露宴・宴会・懇親会・中華料理の円卓に。名前の入力はいらず、そのまま印刷とPDFにできます。会社や地域によって慣習が異なるため、一般的な目安としてお使いください。">
+<link rel="stylesheet" href="../style.css?v=100">
+<link rel="stylesheet" href="entaku.css?v=12">
+</head>
+<body>
+
+<header class="site-head">
+  <div class="wrap">
+    <a class="logo" href="../">🌸 さくら先生の座席表</a>
+    <nav>
+      <a href="../">トップ</a>
+      <a href="../seat/">座席表</a>
+      <a href="../seki/">席次表</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>円卓の上座・下座</h1>
+  <p class="catch">入口を動かすと、上座がその場で変わる</p>
+  <p class="notice-top">結婚式・披露宴・宴会・中華料理の円卓に。ここに出るのは<strong>一般的な目安</strong>です。会社や地域、お店によって慣習が異なります。</p>
+
+  <div class="e-two">
+    <div class="e-fig">
+      <p class="p-date" id="pDateOut"></p>
+      <p class="print-title" id="printTitle">円卓の席次</p>
+      <div id="venueWrap">
+        <svg id="venue" viewBox="0 0 720 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="会場ぜんたいの円卓の並び"></svg>
+      </div>
+      <p class="fig-note" id="venueNote"></p>
+    </div>
+
+    <div class="e-fig2">
+      <div id="figWrap">
+        <svg id="fig" viewBox="0 0 520 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="選んだ卓の中の席順"></svg>
+      </div>
+      <p class="fig-note" id="figNote"></p>
+      <p class="p-site" id="pSiteOut"></p>
+    </div>
+
+    <div class="e-set">
+    <section class="card noprint panel">
+      <h2>会場を決める</h2>
+
+      <div class="row" style="display:block">
+        <label>会場の形</label>
+        <div class="dirs" id="shapeDirs">
+          <button type="button" data-v="wide" class="on">横長</button>
+          <button type="button" data-v="square">正方形</button>
+          <button type="button" data-v="tall">縦長</button>
+        </div>
+      </div>
+
+      <div class="row tight" style="margin-top:14px">
+        <div><label for="tables">円卓の数</label>
+          <span class="ctl"><input id="tables" type="number" min="1" max="12" value="8"><span class="unit">卓</span></span></div>
+        <div><label for="per">選んだ卓の人数</label>
+          <span class="ctl"><input id="per" type="number" min="4" max="12" value="8"><span class="unit">人</span></span></div>
+        <div class="hint" style="align-self:flex-end;padding-bottom:6px">卓ごとに変えられます</div>
+      </div>
+
+      <div class="row" style="display:block;margin-top:14px">
+        <label for="mainSel">高砂・ステージなど</label>
+        <select id="mainSel">
+          <option value="高砂" selected>高砂</option>
+          <option value="ステージ">ステージ</option>
+          <option value="主賓席">主賓席</option>
+          <option value="free">自分で書く</option>
+          <option value="none">なし</option>
+        </select>
+        <p class="hint" id="mainHint"></p>
+
+        <div id="freeWrap" hidden style="margin-top:8px">
+          <label for="mainFree">呼び方を自分で書く</label>
+          <input id="mainFree" type="text" placeholder="ひな壇／来賓席" style="width:100%">
+        </div>
+      </div>
+
+      <div class="row" style="display:block;margin-top:14px">
+        <label>卓の位置</label>
+        <p class="hint">卓はドラッグで動かせます。番号は高砂からの近さで付け直されます。<button type="button" id="posReset" class="mini">並べ直す</button></p>
+      </div>
+
+      <div class="row" style="display:block;margin-top:14px">
+        <label>入口の位置</label>
+        <p class="hint">図の外側の実線（壁）を押すと、そこに入口が付きます。同じ場所をもう一度押すと消えます。何か所でも置けます。</p>
+      </div>
+
+      <div class="row" id="weddingWrap" style="display:block;margin-top:14px">
+        <label class="chk-inline"><input type="checkbox" id="wedding"> 結婚式として見る</label>
+        <p class="hint">高砂に向かって左が新郎、右が新婦のゲストという分け方を出します。</p>
+      </div>
+
+      <div class="row" style="display:block;margin-top:14px">
+        <label>番号を入れ替える</label>
+        <p class="hint">下の図の席を1つ押して、次にもう1つ押すと入れ替わります。<span id="swapNote"></span></p>
+        <button type="button" id="swapReset" class="mini" hidden>入れ替えを元に戻す</button>
+      </div>
+    </section>
+    </div>
+
+    <div class="e-print">
+      <section class="card noprint">
+        <h2>印刷・PDF</h2>
+        <div class="chk-row">
+          <label class="chk-inline"><input type="checkbox" id="pDate" checked> 印刷した日を入れる</label>
+          <label class="chk-inline"><input type="checkbox" id="pName" checked> サイト名を入れる</label>
+        </div>
+        <div class="name-row">
+          <label class="chk-inline"><input type="checkbox" id="pRoom" checked></label>
+          <input id="roomName" type="text" value="円卓の席次" maxlength="24">
+        </div>
+        <p class="hint">紙のいちばん上に出る見出しです。自由に書けます。</p>
+        <p style="margin:14px 0 0"><button id="doPrint" type="button">🖨 印刷（PDF作成）</button></p>
+      </section>
+    </div>
+  </div>
+
+  <section class="read">
+    <h2>上座の決まり方</h2>
+    <p><strong>入口から最も遠い席が上座です。</strong>入口の近くは人の出入りがあって落ち着かないため、お客様や目上の方には奥の席をすすめる、という考え方です。</p>
+    <p><strong>高砂やステージがあるときは、そちらに近い席が上座になります。</strong>結婚式の披露宴が分かりやすい例で、新郎新婦に近いほど上の席として扱われます。</p>
+    <p>上座が決まったら、そこから外へ交互に並びます。<strong>①の左どなりが②、右どなりが③</strong>、そのまた左が④、右が⑤、という順です。「左上右下（さじょううげ）」という考え方によるもので、図で言えば、上座を12時とすると11時が②、1時が③になります。</p>
+    <p>入口にいちばん近い席が下座です。ここには、もてなす側（幹事や主催者）が座ります。料理の取り分けやお店とのやりとりがしやすい席だからです。</p>
+
+    <h2>よくある質問</h2>
+    <dl class="faq">
+      <dt>会社の慣習と違うのですが</dt>
+      <dd>そのときは<strong>会社の慣習を優先してください。</strong>ここに出るのは一般的な目安です。地域やお店によっても違いますし、その場の年長の方の判断が優先されます。</dd>
+
+      <dt>入口が2つある会場です</dt>
+      <dd>主に使うほうの入口で考えてください。ホテルの宴会場のように出入口が複数ある場合は、<strong>お客様が入ってくる側</strong>を入口として選ぶと、実際の感覚に近くなります。</dd>
+
+      <dt>回転テーブルの料理は誰から取りますか</dt>
+      <dd>上座の方から取り、<strong>時計まわり</strong>に回していくのが一般的です。</dd>
+
+      <dt>名前を入れた席次表は作れませんか</dt>
+      <dd>このページは「どこが上座か」を見るためのものなので、名前は扱いません。名前を入れた席次表は<a href="../seki/">席次表メーカー</a>で作れます。</dd>
+
+      <dt>スマホでも使えますか</dt>
+      <dd>使えます。図はそのまま印刷・PDFにできます。</dd>
+    </dl>
+
+    <h2>こんなときに</h2>
+    <ul>
+      <li>結婚式・披露宴で、円卓の席次を決めるとき</li>
+      <li>宴会・懇親会で、上座に誰を案内するか迷ったとき</li>
+      <li>中華料理店の円卓で、席順を確かめたいとき</li>
+      <li>会社の会食で、取引先をどこに案内するか考えるとき</li>
+      <li>幹事として、会場の下見で席の並びを確認するとき</li>
+    </ul>
+
+    <h2>ほかのツール</h2>
+    <ul class="tools">
+      <li><a href="../seki/"><b>席次表メーカー</b><small>名前を入れて、会議・研修・大学の席次表を作る</small></a></li>
+      <li><a href="../seat/"><b>教室の座席表メーカー</b><small>名簿を貼るだけで席替え</small></a></li>
+    </ul>
+
+    <h2>このページについて</h2>
+    <p>入力した内容は、使っている機器の中だけで処理しています。外に送っていないので、個人情報が漏れることも、AIの学習に使われることもありません。登録もインストールもいりません。すべて無料です。</p>
+  </section>
+</main>
+
+<footer class="noprint">
+  <div class="wrap"><span class="fnav"><a href="../contact/">お問い合わせ</a>　<a href="../privacy/">プライバシーポリシー</a></span>
+    <span class="copy">© 2026 さくら先生の座席表</span>
+  </div>
+</footer>
+
+<script src="entaku.js?v=14"></script>
+</body>
+</html>
