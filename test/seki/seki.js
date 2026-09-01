@@ -235,6 +235,12 @@
     refreshSeatInfo();
     document.querySelectorAll('select.nameSel').forEach(fillNames);
   }
+  function clampNum(v, dflt) {
+    var n = parseInt(v, 10);
+    if (!n || n < 2) n = dflt;
+    if (n > 8) n = 8;
+    return String(n);
+  }
   function refreshSeatInfo() {
     var c = +$('cols').value, r = +$('rows').value;
     state.cols = c; state.rows = r;
@@ -1151,7 +1157,10 @@
   }
 
   // 席次表は1枚出して終わり。いま見えているものをそのまま刷る
+  var printScrollY = 0;
   function doPrint() {
+    // 印刷の画面を閉じたあと、ページの先頭に飛ばない
+    printScrollY = window.scrollY || window.pageYOffset || 0;
     setPaper();
     // 🔴 紙だけ登壇者の向きにする（画面は変えない）。2026-08-31 本人
     // ⚠ 紙が終わったら必ず戻す（afterprint）。戻さないと画面が回ったままになる
@@ -1161,11 +1170,28 @@
       state.board = 'bottom';
       drawSheet();
     }
+    // 🔴 画面と同じ絵を1枚作って、それだけを印刷する（2026-09-01。座席表と同じ）。
+    //   ⚠<img> は使わない。読み込みを待つと「指で押した直後」の資格が切れて、
+    //     iPadが印刷を受け付けない。canvas をそのまま置けば待たずに済む
+    if (state.seats) {
+      try {
+        var wrap = $('printImgWrap');
+        var wideP = $('paper').value === 'landscape';
+        var cv = padToAspect(buildSheetCanvas(2), wideP ? 1.72 : 0.78);
+        wrap.innerHTML = '';
+        wrap.appendChild(cv);
+        document.body.classList.add('print-img');
+      } catch (e) { }
+    }
     window.print();
   }
   var printKeepBoard = null;
   window.addEventListener('afterprint', function () {
+    document.body.classList.remove('print-img');
+    if ($('printImgWrap')) $('printImgWrap').innerHTML = '';
     if (printKeepBoard) { state.board = printKeepBoard; printKeepBoard = null; drawSheet(); }
+    setTimeout(function () { window.scrollTo(0, printScrollY); }, 0);
+    setTimeout(function () { window.scrollTo(0, printScrollY); }, 250);
   });
 
   // ---- PNGで保存（自分で描くので外部の部品は使わない）----
@@ -1178,7 +1204,10 @@
     x.closePath();
   }
 
-  function doPng() {
+  // 🔴 席次表を1枚の絵にする（2026-09-01。座席表と同じ作り）。
+  //   k を大きくすると解像度が上がる（描き方は同じ。ものさしを拡大するだけ）
+  function buildSheetCanvas(k) {
+    k = k || 1;
     var o = state.opt, cols = o.cols, rows = o.rows;
     var icon = $('deco').value || '';
     var credit = $('showCredit').checked;
@@ -1186,8 +1215,9 @@
     var W = pad * 2 + cols * cw;
     var H = pad * 2 + head + boardH + rows * ch + (credit ? 28 : 0);
     var cv = document.createElement('canvas');
-    cv.width = W; cv.height = H;
+    cv.width = Math.round(W * k); cv.height = Math.round(H * k);
     var x = cv.getContext('2d');
+    x.scale(k, k);
     x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
 
     x.font = '18px sans-serif';
@@ -1290,6 +1320,22 @@
       x.fillText('SAMPLE', 0, 0);
       x.restore();
     }
+    return cv;
+  }
+  // 🔴 絵を紙の形に合わせる。⚠iPadは印刷のとき幅だけを見るので、
+  //   絵のほうを紙より少し横長にしておく＝幅で合わせると縦が余る（2026-09-01）
+  function padToAspect(src, ratio) {
+    var w = src.width, h = src.height, W = w, H = h;
+    if (w / h < ratio) W = Math.round(h * ratio); else H = Math.round(w / ratio);
+    var cv = document.createElement('canvas');
+    cv.width = W; cv.height = H;
+    var x = cv.getContext('2d');
+    x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
+    x.drawImage(src, Math.round((W - w) / 2), 0);
+    return cv;
+  }
+  function doPng() {
+    var cv = buildSheetCanvas(1);
     var a = document.createElement('a');
     a.href = cv.toDataURL('image/png');
     a.download = (sheetTitle().replace(/\s/g, '') || '席次表') + '.png';
@@ -1505,7 +1551,7 @@
       $('names').value = d.names || '';
       $('clsFree').value = d.clsFree || '';
       if (d.colRoles && d.colRoles.length) state.colRoles = d.colRoles;
-      $('cols').value = d.cols || 6; $('rows').value = d.rows || 5;
+      $('cols').value = clampNum(d.cols, 6); $('rows').value = clampNum(d.rows, 5);
       $('board').value = d.board || 'top';
       if (d.frontWord !== undefined) $('frontWord').value = d.frontWord;
       if (d.paper) $('paper').value = d.paper;

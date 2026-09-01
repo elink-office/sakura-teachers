@@ -234,3 +234,18 @@ body.screen #prevSheet{ display: none !important; }
 .tip-body .tip-h{font-weight:bold;margin:10px 0 2px}
 .tip-body ul{margin:0 0 6px;padding-left:1.3em}
 .tip-body li{margin-bottom:3px}
+
+/* 🔴 印刷まわり（2026-09-01。座席表と同じ） */
+.print-line{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin:0}
+.print-line label{margin:0;font-weight:bold;white-space:nowrap}
+.print-line select{margin:0}
+.tips-sm > summary{font-size:.9rem;font-weight:normal}
+.tips-sm .body p{font-size:.88rem;margin:6px 0}
+#printImgWrap{display:none}
+@media print{
+  body.print-img > *:not(#printImgWrap){display:none !important}
+  body.print-img #printImgWrap{display:block !important;text-align:center;background:#fff}
+  body.print-img{margin:0;padding:0}
+  /* ⚠絵のほうを紙の形に合わせてあるので、ここは幅に合わせるだけでよい */
+  body.print-img #printImgWrap canvas{display:block;width:100%;max-width:100%;height:auto;margin:0}
+}

@@ -85,10 +85,13 @@ body.screen .sheet.masked .grid{display:grid}
 .tip-body .tip-h{font-weight:bold;margin:10px 0 2px}
 .tip-body ul{margin:0 0 6px;padding-left:1.3em}
 .tip-body li{margin-bottom:3px}
-.print-row{align-items:flex-end}
-/* ⚠2つのボタンは横に並べたまま。折り返さない */
-.print-btns{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
-.print-btns label{width:100%}
+/* 用紙の向きと2つのボタンを1行に（2026-09-01 本人）。狭いときだけ折り返す */
+.print-line{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin:0}
+.print-line label{margin:0;font-weight:bold;white-space:nowrap}
+.print-line select{margin:0}
+/* タブレット・スマホの案内は小さめに */
+.tips-sm > summary{font-size:.9rem;font-weight:normal}
+.tips-sm .body p{font-size:.88rem;margin:6px 0}
 .btn-row{margin:8px 0 6px}
 .btn-row .mini{margin:0 8px 6px 0}
 .pick{max-width:24em}
@@ -108,7 +111,7 @@ body.screen .seat.dup .nm{text-decoration:none}
 </style>
 </head>
 <body>
-<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/01 12:03</div>
+<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/01 12:27</div>
 
 <header class="site-head noprint">
   <div class="wrap">
@@ -454,16 +457,13 @@ body.screen .seat.dup .nm{text-decoration:none}
       <p style="margin:0 0 10px">
         <label class="chk-inline"><input type="checkbox" id="printTeacher" checked> 印刷（PDF）は先生の向きで出す</label>
       </p>
-      <div class="row tight print-row">
-        <div><label for="paper">用紙の向き</label>
-          <select id="paper"><option value="landscape">横</option><option value="portrait">縦</option></select>
-        </div>
-        <div class="print-btns"><label>&nbsp;</label>
-          <button id="doPrint" type="button">印刷（PDF作成）</button>
-          <button id="doPng" type="button">画像で保存（PNG）</button>
-        </div>
+      <div class="print-line">
+        <label for="paper">用紙の向き</label>
+        <select id="paper" class="narrow"><option value="landscape">横</option><option value="portrait">縦</option></select>
+        <button id="doPrint" type="button">印刷（PDF作成）</button>
+        <button id="doPng" type="button">画像で保存（PNG）</button>
       </div>
-      <details class="opt sub noprint" style="margin-top:14px">
+      <details class="opt sub noprint tips-sm" style="margin-top:14px">
         <summary>タブレット・スマホの方へ</summary>
         <div class="body">
           <p><strong>「画像で保存（PNG）」がおすすめです。</strong></p>
@@ -642,7 +642,7 @@ body.screen .seat.dup .nm{text-decoration:none}
 </footer>
 
 <script src="../seating.js?v=54"></script>
-<script src="seat.js?v=121"></script>
+<script src="seat.js?v=122"></script>
 <!-- 🔴 印刷用の1枚絵の置き場（2026-09-01）。画面には出ない。
      ⚠**body の直下に置くこと。**中に入れると、印刷のときに親ごと隠されて白紙になる -->
 <div id="printImgWrap"></div>
