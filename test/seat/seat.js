@@ -1182,7 +1182,19 @@
   //     PCでも画面を触れる機種は同じだったので、「PCか否か」ではなく
   //     「マウスか指か」で分ける（pointerType で分かる）
   var drag = null;
-  var HOLD_MS = 500;                // これだけ押し続けたら持ち上がる
+  var HOLD_MS = 350;                // これだけ押し続けたら持ち上がる（2026-09-03 本人「もう少し早く」）
+
+  // 🔴 持ち上がったあとは、ページのスクロールを止める（2026-09-03 本人）。
+  //   本人「縦に動かそうとするとスクロールも一緒に動いてしまう」。
+  //   ⚠ touch-action:manipulation は「スクロールしてよい」なので、指を縦に動かすと
+  //     席とページが両方動く。pointermove の preventDefault だけでは止まらない。
+  //   ⚠ touchmove を **passive:false** で受けて打ち消すのが確実。
+  //     長押しのあいだ指は止まっているので、この時点ではスクロールがまだ始まっておらず、打ち消せる
+  function blockScroll(e) { if (e.cancelable) e.preventDefault(); }
+  function scrollLock(on) {
+    if (on) document.addEventListener('touchmove', blockScroll, { passive: false });
+    else document.removeEventListener('touchmove', blockScroll, { passive: false });
+  }
 
   function cellAt(x, y) {
     var el = document.elementFromPoint(x, y);
@@ -1223,6 +1235,7 @@
       drag.timer = null;
       drag.ready = true;
       try { drag.el.setPointerCapture(drag.id); } catch (err) { }
+      scrollLock(true);              // ここから先はページを動かさない
       lift(drag.x0, drag.y0);
       // 持ち上がった合図。⚠対応していない機器では何も起きない（それでよい。浮いて見える）
       try { if (navigator.vibrate) navigator.vibrate(12); } catch (err) { }
@@ -1233,6 +1246,7 @@
   function dropDrag() {
     if (!drag) return;
     if (drag.timer) clearTimeout(drag.timer);
+    scrollLock(false);
     var d = drag.el;
     d.removeEventListener('pointermove', dragMove);
     d.removeEventListener('pointerup', dragEnd);
@@ -1281,6 +1295,7 @@
   function dragEnd() {
     if (!drag) return;
     if (drag.timer) { clearTimeout(drag.timer); drag.timer = null; }
+    scrollLock(false);
     var d = drag.el;
     d.removeEventListener('pointermove', dragMove);
     d.removeEventListener('pointerup', dragEnd);

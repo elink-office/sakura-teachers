@@ -377,12 +377,15 @@ select.ph option{color:var(--ink)}
    ⚠ ⓘ は1文字ぶんの記号なので細くて小さい。丸はこちらで描いて、押せる大きさにする */
 /* ⚠大きさは「①などの番号の丸（.step＝約22px）より小さく、もとのⓘより一回り大きく」
    （2026-09-03 本人）。＝16px前後におさめる */
+/* ⚠ ？を丸のまんなかに置くため、line-height で寄せずに flex で中央にする。
+   大きさは 14px 固定（アイコンなので em で伸び縮みさせない）。2026-09-03 本人の指定 */
 .tip-btn::before{
-  content:"?";display:inline-block;
-  box-sizing:border-box;width:1.35em;height:1.35em;line-height:1.12em;
-  border:1.4px solid currentColor;border-radius:50%;
-  font-family:Arial,Helvetica,sans-serif;font-weight:bold;font-size:.95em;
-  text-align:center;
+  content:"?";
+  display:inline-flex;align-items:center;justify-content:center;
+  box-sizing:border-box;width:14px;height:14px;
+  border:1.3px solid currentColor;border-radius:50%;
+  font-family:Arial,Helvetica,sans-serif;font-weight:bold;font-size:10px;line-height:1;
+  vertical-align:middle;
 }
 .tip-btn:hover::before,.tip-btn[aria-expanded="true"]::before{background:var(--pink-pale)}
 .tip-btn::after{content:"";position:absolute;inset:-8px}  /* 見えないが押せる範囲 */

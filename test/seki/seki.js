@@ -1079,7 +1079,16 @@
   //     style.css の .seat も touch-action:manipulation に変えてあるので、
   //     こちらを直さないと指でまったく動かせなくなる（セットで直すこと）
   var drag = null;
-  var HOLD_MS = 500;                // これだけ押し続けたら持ち上がる
+  var HOLD_MS = 350;                // これだけ押し続けたら持ち上がる（2026-09-03 本人「もう少し早く」）
+
+  // 🔴 持ち上がったあとは、ページのスクロールを止める（座席表と同じ直し・2026-09-03）。
+  //   ⚠ touch-action:manipulation は「スクロールしてよい」なので、指を縦に動かすと
+  //     席とページが両方動く。touchmove を passive:false で受けて打ち消す
+  function blockScroll(e) { if (e.cancelable) e.preventDefault(); }
+  function scrollLock(on) {
+    if (on) document.addEventListener('touchmove', blockScroll, { passive: false });
+    else document.removeEventListener('touchmove', blockScroll, { passive: false });
+  }
 
   function cellAt(x, y) {
     var el = document.elementFromPoint(x, y);
@@ -1120,6 +1129,7 @@
       drag.timer = null;
       drag.ready = true;
       try { drag.el.setPointerCapture(drag.id); } catch (err) { }
+      scrollLock(true);              // ここから先はページを動かさない
       lift(drag.x0, drag.y0);
       try { if (navigator.vibrate) navigator.vibrate(12); } catch (err) { }
     }, HOLD_MS);
@@ -1129,6 +1139,7 @@
   function dropDrag() {
     if (!drag) return;
     if (drag.timer) clearTimeout(drag.timer);
+    scrollLock(false);
     var d = drag.el;
     d.removeEventListener('pointermove', dragMove);
     d.removeEventListener('pointerup', dragEnd);
@@ -1177,6 +1188,7 @@
   function dragEnd() {
     if (!drag) return;
     if (drag.timer) { clearTimeout(drag.timer); drag.timer = null; }
+    scrollLock(false);
     var d = drag.el;
     d.removeEventListener('pointermove', dragMove);
     d.removeEventListener('pointerup', dragEnd);
