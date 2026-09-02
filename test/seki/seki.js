@@ -1441,7 +1441,8 @@
   // ============================================================
   var KEYC = 'sakura-teachers-rosters-v1';
   var KEYOLD = 'sakura-seat-classes-v1';
-  var MAXC = 10;
+  // 🔴 10 → 20（2026-09-01）。⚠置き場は seat / seki / group で共通。上限は3つ同時に直す
+  var MAXC = 20;
 
   function loadStore() {
     try {

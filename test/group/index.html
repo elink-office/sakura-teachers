@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta name="robots" content="noindex,nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="さくら先生の座席表">
+<meta property="og:title" content="理科室の座席表メーカー｜図工室・家庭科室の班の席をA4の1枚に">
+<meta property="og:description" content="理科室・図工室・家庭科室の座席表を無料で作成。名簿を貼るだけで、実験台ごとの班と、台のどこに座るかまで決まります。1台4〜6人、台は2列でも3列でも。印刷とPDFはA4の1枚に収まります。">
+<meta property="og:url" content="https://sakura-teachers.com/group/">
+<meta property="og:image" content="https://sakura-teachers.com/ogp.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5047272666003169" crossorigin="anonymous"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GCK29PTKBG"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GCK29PTKBG');
+</script>
+<title>【テスト】理科室の座席表メーカー｜図工室・家庭科室の班の席をA4の1枚に｜さくら先生の座席表</title>
+<meta name="description" content="理科室・図工室・家庭科室の座席表を無料で作成。名簿を貼るだけで、実験台ごとの班分けと、台のどこに座るかまで決まります。1台4〜6人、台は2列でも3列でも。男女を均す・この2人は離す、も指定できます。名簿は20クラスまで残せるので、専科の先生でも貼り直しが要りません。印刷とPDFはA4の1枚に収まります。">
+<link rel="stylesheet" href="../style.css?v=101">
+<link rel="stylesheet" href="group.css?v=1">
+</head>
+<body>
+<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/02 09:45</div>
+
+<header class="site-head noprint">
+  <div class="wrap">
+    <a class="logo" href="../">🌸 さくら先生の座席表</a>
+    <nav>
+      <a href="../">トップ</a>
+      <a href="../seat/">座席表</a>
+      <a href="../seki/">席次表</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>理科室・図工室の座席表メーカー</h1>
+  <p class="catch">班も、台のどこに座るかも、A4の1枚に</p>
+  <p class="lead">名簿を貼るだけ。理科室・図工室・家庭科室のように、大きな台をかこんで座る教室のための座席表です。名簿は20クラスまで残せるので、いくつも受け持つ先生でも貼り直しが要りません。使った名簿は外に送っていないので、<strong>AIの学習に使われることもありません</strong>。</p>
+
+  <section class="card noprint">
+    <h2><span class="step">1</span>名簿を入力&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h2>
+    <div class="tip-body" hidden>
+      <ul>
+        <li><strong>1行に1人</strong>です。Excelからそのまま貼れます。番号や性別の列がいっしょでもかまいません。</li>
+        <li>名前の前か後ろに ★ を付けると、その子を<strong>班長</strong>として1つの班に1人ずつ散らします。</li>
+        <li>男女の列（男／女）があれば読み取ります。無いときは③で1人ずつ指定できます。</li>
+      </ul>
+    </div>
+
+    <div class="row tight" id="quickLoad" hidden style="margin-bottom:12px">
+      <div><label for="clsSel2">保存した名簿</label>
+        <select id="clsSel2"><option value="">－</option></select></div>
+      <div><label>&nbsp;</label>
+        <button class="mini" id="clsLoad2" type="button">この名簿を自動入力</button></div>
+    </div>
+
+    <textarea id="names" placeholder="ここをクリック → Excelからコピペ（手入力可）&#10;&#10;やまだ たろう★（リーダー格には★）&#10;さとう はなこ&#10;すずき いちろう&#10;&#10;空のままだとサンプルが出ます"></textarea>
+
+    <div class="row tight" style="margin-top:10px">
+      <div><label for="nameMode">名前の見せ方</label>
+        <select id="nameMode">
+          <option value="wrap">姓と名で改行</option>
+          <option value="one">1行にならべる</option>
+          <option value="sei">姓だけ</option>
+        </select></div>
+      <div><label>人数</label><div class="bignum" id="count">0人</div></div>
+    </div>
+
+    <div class="row tight" style="margin-top:10px">
+      <div><label for="grade">学年</label>
+        <select id="grade" class="narrow"><option value="">－</option><option value="e1">1年</option><option value="e2">2年</option><option value="e3">3年</option><option value="e4">4年</option><option value="e5">5年</option><option value="e6">6年</option></select></div>
+      <div><label for="kumi">組</label>
+        <select id="kumi" class="narrow"><option value="">－</option><option value="1">1組</option><option value="2">2組</option><option value="3">3組</option><option value="4">4組</option><option value="5">5組</option><option value="6">6組</option><option value="7">7組</option><option value="8">8組</option><option value="9">9組</option><option value="10">10組</option><option value="11">11組</option><option value="12">12組</option><option value="A">A組</option><option value="B">B組</option><option value="C">C組</option><option value="D">D組</option><option value="E">E組</option><option value="F">F組</option><option value="G">G組</option><option value="H">H組</option><option value="I">I組</option><option value="J">J組</option><option value="K">K組</option><option value="L">L組</option></select></div>
+      <div class="grow"><label for="clsFree">自由に書く（組の代わり）</label>
+        <input id="clsFree" type="text" placeholder="ひまわり組" style="width:100%"></div>
+    </div>
+  </section>
+
+  <section class="card noprint">
+    <h2><span class="step">2</span>部屋の形&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h2>
+    <div class="tip-body" hidden>
+      <ul>
+        <li>台は<strong>短い辺が黒板を向いている</strong>形で描きます。座るのは長い辺の左右に2人ずつ。5人めからは、黒板から遠いほうの短い辺に回り込みます。</li>
+        <li>「台の数」を自動にすると、人数から台の数を決めます。5人ずつに分けて、<strong>あまりが出た台だけ6人</strong>になります。</li>
+        <li>部屋にある台の数が決まっているときは、その数を選んでください。人数を均して分けます。</li>
+      </ul>
+    </div>
+
+    <div class="row tight">
+      <div><label for="tcols">台のならび</label>
+        <select id="tcols" class="narrow"><option value="2" selected>2列</option><option value="3">3列</option></select></div>
+      <div><label for="tnum">台の数</label>
+        <select id="tnum" class="narrow"><option value="auto" selected>自動</option><option value="2">2台</option><option value="3">3台</option><option value="4">4台</option><option value="5">5台</option><option value="6">6台</option><option value="7">7台</option><option value="8">8台</option><option value="9">9台</option></select></div>
+      <div><label for="gsize">1台の人数</label>
+        <span class="ctl"><select id="gsize" class="narrow"><option value="4">4</option><option value="5" selected>5</option><option value="6">6</option></select><span class="unit">人ずつ</span></span></div>
+      <div><label>できる班</label><div class="bignum" id="tinfo">－</div></div>
+    </div>
+    <p class="hint" id="tnote"></p>
+
+    <div class="row tight" style="margin-top:10px">
+      <div><label for="board">黒板の位置</label>
+        <select id="board"><option value="top" selected>上（子どもに見せる向き）</option><option value="bottom">下（先生の向き）</option></select></div>
+      <div><label for="order">分け方</label>
+        <select id="order"><option value="random" selected>ランダム</option><option value="number">名簿の順</option></select></div>
+      <div class="grow"><label for="room">部屋の名前</label>
+        <input id="room" type="text" list="roomList" placeholder="理科室" style="width:100%">
+        <datalist id="roomList">
+          <option value="理科室"></option><option value="第1理科室"></option><option value="第2理科室"></option>
+          <option value="図工室"></option><option value="家庭科室"></option><option value="音楽室"></option>
+          <option value="パソコン室"></option><option value="図書室"></option>
+        </datalist></div>
+    </div>
+
+    <details class="opt sub noprint" id="condBlock">
+      <summary>詳しい条件（離す・同じ班にする）</summary>
+      <div class="body">
+        <h3>離す組み合わせ</h3>
+        <p class="hint">同じ台にしない組み合わせです。</p>
+        <div id="sepList"></div>
+        <button class="mini" id="addSep" type="button">＋ 組を追加</button>
+
+        <h3 style="margin-top:16px">同じ班にする組み合わせ</h3>
+        <p class="hint">同じ台にする組み合わせです。</p>
+        <div id="adjList"></div>
+        <button class="mini" id="addAdj" type="button">＋ 組を追加</button>
+      </div>
+    </details>
+
+    <p style="margin:16px 0 0"><button class="primary" id="go" type="button">班を作る</button></p>
+  </section>
+
+  <div id="msg"></div>
+
+  <div id="result" hidden>
+    <div class="row noprint" style="margin:0 0 10px">
+      <div class="plan-tabs" id="tabs"></div>
+      <button id="again" type="button">もう一度 作り直す</button>
+    </div>
+    <p class="hint drag-note noprint">名前をつまんで動かすと、席を入れかえられます。</p>
+
+    <div class="sheet" id="sheet">
+      <div class="sheet-head">
+        <span id="decoLeft" class="deco-mark"></span>
+        <div class="sheet-title" id="shTitle">座席表</div>
+        <div class="sheet-date" id="shDate"></div>
+      </div>
+      <div class="board" id="boardTop">黒 板</div>
+      <div class="room" id="roomBox"></div>
+      <div class="board" id="boardBottom" hidden>黒 板</div>
+      <div class="sheet-credit" id="credit">さくら先生の座席表　sakura-teachers.com</div>
+    </div>
+
+    <div id="vio" class="noprint"></div>
+
+    <details class="opt noprint" id="sexCard">
+      <summary><span class="step">3</span>男女&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></summary>
+      <div class="body">
+        <div class="tip-body" hidden>
+          <p>名簿に男女の列があれば自動で読み取ります。無いときは、下の名前を押すと <strong>男 → 女 → 指定なし</strong> と変わります。</p>
+          <p>色は画面のためのものです。紙とPDFには出ません。</p>
+        </div>
+        <p style="margin:0 0 10px">
+          <label class="chk-inline"><input type="checkbox" id="sexBal" checked> 男女が片寄らないように分ける</label>
+        </p>
+        <div class="row tight">
+          <div><label for="colM">男の色</label><select id="colM"></select></div>
+          <div><label for="colF">女の色</label><select id="colF"></select></div>
+          <div><label>&nbsp;</label>
+            <button class="mini" id="sexClear" type="button">男女の指定を全部消す</button></div>
+        </div>
+        <p style="margin-top:10px">
+          <label class="chk-inline"><input type="checkbox" id="sexPrint" checked> 画面で男女の色を分ける</label>
+        </p>
+        <div id="sexList" class="chips"></div>
+      </div>
+    </details>
+
+    <details class="opt noprint" id="printCard">
+      <summary><span class="step">4</span>見た目&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></summary>
+      <div class="body">
+        <div class="tip-body" hidden>
+          <p><strong>丸文字はWindowsとiPadだけ</strong>です。ほかの機器ではゴシック体になりますが、崩れません。</p>
+          <p>班の色を「なし」にすると番号だけになります。白黒で刷るときに向いています。</p>
+        </div>
+        <div class="row tight">
+          <div><label for="font">書体</label>
+            <select id="font">
+              <option value="gothic" selected>ゴシック体</option>
+              <option value="maru">丸文字（Windows・iPadのみ）</option>
+              <option value="mincho">明朝体</option>
+            </select></div>
+          <div><label for="glook">班の色</label>
+            <select id="glook">
+              <option value="both" selected>枠線＋うすい色</option>
+              <option value="edge">枠線だけ</option>
+              <option value="none">色なし（番号だけ）</option>
+            </select></div>
+          <div><label for="deco">アイコン</label>
+            <select id="deco">
+              <option value="🌸">🌸</option>
+              <option value="🔬">🔬</option>
+              <option value="🎨">🎨</option>
+              <option value="🍳">🍳</option>
+              <option value="⭐">⭐</option>
+              <option value="">なし</option>
+            </select></div>
+          <div class="grow"><label for="dt">日付・自由記入</label>
+            <input id="dt" type="text" placeholder="2学期 / ものの燃え方 など" style="width:100%"></div>
+        </div>
+        <p style="margin-top:10px">
+          <label class="chk-inline"><input type="checkbox" id="dtOff"> 日付・自由記入を入れない</label>
+          <label class="chk-inline gap"><input type="checkbox" id="gnum" checked> 班の番号を出す</label>
+          <label class="chk-inline gap"><input type="checkbox" id="leadMark"> 班長に★を出す</label>
+          <label class="chk-inline gap"><input type="checkbox" id="showCredit" checked> 右下にサイト名を入れる</label>
+        </p>
+      </div>
+    </details>
+
+    <section class="card noprint">
+      <h2><span class="step">5</span>印刷・画像で保存&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h2>
+      <div class="tip-body" hidden>
+        <p><strong>PDFにするとき</strong>は、印刷画面で「送信先」（またはプリンター）を PDFに保存 に変えてください。</p>
+        <p>台が3列のときは、用紙を横にすると大きく出ます。2列のときは縦のほうが大きく出ます。</p>
+        <p>「先生の向きで出す」にすると、紙だけ教卓から見た向き（180度まわした形）になります。画面はそのままです。</p>
+      </div>
+      <p style="margin:0 0 10px">
+        <label class="chk-inline"><input type="checkbox" id="printTeacher" checked> 印刷（PDF）は先生の向きで出す</label>
+      </p>
+      <div class="print-line">
+        <label for="paper">用紙の向き</label>
+        <select id="paper" class="narrow"><option value="portrait" selected>縦</option><option value="landscape">横</option></select>
+        <button id="doPrint" type="button">印刷（PDF作成）</button>
+        <button id="doPng" type="button">画像で保存（PNG）</button>
+      </div>
+      <p class="hint" id="paperNote"></p>
+    </section>
+  </div>
+
+  <section class="card noprint">
+    <h2><span class="step">6</span>画面の保存&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h2>
+    <div class="tip-body" hidden>
+      <ul>
+        <li><strong>いま開いている画面をそのまま残します。</strong>名簿・部屋の形・条件・男女の指定・座席まで、次に開いたときそのまま出ます。</li>
+        <li>残るのは1つだけです。いくつも残したいときは⑦を使ってください。</li>
+        <li>残るのは使ってる機器のブラウザの中だけです。どこにも送信されません。</li>
+      </ul>
+    </div>
+    <label style="font-weight:normal">
+      <input type="checkbox" id="save"> この機器に画面を保存する
+    </label>
+    <p class="hint">チェックを入れると次回もこのまま表示されます。外すと次回は最初からの設定になります。サーバーには送信されません。</p>
+    <p><span class="saving" id="savingLabel"></span></p>
+  </section>
+
+  <div id="msg2" class="noprint"></div>
+
+  <section class="card noprint">
+    <h2><span class="step">7</span>保存した名簿の利用&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h2>
+    <div class="tip-body" hidden>
+      <ul>
+        <li><strong>名前を付けて、いくつも保存できます。</strong>ボタンを押したときだけ増えます。</li>
+        <li>残るのは使ってる機器のブラウザの中だけです。どこにも送信されません。</li>
+      </ul>
+      <p class="tip-h">座席表・席次表と共通です</p>
+      <ul>
+        <li><strong>ほかのツールで保存した名簿も、ここに出ます。</strong>逆もできます。同じ機器なら、名簿を貼り直す必要はありません。</li>
+        <li>名簿は共通ですが、部屋の形や班の設定は<strong>ツールごと</strong>に覚えます。混ざることはありません。</li>
+      </ul>
+    </div>
+
+    <p class="safe">🔒 <strong>使ってる機器の中だけで完結します。</strong>保存したものはネット上に流れません。</p>
+
+    <div class="cls-box">
+      <h3>名簿に名前を付けて保存（<span id="clsCount">0／20件</span>）</h3>
+      <p class="hint">名簿・部屋の形・条件・男女の指定を、まとめて残すときに使います。</p>
+      <p class="btn-row">
+        <button class="mini" id="clsNew" type="button">新しく保存</button>
+        <button class="mini" id="clsSave" type="button">上書き</button>
+        <button class="mini" id="clsDel" type="button">削除</button>
+      </p>
+      <div class="pick"><label for="clsSel">保存した名簿</label>
+        <select id="clsSel"><option value="">－</option></select></div>
+      <p class="hint" style="margin-top:14px">⚠ <strong>共用の機器で使ったときは、使い終わったら下の「削除」を押してください。</strong></p>
+    </div>
+
+    <div class="del-box">
+      <h3>削除</h3>
+      <p class="hint">ボタンを押すと、この機器から名簿が消えます。<strong>もとには戻せません。</strong>座席表メーカー・席次表メーカーからも消えます。</p>
+      <p><button class="mini" id="clsClearAll" type="button">名簿の全削除</button></p>
+    </div>
+  </section>
+
+  <section class="read">
+    <h2>使い方</h2>
+    <ol>
+      <li><strong>名簿をExcelからコピーして貼り付けます</strong>（1行に1人）。手で打ってもかまいません。</li>
+      <li>台のならび（2列か3列）と、1台の人数を選びます。台の数は人数から自動で決まります。</li>
+      <li>「班を作る」を押すと<strong>3つの案</strong>が出るので、見比べて選びます。</li>
+      <li>気になるところは<strong>つまんで入れかえ</strong>られます。マウスでも指でも同じように動きます。</li>
+      <li>印刷かPDFで、A4の1枚に出します。</li>
+    </ol>
+
+    <h2>できること</h2>
+    <ul class="can">
+      <li><b>班分けと座席をいっぺんに</b><small>誰と誰が同じ台か、だけでなく、台のどこに座るかまで決まります</small></li>
+      <li><b>1台4〜6人</b><small>5人ずつに分けて、あまりが出た台だけ6人になります。5人に足りないときだけ4人の台ができます</small></li>
+      <li><b>男女を均す</b><small>ひとつの台に男女が片寄らないように分けます</small></li>
+      <li><b>離す・同じ班にする</b><small>「この2人は同じ台にしない」を入れたまま分けられます</small></li>
+      <li><b>印刷・PDF</b><small>A4の1枚に収まります。台の絵のまま出るので、そのまま貼り出せます</small></li>
+    </ul>
+
+    <h2>よくある質問</h2>
+    <dl>
+      <dt>ネットにつながっているのに、本当に外に出ないのですか？</dt>
+      <dd><strong>普段お使いの機器で、名簿を開くのと同じです。</strong>ネットにつながっていても、このページは名簿を受け取っていません。ブラウザの中だけで処理して、そのまま印刷やPDFにしています。だから、外に晒されることも、漏れることも、AIの学習に使われることもありません。<strong>いつもの仕事と同じように、安心して使えます。</strong></dd>
+      <dt>理科室の座席表を作りたい</dt>
+      <dd>このページがそのまま使えます。実験台の短い辺が黒板を向いた形で、1台に4〜6人を割り振ります。台は2列でも3列でも選べます。</dd>
+      <dt>図工室・家庭科室でも使えますか？</dt>
+      <dd>使えます。台の数と1台の人数を変えるだけです。部屋の名前は自由に書けるので、「第2理科室」のような書き方もできます。</dd>
+      <dt>クラスをいくつも受け持っています</dt>
+      <dd><strong>名簿は20クラスまで残せます。</strong>次に開いたときは、選んで呼び出すだけです。座席表メーカー・席次表メーカーで保存した名簿も、ここに出ます。</dd>
+      <dt>班長を1つの班に1人ずつにできますか？</dt>
+      <dd>できます。名簿の名前の前か後ろに <strong>★</strong> を付けてください。班長が2人になった班と、1人もいない班のあいだで入れかえます。班長の数が班の数より少ないときは、いない班をお知らせします。</dd>
+      <dt>前と同じ班にならないようにできますか？</dt>
+      <dd>いまはできません。気になるところは、名前をつまんで入れかえてください。</dd>
+      <dt>1台に7人以上座らせたいのですが</dt>
+      <dd>いまは6人までです。台の短い辺に回り込むところまでが、無理なく座れる形だからです。</dd>
+    </dl>
+
+    <h2>ほかのツール</h2>
+    <ul class="tools">
+      <li><a href="../seat/"><b>🪑 座席表メーカー</b><small>教室の席替えに。名簿を貼るだけで、30人でも40人でも並びます</small></a></li>
+      <li><a href="../seki/"><b>📋 席次表メーカー</b><small>会議・研修・大学の授業に。会社名・役職・名前を並べてA4の1枚に</small></a></li>
+    </ul>
+
+    <h2>このツールについて</h2>
+    <p><strong>使ってる機器の中だけで完結できます。</strong>使った名簿がネット上に流れることはありません。外に送っていないので、AIの学習に使われることも、個人情報が漏れることもありません。安心して使えます。「画面の保存」をオンにしたときだけ、いま使っている機器の中に残ります。オフのままなら、ページを閉じた時点で消えます。インストールも会員登録もいりません。</p>
+  </section>
+</main>
+
+<footer class="noprint">
+  <div class="wrap"><span class="fnav"><a href="../contact/">お問い合わせ</a>　<a href="../privacy/">プライバシーポリシー</a></span>
+    <span class="copy">© 2026 さくら先生の座席表</span></div>
+</footer>
+
+<script src="group.js?v=4"></script>
+<!-- 🔴 印刷用の1枚絵の置き場。画面には出ない。
+     ⚠body の直下に置くこと。中に入れると、印刷のときに親ごと隠されて白紙になる -->
+<div id="printImgWrap"></div>
+</body>
+</html>

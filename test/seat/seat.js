@@ -14,7 +14,9 @@
   //   ⚠置き場はドメイン単位なので、/seat/ で保存したものを /seki/ から読める
   var KEYC = 'sakura-teachers-rosters-v1';
   var KEYOLD = 'sakura-seat-classes-v1';   // 前の置き場。初回に引き継いで、そのまま残しておく
-  var MAXC = 10;   // クラス（名簿）は10件まで＝担任6＋専科・他大学など
+  // 🔴 10 → 20 に増やした（2026-09-01 本人）。理科室・図工室の専科は10クラスほど受け持つ。
+  //   ⚠3つのツールで同じ置き場を見ているので、上限は seat / seki / group を同時に直す
+  var MAXC = 20;   // 名簿は20件まで
   var MAXR = 20;   // 記録は20件まで（月1回とはかぎらないため。2026-08-31 本人）
 
   var state = {
@@ -672,13 +674,18 @@
       return;
     }
     state.opt = opt;
+    // 🔴🔴 班長を先に散らしてから、前の班との重なりを数える（2026-09-02 本人）。
+    //   ⚠前は順番が逆だった＝重なりの少ない案を選んだあとに班長を入れ替えていたので、
+    //     せっかく避けたペアが、班長の入れ替えで戻ることがあった。
+    //   本人「班長はひとつの班に1人が原則。それが守られる形で」
+    //   ＝班長を1人ずつにするのが先。そのうえで、重なりのいちばん少ないものを選ぶ
+    //   ⚠ hasLeaders() が偽なら spreadLeaders は何もしないので、★を使わない先生は今までどおり
+    plans = plans.map(function (pl) { return spreadLeaders(pl); });
     if (pairs) {
       plans = plans.map(function (pl) { return { s: pl, sc: planScore(pl, pairs, opt) }; })
         .sort(function (a, b) { return a.sc - b.sc; })
         .slice(0, 3).map(function (x) { return x.s; });
     }
-    // 班長は席が決まってから散らす（班のかたちは崩さない）
-    plans = plans.map(function (pl) { return spreadLeaders(pl); });
     state.plans = plans; state.cur = 0;
     state.seats = plans[0].slice();
     $('result').hidden = false;
