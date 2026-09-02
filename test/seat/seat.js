@@ -28,7 +28,10 @@
     grp: { on: false, size: 4, style: 'block', look: 'both', num: true, mark: false },
     gmap: null, gcount: 0,
     gfix: {},                       // 先生が手で変えた班（席の番号 → 班の番号）
-    leaders: {},                    // 班長（名簿に ★ を付けた人）名前 -> true
+    leaders: {},                    // ★（班に1人ずつにする人）名前 -> true。名簿の★＋条件でえらんだ人
+    nums: {},                       // 出席番号 名前 -> '12'（名簿に番号が無ければ名簿の順）
+    numOn: false,                   // 席に出席番号を出すか（出席番号順をえらぶと自動で入る）
+    hist: [],                       // 「1つ戻す」用。入れ替える前の並びを積んでいく
     lastRaw: null,                  // 前に読んだ名簿の文字列（男女を入れ直しすぎないため）
     avoid: { on: false, back: 3 }   // 前の班と同じメンバーをさける／何回さかのぼるか
   };
@@ -82,16 +85,25 @@
   // 手で「11 佐藤 はなこ 男」のように空白で区切って書く人むけ
   var LEAD_NUM = /^[0-9０-９]+[ 　]+/;
   var TAIL_SEX = /[ 　]+(男子|女子|男|女)$/;
+  // 🔴 出席番号は捨てずに持っておく（2026-09-03 本人・現場の先生の要望）。
+  //   ⚠これまでは「数字だけの列＝出席番号」を読み捨てていた（名前だけあればよかったため）。
+  //     席に出すようになったので、拾って out.num に入れる。名前の判定は今までどおり
+  function toHalf(s) {
+    return s.replace(/[０-９]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 0xFEE0); });
+  }
   function parseLine(line) {
     // ⚠タブは名簿の欄に打てないので、カンマでも列に分ける（2026-09-01 本人）。
     //   ⚠空白は区切りにしない。名前に空白が入る（やまだ たろう）ため
     var cells = line.split(/[\t,，]/)
       .map(function (x) { return x.replace(/^[\s　]+/, '').replace(/[\s　]+$/, ''); })
       .filter(function (x) { return x.length; });
-    var out = { name: '', lead: false, sex: '' };
+    var out = { name: '', lead: false, sex: '', num: '' };
     if (cells.length && cells.every(function (c) { return HEAD_WORD.test(c); })) return out;
     if (cells.length === 1) {
-      var one = cells[0].replace(LEAD_NUM, '');
+      var one = cells[0];
+      // 「11 佐藤 はなこ」の先頭の数字＝出席番号。外す前に控えておく
+      var ln = one.match(LEAD_NUM);
+      if (ln) { out.num = toHalf(ln[0].replace(/[ 　]+$/, '')); one = one.replace(LEAD_NUM, ''); }
       var m = one.match(TAIL_SEX);
       if (m) {
         out.sex = (m[1].charAt(0) === '女') ? 'f' : 'm';
@@ -104,14 +116,24 @@
       if (MARK_ONLY.test(c)) { out.lead = true; continue; }
       if (SEX_M.test(c)) { out.sex = 'm'; continue; }
       if (SEX_F.test(c)) { out.sex = 'f'; continue; }
-      if (NUM_ONLY.test(c)) continue;
+      // ⚠数字だけの列は出席番号。いちばん最初のものを使う（2つあることは無いが念のため）
+      if (NUM_ONLY.test(c)) { if (!out.num) out.num = toHalf(c); continue; }
       if (!out.name) out.name = c;
     }
     if (isLeadName(out.name)) { out.lead = true; out.name = stripLead(out.name); }
     return out;
   }
+  // 「詳しい条件」の「班に1人ずつにする人」でえらんだ人（名簿の★と同じ扱い）
+  function condLeaders() {
+    var out = {}, el = $('leadList');
+    if (!el) return out;
+    Array.prototype.forEach.call(el.querySelectorAll('select.nameSel'), function (s) {
+      if (s.value) out[s.value] = true;
+    });
+    return out;
+  }
   function readNames() {
-    var out = [], lead = {};
+    var out = [], lead = {}, nums = {}, seq = 0;
     // ⚠男女を入れるのは、名簿を貼り直したときだけ。
     //   毎回入れ直すと、③で手で変えたぶんが元にもどってしまう
     var raw = $('names').value;
@@ -120,10 +142,17 @@
       var p = parseLine(line);
       if (!p.name) return;
       out.push(p.name);
+      seq++;
+      // 名簿に番号があればその番号。無ければ名簿にならんでいる順（1・2・3…）
+      nums[p.name] = p.num || String(seq);
       if (p.lead) lead[p.name] = true;
       if (fresh && p.sex) state.sex[p.name] = p.sex;
     });
     state.lastRaw = raw;
+    state.nums = nums;
+    // 名簿に★を書かずに、条件のほうでえらんだ人も合わせる（2026-09-03）
+    var cl = condLeaders();
+    for (var k in cl) lead[k] = true;
     state.leaders = lead;
     return out;
   }
@@ -132,6 +161,10 @@
     var typed = readNames();
     if (state.sample && !typed.length) {
       state.names = state.sampleNames;
+      // サンプルにも出席番号を付けておく（並んでいる順）
+      var sn = {};
+      state.names.forEach(function (n, i) { sn[n] = String(i + 1); });
+      state.nums = sn;
       $('count').textContent = 'サンプル ' + state.names.length + '人';
     } else {
       state.names = typed;
@@ -383,6 +416,32 @@
     $('fixList').appendChild(wrap);
   }
 
+  // 🔴 ★（班に1人ずつにする人）を、名簿を書きかえずにえらぶ（2026-09-03 本人）。
+  //   ⚠名簿の★と合わせて効く。消したいときは、この行を削除する
+  function addLeadRow() {
+    var wrap = document.createElement('div');
+    wrap.className = 'pair';
+    var n = document.createElement('select'); n.className = 'nameSel ph';
+    n.dataset.ph = '人をえらぶ'; fillNames(n);
+    n.addEventListener('change', function () {
+      n.classList.toggle('ph', !n.value);
+      leadChanged();
+    });
+    var del = document.createElement('button');
+    del.type = 'button'; del.className = 'mini'; del.textContent = '削除';
+    del.onclick = function () { wrap.remove(); leadChanged(); };
+    wrap.appendChild(n); wrap.appendChild(del);
+    $('leadList').appendChild(wrap);
+  }
+  // えらび直したら、その場で散らし直す（席替えを押し直さなくてよい）
+  function leadChanged() {
+    refreshNames();
+    if (state.seats && state.opt) {
+      state.seats = spreadLeaders(state.seats);
+      drawSheet();
+    }
+  }
+
   // ============================================================
   //  班長・前の班・クラスの保存（2026-08-31）
   // ============================================================
@@ -520,13 +579,25 @@
 
   // 画面に出すための情報（班長のいない班／前回も同じ班／前回と同じ席）
   function checkInfo(gm) {
-    var out = { noLead: [], dup: {}, dupText: [], same: 0 };
+    var out = { noLead: [], dup: {}, dupText: [], same: 0, sizeNote: null };
     var i, g, mem = {}, seats = state.seats;
     if (!seats) return out;
     if (gm) {
       for (i = 0; i < seats.length; i++) {
         g = gm[i];
         if (g && seats[i]) (mem[g] = mem[g] || []).push(seats[i]);
+      }
+      // 🔴 指定した人数の班にならなかったときだけ知らせる（2026-09-02 本人）。
+      //   ⚠決め打ちで出さない。**実際にできた班を数えて**、届かなかったときだけ。
+      //   理由＝机のかたまりは2列ずつの帯で切るので、帯の人数が指定で割り切れないと
+      //     「多い班は作らない」の決まりで人数が落ちる（35人・6列だと帯が12人＝5人班にならない）
+      //   ⚠「縦の列ごと」は人数で切っていないので出さない
+      if (state.grp.style !== 'col') {
+        var mx = 0, tot = 0;
+        for (g in mem) { if (mem[g].length > mx) mx = mem[g].length; tot += mem[g].length; }
+        // ⚠そもそも人数が足りないときは出さない（見れば分かることなので）
+        if (mx && tot >= state.grp.size && mx < state.grp.size)
+          out.sizeNote = { want: state.grp.size, got: mx };
       }
       if (hasLeaders()) {
         for (g in mem) {
@@ -586,10 +657,16 @@
         fix[name] = (r - 1) * state.cols + (c - 1);
       } else zone[name] = kind;
     });
+    // 🔴「設定しない」を足した（2026-09-03）。えらばれているあいだは、
+    //   離す・隣にするの条件そのものを使わない。
+    //   ⚠ seating.js には 'none' という考え方が無いので、中では今までどおり cross を渡し、
+    //     条件のほうを空にする（＝どこを隣とみなすかが意味を持たなくなる）
+    var uiMode = (document.querySelector('input[name=mode]:checked') || {}).value || 'none';
+    var off = (uiMode === 'none');
     return {
       names: state.names, cols: state.cols, rows: state.rows,
-      mode: (document.querySelector('input[name=mode]:checked') || {}).value || 'cross',
-      separate: pairs('sepList'), adjacent: pairs('adjList'),
+      mode: off ? 'cross' : uiMode,
+      separate: off ? [] : pairs('sepList'), adjacent: off ? [] : pairs('adjList'),
       fixed: fix, zone: zone
     };
   }
@@ -637,6 +714,7 @@
     refreshNames();
     renderSexList();
     state.gfix = {};                // 席替えをしたら、手で変えた班は白紙に戻す
+    clearHist();                    // ここから先は別の並び。「1つ戻す」も白紙にする
     var opt = collect();
     var msg = $('msg');
     if (!opt.names.length) {
@@ -805,6 +883,13 @@
           var col = sexColor(name);
           if (col) sp.style.color = col;
           d.appendChild(sp);
+          // 🔴 出席番号は左下（2026-09-03）。班番号＝左上・★＝右上とぶつからない場所
+          if (state.numOn && state.nums[name]) {
+            var no = document.createElement('span');
+            no.className = 'no';
+            no.textContent = state.nums[name];
+            d.appendChild(no);
+          }
         } else d.textContent = '空';
         g.appendChild(d);
       }
@@ -867,11 +952,15 @@
       sp.style.setProperty('--nmPrint', minMm + 'mm');
     });
     }
+    // ⚠この一文は毎回ここで書きかえている。HTML側を直しても出ない（2026-09-03 に気づいた）
     var note = document.querySelector('.drag-note');
     if (note) {
-      note.innerHTML = state.grp.on
+      note.innerHTML = (state.grp.on
         ? '席はマグネットのように、ドラッグで入れ替えができます。<strong>班番号を押すと、席の班と色を変更できます</strong>'
-        : '席はマグネットのように、ドラッグで入れ替えができます';
+        : '席はマグネットのように、ドラッグで入れ替えができます')
+        // 🔴 長押しにしたので、そのことを画面に書く（2026-09-03 本人・現場の先生）
+        + '<br>スマホ・タブレットは<strong>席を長押ししてから</strong>動かします。' +
+        'まちがえたら<strong>「↩ 1つ戻す」</strong>で戻せます。';
     }
     drawCheck(chk, samap);
     bindDrag();
@@ -886,8 +975,13 @@
     var el = $('gInfo');
     if (!el) return;
     var li = [];
+    // ⚠文言は本人が書いたもの（2026-09-02）。勝手に言い換えない
+    if (chk.sizeNote)
+      li.push('<strong>' + chk.sizeNote.want + '人の班になりません</strong>：' +
+        '2列ずつのまとまりで分けているからです。' + chk.sizeNote.want + '人班にしたい場合は、' +
+        '教室の形を変更するか、マスの左上の班の番号を押して班を変更してください。');
     if (chk.noLead.length)
-      li.push('<strong>リーダー格がいない班</strong>：' + chk.noLead.join('班・') + '班');
+      li.push('<strong>★の人がいない班</strong>：' + chk.noLead.join('班・') + '班');
     if (chk.dupText.length) {
       // ⚠多いと一行が長くなりすぎるので、6組までにして残りは数で言う
       var show = chk.dupText.slice(0, 6).map(esc).join('／');
@@ -1005,6 +1099,7 @@
         if (no === now) b.className = 'on';
         b.onclick = function (ev) {
           ev.stopPropagation();
+          pushHist();               // 「1つ戻す」で、班を変える前にもどせるように
           state.gfix[i] = no;
           closeGroupPick();
           drawSheet();
@@ -1056,8 +1151,38 @@
       '<br><small>このままでも印刷できます。</small></div>';
   }
 
-  // ---- 席を動かす（マウスも指も同じ動き。離すとぱちっとはまる） ----
+  // ---- 1つ戻す（2026-09-03 本人・現場の先生「手が当たっただけで入れ替わって困る」） ----
+  //   ⚠押すたびに1回ずつ、入れ替えた順にさかのぼる。
+  //     「席替えする」を押し直したら白紙にもどす（そこから先は別の並びなので）
+  function pushHist() {
+    if (!state.seats) return;
+    var g = {};
+    for (var k in state.gfix) g[k] = state.gfix[k];
+    state.hist.push({ seats: state.seats.slice(), gfix: g });
+    if (state.hist.length > 50) state.hist.shift();
+    updateUndo();
+  }
+  function clearHist() { state.hist = []; updateUndo(); }
+  function updateUndo() {
+    var b = $('undo'); if (b) b.disabled = !state.hist.length;
+  }
+  function undoOnce() {
+    var h = state.hist.pop();
+    if (!h) { updateUndo(); return; }
+    state.seats = h.seats.slice();
+    state.gfix = h.gfix;
+    drawSheet();
+    updateUndo();
+    if ($('save').checked && !state.sample) save();
+  }
+
+  // ---- 席を動かす（離すとぱちっとはまる） ----
+  // 🔴 マウスはすぐ動く／画面を触ったときは長押ししてから動く（2026-09-03 本人・現場の先生）。
+  //   ⚠タブレットでスクロールしようとして席が入れ替わる、という声。
+  //     PCでも画面を触れる機種は同じだったので、「PCか否か」ではなく
+  //     「マウスか指か」で分ける（pointerType で分かる）
   var drag = null;
+  var HOLD_MS = 500;                // これだけ押し続けたら持ち上がる
 
   function cellAt(x, y) {
     var el = document.elementFromPoint(x, y);
@@ -1079,12 +1204,41 @@
     closeGroupPick();
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     var d = e.currentTarget;
+    var byMouse = (e.pointerType === 'mouse');
     drag = { el: d, from: +d.dataset.i, id: e.pointerId,
-             x0: e.clientX, y0: e.clientY, active: false, ghost: null, over: null };
-    try { d.setPointerCapture(e.pointerId); } catch (err) { }
+             x0: e.clientX, y0: e.clientY, active: false, ghost: null, over: null,
+             byMouse: byMouse, ready: byMouse, timer: null };
     d.addEventListener('pointermove', dragMove);
     d.addEventListener('pointerup', dragEnd);
     d.addEventListener('pointercancel', dragEnd);
+    if (byMouse) {
+      try { d.setPointerCapture(e.pointerId); } catch (err) { }
+      return;
+    }
+    // 指・ペンは長押しだけ。
+    // ⚠つかまえる（setPointerCapture）のも長押しが決まってから。
+    //   先につかまえると、スクロールにゆずれなくなる
+    drag.timer = setTimeout(function () {
+      if (!drag) return;
+      drag.timer = null;
+      drag.ready = true;
+      try { drag.el.setPointerCapture(drag.id); } catch (err) { }
+      lift(drag.x0, drag.y0);
+      // 持ち上がった合図。⚠対応していない機器では何も起きない（それでよい。浮いて見える）
+      try { if (navigator.vibrate) navigator.vibrate(12); } catch (err) { }
+    }, HOLD_MS);
+  }
+
+  // 何もせずに手を離す（スクロールにゆずる）
+  function dropDrag() {
+    if (!drag) return;
+    if (drag.timer) clearTimeout(drag.timer);
+    var d = drag.el;
+    d.removeEventListener('pointermove', dragMove);
+    d.removeEventListener('pointerup', dragEnd);
+    d.removeEventListener('pointercancel', dragEnd);
+    try { d.releasePointerCapture(drag.id); } catch (err) { }
+    drag = null;
   }
 
   function lift(x, y) {
@@ -1107,7 +1261,10 @@
   function dragMove(e) {
     if (!drag) return;
     if (!drag.active) {
-      if (Math.abs(e.clientX - drag.x0) + Math.abs(e.clientY - drag.y0) < 6) return;
+      var far = Math.abs(e.clientX - drag.x0) + Math.abs(e.clientY - drag.y0);
+      // 長押しが決まる前に指が動いた＝スクロールしたいということ。席には手を付けない
+      if (!drag.ready) { if (far > 10) dropDrag(); return; }
+      if (far < 6) return;
       lift(drag.x0, drag.y0);
     }
     e.preventDefault();
@@ -1123,6 +1280,7 @@
 
   function dragEnd() {
     if (!drag) return;
+    if (drag.timer) { clearTimeout(drag.timer); drag.timer = null; }
     var d = drag.el;
     d.removeEventListener('pointermove', dragMove);
     d.removeEventListener('pointerup', dragEnd);
@@ -1143,6 +1301,7 @@
       if (gh.parentNode) gh.parentNode.removeChild(gh);
       d.classList.remove('lift');
       if (to !== from) {
+        pushHist();                 // 入れ替える前の並びを残す（↩ 1つ戻す）
         var t2 = state.seats[from]; state.seats[from] = state.seats[to]; state.seats[to] = t2;
       }
       drawSheet();
@@ -1388,7 +1547,8 @@
         month: $('month') ? $('month').value : '',
         cols: $('cols').value, rows: $('rows').value,
         board: $('board').value,
-        mode: (document.querySelector('input[name=mode]:checked') || {}).value || 'cross',
+        mode: (document.querySelector('input[name=mode]:checked') || {}).value || 'none',
+        numOn: $('numOn') ? $('numOn').checked : false,
         nameMode: $('nameMode').value, nameAlign: $('nameAlign') ? $('nameAlign').value : 'center',
         font: $('font').value, bold: $('bold').checked,
         showCredit: $('showCredit').checked,
@@ -1440,8 +1600,16 @@
       // ⚠えらぶ形にしたので、前に保存した 9 以上は入らない。8 におさめる
       $('cols').value = clampNum(d.cols, 6); $('rows').value = clampNum(d.rows, 6);
       $('board').value = d.board || 'top';
-      var mr = document.querySelector('input[name=mode][value="' + (d.mode || 'cross') + '"]');
+      // ⚠前に保存した人は 'cross' などを持っている。そのままにする（勝手に外さない）
+      var mr = document.querySelector('input[name=mode][value="' + (d.mode || 'none') + '"]');
       if (mr) mr.checked = true;
+      modeChanged();
+      // ⚠前に保存した人はこの項目を持っていない。そのときは既定（出さない）のまま
+      if (d.numOn !== undefined && $('numOn')) {
+        $('numOn').checked = !!d.numOn;
+        state.numOn = !!d.numOn;
+        state.numTouched = true;      // 前に決めたとおりにする
+      }
       if (d.nameMode) $('nameMode').value = d.nameMode;
       if (d.nameAlign && $('nameAlign')) $('nameAlign').value = d.nameAlign;
       if (d.font) $('font').value = d.font;
@@ -1727,8 +1895,21 @@
     });
   }
 
+  // 「隣」の考え方が「設定しない」なら、離す・隣にするの欄そのものを隠す
+  function modeChanged() {
+    var m = (document.querySelector('input[name=mode]:checked') || {}).value || 'none';
+    var box = $('pairBlocks');
+    if (box) box.hidden = (m === 'none');
+  }
+
   function orderChanged() {
     var byNumber = $('order').value === 'number';
+    // 🔴 出席番号順をえらんだら、席の出席番号も自動で出す（2026-09-03 本人）。
+    //   ⚠先生が自分でチェックを触ったあとは、こちらから入れ直さない
+    if (byNumber && !state.numTouched && $('numOn') && !$('numOn').checked) {
+      $('numOn').checked = true;
+      state.numOn = true;
+    }
     // 出席番号順のときだけ使う。ふだんは押せない形にして「あること」は見せておく
     $('dir').disabled = !byNumber;
     $('dirWrap').classList.toggle('off', !byNumber);
@@ -1862,6 +2043,23 @@
     $('addSep').onclick = function () { addPairRow('sepList'); };
     $('addAdj').onclick = function () { addPairRow('adjList'); };
     $('addFix').onclick = addFixRow;
+    if ($('addLead')) $('addLead').onclick = addLeadRow;
+    if ($('undo')) $('undo').onclick = undoOnce;
+    // 🔴「隣」の考え方（2026-09-03）。「設定しない」のあいだは、離す・隣にするの欄を出さない
+    document.querySelectorAll('input[name=mode]').forEach(function (r) {
+      r.addEventListener('change', function () {
+        modeChanged();
+        if ($('save').checked && !state.sample) save();
+      });
+    });
+    modeChanged();
+    // 🔴 席に出席番号を出す（2026-09-03）
+    if ($('numOn')) $('numOn').addEventListener('change', function () {
+      state.numOn = this.checked;
+      state.numTouched = true;       // 自分で決めた人には、こちらから入れ直さない
+      if (state.seats) drawSheet();
+      if ($('save').checked && !state.sample) save();
+    });
     // ⚠run を直接わたさない。クリックの情報が第1引数に入って「初回」と間違われる
     $('go').onclick = function () { run(); };
     // ⚠「べつの案を出す」は座席表を見ながら押すので、画面を動かさない

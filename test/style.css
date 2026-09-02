@@ -366,14 +366,25 @@ select.ph option{color:var(--ink)}
   font-size:.78rem;color:#c9b8c0;letter-spacing:.02em;
 }
 
-/* 〇にi の説明 */
+/* 〇に？ の説明 */
 .tip-btn{
   position:relative;padding:0;margin-left:6px;border:0;background:none;
-  /* 🔴 桜色だと主張が強い。押せることは形（ⓘ）で分かるので、色はグレーでいい */
+  /* 🔴 桜色だと主張が強い。押せることは形（〇に？）で分かるので、色はグレーでいい */
   color:var(--ink-soft);font-size:.78rem;line-height:1;
   vertical-align:middle;cursor:pointer;
 }
-.tip-btn::before{content:"ⓘ"}
+/* 🔴 ⓘ をやめて「〇に？」にした（2026-09-03 本人・現場の先生「押す想像をしなかった」）。
+   ⚠ ⓘ は1文字ぶんの記号なので細くて小さい。丸はこちらで描いて、押せる大きさにする */
+/* ⚠大きさは「①などの番号の丸（.step＝約22px）より小さく、もとのⓘより一回り大きく」
+   （2026-09-03 本人）。＝16px前後におさめる */
+.tip-btn::before{
+  content:"?";display:inline-block;
+  box-sizing:border-box;width:1.35em;height:1.35em;line-height:1.12em;
+  border:1.4px solid currentColor;border-radius:50%;
+  font-family:Arial,Helvetica,sans-serif;font-weight:bold;font-size:.95em;
+  text-align:center;
+}
+.tip-btn:hover::before,.tip-btn[aria-expanded="true"]::before{background:var(--pink-pale)}
 .tip-btn::after{content:"";position:absolute;inset:-8px}  /* 見えないが押せる範囲 */
 .tip-btn:hover,.tip-btn[aria-expanded="true"]{color:var(--ink)}
 .tip-body{
@@ -475,8 +486,13 @@ body.screen .seat.empty{
   background:#fff;border-style:solid;font-size:0;color:transparent;
 }
 
-/* ドラッグ（マウスも指も同じ動き） */
-.seat{touch-action:none;user-select:none;-webkit-user-select:none;-webkit-user-drag:none}
+/* ドラッグ（マウスはすぐ動く／指は長押ししてから動く） */
+/* 🔴 指のときは長押しに変えた（2026-09-03 本人・現場の先生）。
+   ⚠ touch-action:none だったので、席の上から始めたスクロールが全部ドラッグになっていた
+     ＝タブレットでスクロールしようとして席が入れ替わる、の原因。
+   ⚠ manipulation ＝ スクロールとピンチは通す／ダブルタップの拡大だけ止める。
+     長押しが決まったあとは seat.js が pointermove を止めるので、そこからはスクロールしない */
+.seat{touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-user-drag:none}
 .seat img,.seat span{-webkit-user-drag:none}
 .seat.lift{opacity:.25}
 .seat.over{border-color:var(--pink);background:var(--pink-pale);box-shadow:0 0 0 2px var(--pink-light) inset}

@@ -1163,7 +1163,11 @@
     ['tcols', 'tnum', 'gsize', 'order'].forEach(function (id) {
       $(id).addEventListener('change', function () {
         refreshRoom(); paperNote();
-        if ($('save').checked) save();
+        // 🔴 部屋の形を変えたら、その場で作り直す（2026-09-02 本人「5人にしても変わらない」）。
+        //   ⚠②の説明だけ変わって、下の座席表が前のままだと「効いていない」ように見える。
+        //     ならぶ向きを選んだ瞬間に反映した 2026-08-31 と同じ考え方
+        if (state.seats) run(true);
+        else if ($('save').checked) save();
       });
     });
     $('board').addEventListener('change', function () {

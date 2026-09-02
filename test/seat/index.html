@@ -26,7 +26,7 @@
 <meta name="google-site-verification" content="PfjmCGxUaN1hzuj_dRw3e4PTY6xepghfXM_CrU_sO-A" />
 <title>【テスト】教室の座席表メーカー｜席替えを簡単に・30人40人・4列〜8列対応</title>
 <meta name="description" content="教室の座席表の作り方は簡単。名簿を貼るだけで席替えができるフリーツールです。新年度の出席番号順にも対応。小学校・中学校・高校のどのクラスでも、30人・35人・40人、4列・5列・6列・8列の教室席配置に対応。生徒に見せる向きと、先生が教卓から見る向きを切り替えられます。班分けと色分けもそのまま印刷・PDFにできます。Excelテンプレートは不要です。名簿はブラウザの中だけで処理し、AIの学習にも使われません。">
-<link rel="stylesheet" href="../style.css?v=101">
+<link rel="stylesheet" href="../style.css?v=103">
 <link rel="stylesheet" href="seat.css?v=1">
 <link rel="stylesheet" href="../print.css?v=54" media="print">
 <style>
@@ -65,6 +65,9 @@
 .sheet.al-left .seat .nm{padding-left:2px}
 /* 班番号は★と同じ大きさ・同じ高さにそろえる */
 .seat .gno{font-size:.62em;top:1px;left:3px;padding:0;line-height:1}
+/* 🔴 出席番号（2026-09-03）。班番号＝左上・★＝右上なので、空いている左下に置く */
+.seat .no{position:absolute;left:3px;bottom:1px;font-size:.62em;line-height:1;color:#8b959b}
+body.screen .seat .no{font-size:var(--markSize,1.1em);left:5px;bottom:3px}
 .seat .gno:hover{background:rgba(0,0,0,.08);border-radius:4px}
 /* モニターは遠くから見るので、班番号と★も大きくする */
 body.screen .seat .gno{font-size:var(--markSize,1.2em)}
@@ -111,7 +114,7 @@ body.screen .seat.dup .nm{text-decoration:none}
 </style>
 </head>
 <body>
-<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/02 09:45</div>
+<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/03 08:03</div>
 
 <header class="site-head noprint">
   <div class="wrap">
@@ -144,12 +147,12 @@ body.screen .seat.dup .nm{text-decoration:none}
           <li>同じ名字の子が何人かいるときは、<strong>名前まで入れておく</strong>と取りちがえません。</li>
         </ul>
 
-        <p class="tip-h">★（リーダー格）</p>
+        <p class="tip-h">★（班に1人ずつにしたい人）</p>
         <ul>
+          <li>班に分けるとき、<strong>★を付けた人がなるべく1班に1人ずつ</strong>になるように席を決めます。班長・リーダー・声かけ役など、<strong>何に使うかは先生が決めてかまいません</strong>。</li>
           <li>名前の<strong>前でも後ろでも</strong>かまいません。<strong>別の列</strong>に ★ だけ、または「リーダー」「班長」と書いてあっても読みます。</li>
-          <li><strong>変えるときは、この名簿の★を書きかえてください。</strong></li>
-          <li>班に分けるとき、<strong>★の子がなるべく1班に1人ずつ</strong>になるように席を決めます。</li>
-          <li>★は<strong>先生が見るための印</strong>です。出すかどうかは④でえらべます。</li>
+          <li><strong>名簿に書かずに指定することもできます。</strong>②の「詳しい条件」に<strong>「班に1人ずつにする人」</strong>があります。毎回変えるなら、そちらのほうが早いです。</li>
+          <li>★は<strong>先生が見るための印</strong>です。座席表に出すかどうかは④でえらべます。</li>
         </ul>
 
         <p class="tip-h">男女</p>
@@ -171,7 +174,10 @@ body.screen .seat.dup .nm{text-decoration:none}
       </div>
       <div class="in-col">
         <div>
-      <textarea id="names" placeholder="ここをクリック → Excelからコピペ（手入力可）&#10;&#10;やまだ たろう★（リーダー格には★）&#10;さとう はなこ&#10;すずき いちろう&#10;&#10;空のままだとサンプルが出ます"></textarea>
+      <textarea id="names" placeholder="ここをクリック → Excelからコピペ（手入力可）&#10;&#10;やまだ たろう★（班に1人ずつにしたい人に★）&#10;さとう はなこ&#10;すずき いちろう&#10;&#10;空のままだとサンプルが出ます"></textarea>
+      <!-- 🔴 ★の意味は、たたんだ説明の中だけでなく、ここに出しておく（2026-09-03 本人・現場の先生）。
+           ⚠久しぶりに使う人は、名簿の中の薄い字だけでは意味を思い出せない -->
+      <p class="hint lead-hint">★を名前に付けると、その人が<strong>班に1人ずつ</strong>になるように分けます。班長・リーダー・声かけ役など、使い方は自由です。<span class="ex">（名簿に書かずに、②の「詳しい条件」で選ぶこともできます）</span></p>
       <div class="row tight" style="margin-top:10px">
         <div><label for="nameMode">名前の見せ方</label>
           <select id="nameMode">
@@ -239,32 +245,57 @@ body.screen .seat.dup .nm{text-decoration:none}
           </select></div>
       </div>
       <p class="hint" id="orderNote"></p>
+      <!-- 🔴 出席番号を席に出す（2026-09-03 本人・現場の先生の要望）。
+           ⚠「出席番号順」をえらんだときは、こちらで自動で入れる（本人）。
+             そのあと先生が外したら、その気持ちを優先して自動では入れ直さない -->
+      <p style="margin:6px 0 0">
+        <label class="chk-inline"><input type="checkbox" id="numOn"> 席に出席番号を出す</label>
+        <span class="hint" style="margin-left:8px">名簿に番号の列があればその番号、なければ名簿の順に1・2・3…と付きます。席の<strong>左下</strong>に小さく出ます。</span>
+      </p>
     <details class="opt sub noprint" id="condBlock">
       <summary>詳しい条件（離す・隣にする・席を決める）</summary>
       <div class="body">
+        <!-- 🔴 4つ目に「設定しない」を足して、それを初期にした（2026-09-03 本人・現場の先生）。
+             ⚠3つの意味を先に読ませていたのが、いちばん迷わせていた。
+               使う人だけが選べばよいので、選ぶまで「離す」「隣にする」の欄は出さない -->
         <h3>「隣」の考え方&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h3>
         <div class="tip-body" hidden>
-          <p>「離す」「隣にする」で、<strong>どこまでを“隣”とみなすか</strong>を決めます。</p>
+          <p>「離す」「隣にする」で、<strong>どこまでを“隣”とみなすか</strong>を決めます。<strong>使わないときは「設定しない」のままでかまいません。</strong></p>
           <p>きつくするほど、条件を満たす配置が見つかりにくくなります。作れないときは、ここをゆるくしてみてください。</p>
         </div>
         <div class="radios">
+          <label><input type="radio" name="mode" value="none" checked> 設定しない</label>
           <label><input type="radio" name="mode" value="lr"> 左右だけ</label>
-          <label><input type="radio" name="mode" value="cross" checked> 前後左右</label>
+          <label><input type="radio" name="mode" value="cross"> 前後左右</label>
           <label><input type="radio" name="mode" value="king"> まわり全部（ななめも）</label>
         </div>
 
-        <h3>離す組み合わせ</h3>
-        <div id="sepList"></div>
-        <button class="mini" id="addSep" type="button">＋ 組を追加</button>
+        <div id="pairBlocks" hidden>
+          <h3>離す組み合わせ</h3>
+          <div id="sepList"></div>
+          <button class="mini" id="addSep" type="button">＋ 組を追加</button>
 
-        <h3>隣にする組み合わせ</h3>
-        <div id="adjList"></div>
-        <button class="mini" id="addAdj" type="button">＋ 組を追加</button>
+          <h3>隣にする組み合わせ</h3>
+          <div id="adjList"></div>
+          <button class="mini" id="addAdj" type="button">＋ 組を追加</button>
+        </div>
 
         <h3>席を決める人</h3>
         <div id="fixList"></div>
         <button class="mini" id="addFix" type="button">＋ 人を追加</button>
         <p class="hint">視力などの配慮は<strong>「前のほう」がおすすめ</strong>です。席をぴったり決めると、毎回まったく同じ席になります。</p>
+
+        <!-- 🔴 ★を名簿に書かずに指定できる枠（2026-09-03 本人「★は変更する可能性もあるから」）。
+             ⚠名簿の★も生きている。両方を合わせて「1班に1人ずつ」に散らす -->
+        <h3>班に1人ずつにする人&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h3>
+        <div class="tip-body" hidden>
+          <p>ここで選んだ人は、<strong>なるべく1班に1人ずつ</strong>になるように分かれます（名簿に★を付けたのと同じです）。</p>
+          <p>班長・リーダー・声かけ役など、<strong>何のために分けるかは先生が決めてかまいません</strong>。名簿を書きかえずに変えられます。</p>
+          <p>④の「班に分ける」を入れているときだけ効きます。</p>
+        </div>
+        <div id="leadList"></div>
+        <button class="mini" id="addLead" type="button">＋ 人を追加</button>
+        <p class="hint">名簿に★を付けている人がいれば、その人たちも合わせて分かれます。</p>
       </div>
     </details>
     </section>
@@ -279,10 +310,13 @@ body.screen .seat.dup .nm{text-decoration:none}
     <div class="tabs-row noprint">
       <div class="plan-tabs" id="tabs"></div>
       <button id="again" type="button">もう一度 席替え</button>
+      <!-- 🔴 手が当たって入れ替わったときのために（2026-09-03 本人・現場の先生）。
+           ⚠押すたびに1回ずつ、入れ替えた順にさかのぼる -->
+      <button id="undo" type="button" disabled>↩ 1つ戻す</button>
       <button id="hideSheet" type="button">🙈 座席表をかくす</button>
       <button id="screenOn" type="button">📺 モニターに映す</button>
     </div>
-    <p class="hint drag-note noprint">席はマグネットのように、ドラッグで入れ替えができます</p>
+    <p class="hint drag-note noprint">席はマグネットのように、ドラッグで入れ替えができます。<strong>スマホ・タブレットは、席を長押ししてから動かします</strong>（軽く触れただけでは動きません）。まちがえたら「↩ 1つ戻す」で戻せます。</p>
 
     <div id="sheetBox">
     <div class="sheet" id="sheet">
@@ -341,7 +375,7 @@ body.screen .seat.dup .nm{text-decoration:none}
         <p>色は印刷にも画像にもそのまま出ます。色の見分けがつきにくい方にも伝わる組み合わせを選んであります。</p>
       </div>
       <p class="note-sm">
-        席は<strong>マグネットのように、ドラッグで入れ替え</strong>ができます。班番号を押すと、その席の班と色を変えられます。
+        席は<strong>マグネットのように、ドラッグで入れ替え</strong>ができます（スマホ・タブレットは長押ししてから）。班番号を押すと、その席の班と色を変えられます。
       </p>
       <!-- 🔴 知らせはここに置く（2026-08-31 本人）。座席表のすぐ下だと、
            モニターに映す前に子どもに見られてしまうため -->
@@ -354,7 +388,7 @@ body.screen .seat.dup .nm{text-decoration:none}
       </label>
       <div id="grpOpts" hidden style="margin-top:12px">
         <label class="chk-inline" style="margin-bottom:10px">
-          <input type="checkbox" id="leadMark"> リーダー格（班長）に★を出す
+          <input type="checkbox" id="leadMark"> ★を座席表に出す（班に1人ずつにした人）
         </label>
         <div class="row">
           <div><label for="grpSize">1班の人数</label>
@@ -644,7 +678,7 @@ body.screen .seat.dup .nm{text-decoration:none}
 </footer>
 
 <script src="../seating.js?v=54"></script>
-<script src="seat.js?v=135"></script>
+<script src="seat.js?v=137"></script>
 <!-- 🔴 印刷用の1枚絵の置き場（2026-09-01）。画面には出ない。
      ⚠**body の直下に置くこと。**中に入れると、印刷のときに親ごと隠されて白紙になる -->
 <div id="printImgWrap"></div>

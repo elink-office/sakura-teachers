@@ -25,11 +25,11 @@
 </script>
 <title>【テスト】理科室の座席表メーカー｜図工室・家庭科室の班の席をA4の1枚に｜さくら先生の座席表</title>
 <meta name="description" content="理科室・図工室・家庭科室の座席表を無料で作成。名簿を貼るだけで、実験台ごとの班分けと、台のどこに座るかまで決まります。1台4〜6人、台は2列でも3列でも。男女を均す・この2人は離す、も指定できます。名簿は20クラスまで残せるので、専科の先生でも貼り直しが要りません。印刷とPDFはA4の1枚に収まります。">
-<link rel="stylesheet" href="../style.css?v=101">
+<link rel="stylesheet" href="../style.css?v=103">
 <link rel="stylesheet" href="group.css?v=1">
 </head>
 <body>
-<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/02 09:45</div>
+<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/03 08:03</div>
 
 <header class="site-head noprint">
   <div class="wrap">
@@ -52,7 +52,7 @@
     <div class="tip-body" hidden>
       <ul>
         <li><strong>1行に1人</strong>です。Excelからそのまま貼れます。番号や性別の列がいっしょでもかまいません。</li>
-        <li>名前の前か後ろに ★ を付けると、その子を<strong>班長</strong>として1つの班に1人ずつ散らします。</li>
+        <li>名前の前か後ろに ★ を付けると、その人が<strong>1つの班に1人ずつ</strong>になるように散らします。班長・リーダー・声かけ役など、使い方は自由です。</li>
         <li>男女の列（男／女）があれば読み取ります。無いときは③で1人ずつ指定できます。</li>
       </ul>
     </div>
@@ -64,7 +64,7 @@
         <button class="mini" id="clsLoad2" type="button">この名簿を自動入力</button></div>
     </div>
 
-    <textarea id="names" placeholder="ここをクリック → Excelからコピペ（手入力可）&#10;&#10;やまだ たろう★（リーダー格には★）&#10;さとう はなこ&#10;すずき いちろう&#10;&#10;空のままだとサンプルが出ます"></textarea>
+    <textarea id="names" placeholder="ここをクリック → Excelからコピペ（手入力可）&#10;&#10;やまだ たろう★（班に1人ずつにしたい人に★）&#10;さとう はなこ&#10;すずき いちろう&#10;&#10;空のままだとサンプルが出ます"></textarea>
 
     <div class="row tight" style="margin-top:10px">
       <div><label for="nameMode">名前の見せ方</label>
@@ -220,7 +220,7 @@
         <p style="margin-top:10px">
           <label class="chk-inline"><input type="checkbox" id="dtOff"> 日付・自由記入を入れない</label>
           <label class="chk-inline gap"><input type="checkbox" id="gnum" checked> 班の番号を出す</label>
-          <label class="chk-inline gap"><input type="checkbox" id="leadMark"> 班長に★を出す</label>
+          <label class="chk-inline gap"><input type="checkbox" id="leadMark"> ★を表に出す（班に1人ずつにした人）</label>
           <label class="chk-inline gap"><input type="checkbox" id="showCredit" checked> 右下にサイト名を入れる</label>
         </p>
       </div>
@@ -329,8 +329,8 @@
       <dd>使えます。台の数と1台の人数を変えるだけです。部屋の名前は自由に書けるので、「第2理科室」のような書き方もできます。</dd>
       <dt>クラスをいくつも受け持っています</dt>
       <dd><strong>名簿は20クラスまで残せます。</strong>次に開いたときは、選んで呼び出すだけです。座席表メーカー・席次表メーカーで保存した名簿も、ここに出ます。</dd>
-      <dt>班長を1つの班に1人ずつにできますか？</dt>
-      <dd>できます。名簿の名前の前か後ろに <strong>★</strong> を付けてください。班長が2人になった班と、1人もいない班のあいだで入れかえます。班長の数が班の数より少ないときは、いない班をお知らせします。</dd>
+      <dt>班長になる人を1つの班に1人ずつにできますか？</dt>
+      <dd>できます。名簿の名前の前か後ろに <strong>★</strong> を付けてください。★が2人になった班と、1人もいない班のあいだで入れかえます。★の数が班の数より少ないときは、いない班をお知らせします。班長でなくても、声かけ役・そうじのリーダーなど、分けたい人なら何にでも使えます。</dd>
       <dt>前と同じ班にならないようにできますか？</dt>
       <dd>いまはできません。気になるところは、名前をつまんで入れかえてください。</dd>
       <dt>1台に7人以上座らせたいのですが</dt>
@@ -353,7 +353,7 @@
     <span class="copy">© 2026 さくら先生の座席表</span></div>
 </footer>
 
-<script src="group.js?v=4"></script>
+<script src="group.js?v=5"></script>
 <!-- 🔴 印刷用の1枚絵の置き場。画面には出ない。
      ⚠body の直下に置くこと。中に入れると、印刷のときに親ごと隠されて白紙になる -->
 <div id="printImgWrap"></div>

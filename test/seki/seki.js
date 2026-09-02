@@ -908,11 +908,14 @@
     var noR = sz('szNo', .52);
     sh.style.setProperty('--snoSize', Math.max(9, Math.round(minSize * noR)) + 'px');
     sh.style.setProperty('--snoPrint', (Math.round(printMM * noR * 10) / 10) + 'mm');
+    // ⚠この一文は毎回ここで書きかえている。HTML側を直しても出ない
     var note = document.querySelector('.drag-note');
     if (note) {
-      note.innerHTML = state.grp.on
+      note.innerHTML = (state.grp.on
         ? '席をドラッグすると、配置の移動ができます。<strong>グループ記号を押すと、席のグループと色を変更できます</strong>'
-        : '席をドラッグすると、配置の移動ができます';
+        : '席をドラッグすると、配置の移動ができます')
+        // 🔴 長押しにしたので、そのことを画面に書く（2026-09-03。座席表と同じ直し）
+        + '<br>スマホ・タブレットは<strong>席を長押ししてから</strong>動かします。';
     }
     bindDrag();
     drawViolations();
@@ -1070,8 +1073,13 @@
       '<br><small>このままでも印刷できます。</small></div>';
   }
 
-  // ---- 席を動かす（マウスも指も同じ動き。離すとぱちっとはまる） ----
+  // ---- 席を動かす（離すとぱちっとはまる） ----
+  // 🔴 マウスはすぐ動く／画面を触ったときは長押ししてから動く（2026-09-03 本人・現場の先生）。
+  //   ⚠座席表と同じ直し。タブレットでスクロールしようとして席が入れ替わるのを止める。
+  //     style.css の .seat も touch-action:manipulation に変えてあるので、
+  //     こちらを直さないと指でまったく動かせなくなる（セットで直すこと）
   var drag = null;
+  var HOLD_MS = 500;                // これだけ押し続けたら持ち上がる
 
   function cellAt(x, y) {
     var el = document.elementFromPoint(x, y);
@@ -1093,12 +1101,40 @@
     closeGroupPick();
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     var d = e.currentTarget;
+    var byMouse = (e.pointerType === 'mouse');
     drag = { el: d, from: +d.dataset.i, id: e.pointerId,
-             x0: e.clientX, y0: e.clientY, active: false, ghost: null, over: null };
-    try { d.setPointerCapture(e.pointerId); } catch (err) { }
+             x0: e.clientX, y0: e.clientY, active: false, ghost: null, over: null,
+             byMouse: byMouse, ready: byMouse, timer: null };
     d.addEventListener('pointermove', dragMove);
     d.addEventListener('pointerup', dragEnd);
     d.addEventListener('pointercancel', dragEnd);
+    if (byMouse) {
+      try { d.setPointerCapture(e.pointerId); } catch (err) { }
+      return;
+    }
+    // 指・ペンは長押しだけ。
+    // ⚠つかまえる（setPointerCapture）のも長押しが決まってから。
+    //   先につかまえると、スクロールにゆずれなくなる
+    drag.timer = setTimeout(function () {
+      if (!drag) return;
+      drag.timer = null;
+      drag.ready = true;
+      try { drag.el.setPointerCapture(drag.id); } catch (err) { }
+      lift(drag.x0, drag.y0);
+      try { if (navigator.vibrate) navigator.vibrate(12); } catch (err) { }
+    }, HOLD_MS);
+  }
+
+  // 何もせずに手を離す（スクロールにゆずる）
+  function dropDrag() {
+    if (!drag) return;
+    if (drag.timer) clearTimeout(drag.timer);
+    var d = drag.el;
+    d.removeEventListener('pointermove', dragMove);
+    d.removeEventListener('pointerup', dragEnd);
+    d.removeEventListener('pointercancel', dragEnd);
+    try { d.releasePointerCapture(drag.id); } catch (err) { }
+    drag = null;
   }
 
   function lift(x, y) {
@@ -1121,7 +1157,10 @@
   function dragMove(e) {
     if (!drag) return;
     if (!drag.active) {
-      if (Math.abs(e.clientX - drag.x0) + Math.abs(e.clientY - drag.y0) < 6) return;
+      var far = Math.abs(e.clientX - drag.x0) + Math.abs(e.clientY - drag.y0);
+      // 長押しが決まる前に指が動いた＝スクロールしたいということ。席には手を付けない
+      if (!drag.ready) { if (far > 10) dropDrag(); return; }
+      if (far < 6) return;
       lift(drag.x0, drag.y0);
     }
     e.preventDefault();
@@ -1137,6 +1176,7 @@
 
   function dragEnd() {
     if (!drag) return;
+    if (drag.timer) { clearTimeout(drag.timer); drag.timer = null; }
     var d = drag.el;
     d.removeEventListener('pointermove', dragMove);
     d.removeEventListener('pointerup', dragEnd);
