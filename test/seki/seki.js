@@ -21,7 +21,8 @@
     // サンプルは名簿欄に入れない（消す手間が出るので）
     grp: { on: false, size: 4, style: 'org', look: 'both', num: true },
     gmap: null, gcount: 0,
-    gfix: {}                        // 手で変えたグループ（席の番号 → グループの番号）
+    gfix: {},                       // 手で変えたグループ（席の番号 → グループの番号）
+    hist: []                        // 「1つ戻す」用。入れ替える前の並びを積んでいく
   };
 
   // 班の色（色の見分けがつきにくい方にも伝わる組み合わせ）
@@ -662,6 +663,7 @@
     }
     refreshNames();
     state.gfix = {};                // 席替えをしたら、手で変えた班は白紙に戻す
+    clearHist();                    // ここから先は別の並び。「1つ戻す」も白紙にする
     var opt = collect();
     var msg = $('msg');
     if (!opt.names.length) {
@@ -1020,6 +1022,7 @@
         if (no === now) b.className = 'on';
         b.onclick = function (ev) {
           ev.stopPropagation();
+          pushHist();               // 「1つ戻す」で、グループを変える前にもどせるように
           state.gfix[i] = no;
           closeGroupPick();
           drawSheet();
@@ -1071,6 +1074,31 @@
     });
     el.innerHTML = '<div class="notice warn">' + lines.map(esc).join('<br>') +
       '<br><small>このままでも印刷できます。</small></div>';
+  }
+
+  // 🔴「↩ 1つ戻す」（2026-09-03 本人「ドラッグして移動できるものは入れよう」）。
+  //   ⚠座席表と同じ作り。押すたびに1回ずつ、入れ替えた順にさかのぼる。
+  //     作り直したら白紙にもどす（そこから先は別の並びなので）
+  function pushHist() {
+    if (!state.seats) return;
+    var g = {};
+    for (var k in state.gfix) g[k] = state.gfix[k];
+    state.hist.push({ seats: state.seats.slice(), gfix: g });
+    if (state.hist.length > 50) state.hist.shift();
+    updateUndo();
+  }
+  function clearHist() { state.hist = []; updateUndo(); }
+  function updateUndo() {
+    var b = $('undo'); if (b) b.disabled = !state.hist.length;
+  }
+  function undoOnce() {
+    var h = state.hist.pop();
+    if (!h) { updateUndo(); return; }
+    state.seats = h.seats.slice();
+    state.gfix = h.gfix;
+    drawSheet();
+    updateUndo();
+    if ($('save') && $('save').checked && !state.sample) save();
   }
 
   // ---- 席を動かす（離すとぱちっとはまる） ----
@@ -1209,6 +1237,7 @@
       if (gh.parentNode) gh.parentNode.removeChild(gh);
       d.classList.remove('lift');
       if (to !== from) {
+        pushHist();                 // 入れ替える前の並びを残す（↩ 1つ戻す）
         var t2 = state.seats[from]; state.seats[from] = state.seats[to]; state.seats[to] = t2;
       }
       drawSheet();
@@ -1914,6 +1943,7 @@
     document.addEventListener('click', function (e) {
       if (pick && !pick.contains(e.target)) closeGroupPick();
     });
+    if ($('undo')) $('undo').onclick = undoOnce;
     $('screenOn').onclick = screenOn;
     $('screenOff').onclick = screenOff;
     // 全画面から抜けたとき（Esc・ブラウザのボタン）も、画面をもとに戻す

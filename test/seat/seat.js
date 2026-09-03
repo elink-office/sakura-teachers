@@ -457,8 +457,8 @@
     var el = $('leadIgnoreNote'); if (!el) return;
     var on = $('leadIgnore') ? $('leadIgnore').checked : false;
     el.hidden = !on;
-    if (on) el.innerHTML = '★は班に1人になるように設定しています。いまの並びは★で分けたままなので、' +
-      '<strong>もう一度「席替えする」を押してください。</strong>';
+    if (on) el.innerHTML = '★は班に1人になるように設定しています。いまの並びは★で分けたままです。' +
+      '必要に応じて<strong>もう一度「席替えする」を押してください。</strong>';
   }
 
   // 🔴 何人えらんでいるかだけを、ボタンの右に出す（2026-09-03 本人）。

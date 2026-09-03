@@ -31,10 +31,13 @@
 /* 🔴「＋人を追加」と人数を1行に（2026-09-03 本人・座席表と同じ） */
 .lead-add{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .lead-add .hint{margin:0}
+/* 🔴「1つ戻す」とドラッグの説明を1行に（2026-09-03 本人・座席表と同じ） */
+.drag-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
+.drag-row .drag-note{margin:0;flex:1 1 260px}
 </style>
 </head>
 <body>
-<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/03 10:55</div>
+<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/03 11:24</div>
 
 <header class="site-head noprint">
   <div class="wrap">
@@ -172,7 +175,11 @@
       <div class="plan-tabs" id="tabs"></div>
       <button id="again" type="button">もう一度 作り直す</button>
     </div>
-    <p class="hint drag-note noprint">名前をつまんで動かすと、席を入れかえられます。</p>
+    <!-- 🔴「1つ戻す」は案のタブと同じ行に置かない（2026-09-03 本人・座席表と同じ） -->
+    <div class="drag-row noprint">
+      <button id="undo" type="button" disabled>↩ 1つ戻す</button>
+      <p class="hint drag-note">名前をつまんで動かすと、席を入れかえられます。</p>
+    </div>
 
     <div class="sheet" id="sheet">
       <div class="sheet-head">
@@ -379,7 +386,7 @@
     <span class="copy">© 2026 さくら先生の座席表</span></div>
 </footer>
 
-<script src="group.js?v=8"></script>
+<script src="group.js?v=10"></script>
 <!-- 🔴 印刷用の1枚絵の置き場。画面には出ない。
      ⚠body の直下に置くこと。中に入れると、印刷のときに親ごと隠されて白紙になる -->
 <div id="printImgWrap"></div>

@@ -19,6 +19,7 @@
   var state = {
     names: [], sex: {}, leaders: {}, lastRaw: null,
     ignoreLead: false,              // ★を気にせず班に分ける（2026-09-03）
+    hist: [],                       // 「1つ戻す」用。入れ替える前の並びを積んでいく
     tcols: 2, tnum: 'auto', gsize: 5, board: 'top', order: 'random',
     sep: [], adj: [],
     sizes: [], plans: [], cur: 0, seats: null,
@@ -283,8 +284,8 @@
     var el = $('leadIgnoreNote'); if (!el) return;
     var on = $('leadIgnore') ? $('leadIgnore').checked : false;
     el.hidden = !on;
-    if (on) el.innerHTML = '★は班に1人になるように設定しています。いまの並びは★で分けたままなので、' +
-      '<strong>もう一度「班を作る」を押してください。</strong>';
+    if (on) el.innerHTML = '★は班に1人になるように設定しています。いまの並びは★で分けたままです。' +
+      '必要に応じて<strong>もう一度「班を作る」を押してください。</strong>';
   }
   function readLeads() {
     var out = [], el = $('leadList');
@@ -411,6 +412,7 @@
     refreshNames();
     var n = state.names.length;
     if (!n) { note('名簿を入れてください。'); return; }
+    clearHist();                    // ここから先は別の並び。「1つ戻す」も白紙にする
     refreshRoom();
     var sizes = state.sizes;
     if (sizes.some(function (s) { return s > SLOT; })) {
@@ -692,6 +694,27 @@
 
   // ---- つまんで入れかえ ----
   var drag = null;
+  // 🔴「↩ 1つ戻す」（2026-09-03 本人「ドラッグして移動できるものは入れよう」）。
+  //   ⚠理科室には「手で班を変える」しくみが無いので、席の並びだけを積む
+  function pushHist() {
+    if (!state.seats) return;
+    state.hist.push(state.seats.slice());
+    if (state.hist.length > 50) state.hist.shift();
+    updateUndo();
+  }
+  function clearHist() { state.hist = []; updateUndo(); }
+  function updateUndo() {
+    var b = $('undo'); if (b) b.disabled = !state.hist.length;
+  }
+  function undoOnce() {
+    var h = state.hist.pop();
+    if (!h) { updateUndo(); return; }
+    state.seats = h.slice();
+    drawSheet();
+    updateUndo();
+    if ($('save') && $('save').checked) save();
+  }
+
   function cellAt(x, y) {
     var el = document.elementFromPoint(x, y);
     while (el && el !== document.body) {
@@ -769,6 +792,7 @@
       if (gh.parentNode) gh.parentNode.removeChild(gh);
       d.classList.remove('lift');
       if (to !== from) {
+        pushHist();                 // 入れ替える前の並びを残す（↩ 1つ戻す）
         var t2 = state.seats[from]; state.seats[from] = state.seats[to]; state.seats[to] = t2;
       }
       drawSheet();
@@ -1285,6 +1309,7 @@
     $('addSep').onclick = function () { addPairRow('sepList'); };
     $('addAdj').onclick = function () { addPairRow('adjList'); };
     // ⚠ addLeadRow をそのまま渡さない。クリックの情報が第1引数（名前）に入ってしまう
+    if ($('undo')) $('undo').onclick = undoOnce;
     if ($('addLead')) $('addLead').onclick = function () { addLeadRow(); };
     // 🔴「★を気にせず班に分ける」（2026-09-03 知り合いの先生の要望）
     if ($('leadIgnore')) $('leadIgnore').addEventListener('change', function () {

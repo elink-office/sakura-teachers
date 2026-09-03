@@ -28,9 +28,14 @@
 <link rel="stylesheet" href="../style.css?v=105">
 <link rel="stylesheet" href="seki.css?v=20">
 <link rel="stylesheet" href="../print.css?v=54" media="print">
+<style>
+/* 🔴「1つ戻す」とドラッグの説明を1行に（2026-09-03 本人・座席表と同じ） */
+.drag-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
+.drag-row .drag-note{margin:0;flex:1 1 260px}
+</style>
 </head>
 <body>
-<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/03 10:55</div>
+<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/03 11:24</div>
 
 <header class="site-head noprint">
   <div class="wrap">
@@ -192,7 +197,12 @@
       <button id="again" type="button">もう一度 作り直す</button>
       <button id="screenOn" type="button">📺 モニターに映す</button>
     </div>
-    <p class="hint drag-note noprint">席は自由に動かせます</p>
+    <!-- 🔴「1つ戻す」は案のタブと同じ行に置かない（2026-09-03 本人）。
+         本人「同じ行にあったら埋もれて気づかない」。席をさわる話と同じ行にする -->
+    <div class="drag-row noprint">
+      <button id="undo" type="button" disabled>↩ 1つ戻す</button>
+      <p class="hint drag-note">席は自由に動かせます</p>
+    </div>
 
     <div id="sheetBox">
     <div class="sheet" id="sheet">
@@ -546,7 +556,7 @@
 </footer>
 
 <script src="../seating.js?v=54"></script>
-<script src="seki.js?v=45"></script>
+<script src="seki.js?v=46"></script>
 <!-- 🔴 印刷用の1枚絵の置き場。⚠body の直下に置くこと -->
 <div id="printImgWrap"></div>
 </body>
