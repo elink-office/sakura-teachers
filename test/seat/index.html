@@ -125,7 +125,7 @@ body.screen .seat.dup .nm{text-decoration:none}
 </style>
 </head>
 <body>
-<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/03 09:09</div>
+<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/03 10:27</div>
 
 <header class="site-head noprint">
   <div class="wrap">
@@ -308,6 +308,8 @@ body.screen .seat.dup .nm{text-decoration:none}
         </div>
         <div id="leadList"></div>
         <button class="mini" id="addLead" type="button">＋ 人を追加</button>
+        <!-- 🔴 何人えらんでいるかを出す（2026-09-03 本人）。班の数と見くらべられるように -->
+        <p class="hint" id="leadCount"></p>
         <p class="hint">えらんだ人は、なるべく<strong>1つの班に1人ずつ</strong>になるように分かれます。⑦で画面を保存すると、この指定も一緒に残ります。</p>
       </div>
     </details>
@@ -694,7 +696,7 @@ body.screen .seat.dup .nm{text-decoration:none}
 </footer>
 
 <script src="../seating.js?v=54"></script>
-<script src="seat.js?v=145"></script>
+<script src="seat.js?v=146"></script>
 <!-- 🔴 印刷用の1枚絵の置き場（2026-09-01）。画面には出ない。
      ⚠**body の直下に置くこと。**中に入れると、印刷のときに親ごと隠されて白紙になる -->
 <div id="printImgWrap"></div>

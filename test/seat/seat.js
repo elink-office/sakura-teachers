@@ -441,6 +441,7 @@
     del.onclick = function () { wrap.remove(); leadChanged(); };
     wrap.appendChild(n); wrap.appendChild(del);
     $('leadList').appendChild(wrap);
+    updateLeadCount();
   }
   // えらび直したら、その場で散らし直す（席替えを押し直さなくてよい）
   function leadChanged() {
@@ -449,6 +450,22 @@
       state.seats = spreadLeaders(state.seats);
       drawSheet();
     }
+    updateLeadCount();
+  }
+  // 🔴 いま何人えらんでいるかを出す（2026-09-03 本人）。
+  //   ⭐班の数と並べて出す＝足りているか・多すぎないかが、その場で分かる
+  function updateLeadCount() {
+    var el = $('leadCount'); if (!el) return;
+    var n = Object.keys(condLeaders()).length;
+    var g = (state.grp.on && state.gcount) ? state.gcount : 0;
+    if (!n) { el.innerHTML = ''; return; }
+    var t = 'いま <strong>' + n + '人</strong> えらんでいます';
+    if (g) {
+      t += '（班は ' + g + 'つ）。';
+      if (n > g) t += '<strong>班より多いので、2人になる班ができます。</strong>';
+      else if (n < g) t += '<strong>' + (g - n) + 'つの班には、★の人がいません。</strong>';
+    } else t += '。';
+    el.innerHTML = t;
   }
 
   // ============================================================
@@ -972,6 +989,7 @@
         : '席はマグネットのように入れ替えができます。';
     }
     drawCheck(chk, samap);
+    updateLeadCount();          // 班の数が決まったので、★の人数の案内も出し直す
     bindDrag();
     drawViolations();
     drawDeco();
@@ -1648,6 +1666,7 @@
       if ($('leadList')) {
         $('leadList').innerHTML = '';
         (d.leads || []).forEach(function (nm) { addLeadRow(nm); });
+        updateLeadCount();
       }
       // ⚠前に保存した人はこの項目を持っていない。そのときは既定（出さない）のまま
       if (d.numOn !== undefined && $('numOn')) {
@@ -2035,6 +2054,11 @@
       state.grp.on = this.checked;
       $('grpOpts').hidden = !this.checked;
       $('grpNumWrap').hidden = !this.checked;
+      // 🔴🔴 班に分けた「その瞬間」にも★を散らす（2026-09-03 本人の指摘で判明）。
+      //   ⚠これが無いと、班を使わずに席替えしたあとで班に分けたとき、
+      //     ★が2人の班と0人の班ができたままになる。
+      //     （席替えのときだけ散らしていた＝班が無い状態では散らしようがなかった）
+      if (state.seats && this.checked) state.seats = spreadLeaders(state.seats);
       if (state.seats) drawSheet();
       if ($('save').checked && !state.sample) save();
     });
