@@ -21,7 +21,8 @@
     // サンプルは名簿欄に入れない（消す手間が出るので）
     grp: { on: false, size: 4, style: 'org', look: 'both', num: true },
     gmap: null, gcount: 0,
-    gfix: {}                        // 手で変えたグループ（席の番号 → グループの番号）
+    gfix: {},                       // 手で変えたグループ（席の番号 → グループの番号）
+    hist: []                        // 「1つ戻す」用。入れ替える前の並びを積んでいく
   };
 
   // 班の色（色の見分けがつきにくい方にも伝わる組み合わせ）
@@ -662,6 +663,7 @@
     }
     refreshNames();
     state.gfix = {};                // 席替えをしたら、手で変えた班は白紙に戻す
+    clearHist();                    // ここから先は別の並び。「1つ戻す」も白紙にする
     var opt = collect();
     var msg = $('msg');
     if (!opt.names.length) {
@@ -908,11 +910,14 @@
     var noR = sz('szNo', .52);
     sh.style.setProperty('--snoSize', Math.max(9, Math.round(minSize * noR)) + 'px');
     sh.style.setProperty('--snoPrint', (Math.round(printMM * noR * 10) / 10) + 'mm');
+    // ⚠この一文は毎回ここで書きかえている。HTML側を直しても出ない
     var note = document.querySelector('.drag-note');
     if (note) {
-      note.innerHTML = state.grp.on
+      note.innerHTML = (state.grp.on
         ? '席をドラッグすると、配置の移動ができます。<strong>グループ記号を押すと、席のグループと色を変更できます</strong>'
-        : '席をドラッグすると、配置の移動ができます';
+        : '席をドラッグすると、配置の移動ができます')
+        // 🔴 長押しにしたので、そのことを画面に書く（2026-09-03。座席表と同じ直し）
+        + '<br>スマホ・タブレットは<strong>席を長押ししてから</strong>動かします。';
     }
     bindDrag();
     drawViolations();
@@ -1017,6 +1022,7 @@
         if (no === now) b.className = 'on';
         b.onclick = function (ev) {
           ev.stopPropagation();
+          pushHist();               // 「1つ戻す」で、グループを変える前にもどせるように
           state.gfix[i] = no;
           closeGroupPick();
           drawSheet();
@@ -1070,8 +1076,47 @@
       '<br><small>このままでも印刷できます。</small></div>';
   }
 
-  // ---- 席を動かす（マウスも指も同じ動き。離すとぱちっとはまる） ----
+  // 🔴「↩ 1つ戻す」（2026-09-03 本人「ドラッグして移動できるものは入れよう」）。
+  //   ⚠座席表と同じ作り。押すたびに1回ずつ、入れ替えた順にさかのぼる。
+  //     作り直したら白紙にもどす（そこから先は別の並びなので）
+  function pushHist() {
+    if (!state.seats) return;
+    var g = {};
+    for (var k in state.gfix) g[k] = state.gfix[k];
+    state.hist.push({ seats: state.seats.slice(), gfix: g });
+    if (state.hist.length > 50) state.hist.shift();
+    updateUndo();
+  }
+  function clearHist() { state.hist = []; updateUndo(); }
+  function updateUndo() {
+    var b = $('undo'); if (b) b.disabled = !state.hist.length;
+  }
+  function undoOnce() {
+    var h = state.hist.pop();
+    if (!h) { updateUndo(); return; }
+    state.seats = h.seats.slice();
+    state.gfix = h.gfix;
+    drawSheet();
+    updateUndo();
+    if ($('save') && $('save').checked && !state.sample) save();
+  }
+
+  // ---- 席を動かす（離すとぱちっとはまる） ----
+  // 🔴 マウスはすぐ動く／画面を触ったときは長押ししてから動く（2026-09-03 本人・現場の先生）。
+  //   ⚠座席表と同じ直し。タブレットでスクロールしようとして席が入れ替わるのを止める。
+  //     style.css の .seat も touch-action:manipulation に変えてあるので、
+  //     こちらを直さないと指でまったく動かせなくなる（セットで直すこと）
   var drag = null;
+  var HOLD_MS = 350;                // これだけ押し続けたら持ち上がる（2026-09-03 本人「もう少し早く」）
+
+  // 🔴 持ち上がったあとは、ページのスクロールを止める（座席表と同じ直し・2026-09-03）。
+  //   ⚠ touch-action:manipulation は「スクロールしてよい」なので、指を縦に動かすと
+  //     席とページが両方動く。touchmove を passive:false で受けて打ち消す
+  function blockScroll(e) { if (e.cancelable) e.preventDefault(); }
+  function scrollLock(on) {
+    if (on) document.addEventListener('touchmove', blockScroll, { passive: false });
+    else document.removeEventListener('touchmove', blockScroll, { passive: false });
+  }
 
   function cellAt(x, y) {
     var el = document.elementFromPoint(x, y);
@@ -1093,12 +1138,42 @@
     closeGroupPick();
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     var d = e.currentTarget;
+    var byMouse = (e.pointerType === 'mouse');
     drag = { el: d, from: +d.dataset.i, id: e.pointerId,
-             x0: e.clientX, y0: e.clientY, active: false, ghost: null, over: null };
-    try { d.setPointerCapture(e.pointerId); } catch (err) { }
+             x0: e.clientX, y0: e.clientY, active: false, ghost: null, over: null,
+             byMouse: byMouse, ready: byMouse, timer: null };
     d.addEventListener('pointermove', dragMove);
     d.addEventListener('pointerup', dragEnd);
     d.addEventListener('pointercancel', dragEnd);
+    if (byMouse) {
+      try { d.setPointerCapture(e.pointerId); } catch (err) { }
+      return;
+    }
+    // 指・ペンは長押しだけ。
+    // ⚠つかまえる（setPointerCapture）のも長押しが決まってから。
+    //   先につかまえると、スクロールにゆずれなくなる
+    drag.timer = setTimeout(function () {
+      if (!drag) return;
+      drag.timer = null;
+      drag.ready = true;
+      try { drag.el.setPointerCapture(drag.id); } catch (err) { }
+      scrollLock(true);              // ここから先はページを動かさない
+      lift(drag.x0, drag.y0);
+      try { if (navigator.vibrate) navigator.vibrate(12); } catch (err) { }
+    }, HOLD_MS);
+  }
+
+  // 何もせずに手を離す（スクロールにゆずる）
+  function dropDrag() {
+    if (!drag) return;
+    if (drag.timer) clearTimeout(drag.timer);
+    scrollLock(false);
+    var d = drag.el;
+    d.removeEventListener('pointermove', dragMove);
+    d.removeEventListener('pointerup', dragEnd);
+    d.removeEventListener('pointercancel', dragEnd);
+    try { d.releasePointerCapture(drag.id); } catch (err) { }
+    drag = null;
   }
 
   function lift(x, y) {
@@ -1121,7 +1196,10 @@
   function dragMove(e) {
     if (!drag) return;
     if (!drag.active) {
-      if (Math.abs(e.clientX - drag.x0) + Math.abs(e.clientY - drag.y0) < 6) return;
+      var far = Math.abs(e.clientX - drag.x0) + Math.abs(e.clientY - drag.y0);
+      // 長押しが決まる前に指が動いた＝スクロールしたいということ。席には手を付けない
+      if (!drag.ready) { if (far > 10) dropDrag(); return; }
+      if (far < 6) return;
       lift(drag.x0, drag.y0);
     }
     e.preventDefault();
@@ -1137,6 +1215,8 @@
 
   function dragEnd() {
     if (!drag) return;
+    if (drag.timer) { clearTimeout(drag.timer); drag.timer = null; }
+    scrollLock(false);
     var d = drag.el;
     d.removeEventListener('pointermove', dragMove);
     d.removeEventListener('pointerup', dragEnd);
@@ -1157,6 +1237,7 @@
       if (gh.parentNode) gh.parentNode.removeChild(gh);
       d.classList.remove('lift');
       if (to !== from) {
+        pushHist();                 // 入れ替える前の並びを残す（↩ 1つ戻す）
         var t2 = state.seats[from]; state.seats[from] = state.seats[to]; state.seats[to] = t2;
       }
       drawSheet();
@@ -1441,7 +1522,8 @@
   // ============================================================
   var KEYC = 'sakura-teachers-rosters-v1';
   var KEYOLD = 'sakura-seat-classes-v1';
-  var MAXC = 10;
+  // 🔴 10 → 20（2026-09-01）。⚠置き場は seat / seki / group で共通。上限は3つ同時に直す
+  var MAXC = 20;
 
   function loadStore() {
     try {
@@ -1553,7 +1635,7 @@
   }
   function doClsSave() {
     var st = loadStore(), c = curClass(st);
-    if (!c) { alert('上書きする名簿をえらんでください。はじめて残すときは「新しく保存」です。'); return; }
+    if (!c) { alert('上書きする名簿をえらんでください。はじめて残すときは「新しい名前で保存」です。'); return; }
     c.names = $('names').value;
     c.seki = snapshot();
     if (!saveStore(st)) return;
@@ -1861,6 +1943,7 @@
     document.addEventListener('click', function (e) {
       if (pick && !pick.contains(e.target)) closeGroupPick();
     });
+    if ($('undo')) $('undo').onclick = undoOnce;
     $('screenOn').onclick = screenOn;
     $('screenOff').onclick = screenOff;
     // 全画面から抜けたとき（Esc・ブラウザのボタン）も、画面をもとに戻す

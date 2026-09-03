@@ -24,9 +24,14 @@
 </script>
 <title>席次表メーカー｜会議・研修・大学の席次表を無料で自動作成</title>
 <meta name="description" content="席次表の作り方は簡単。名簿を貼るだけで、会議・研修・セミナー・大学の席次表が自動で作れる無料ツールです。前を向いて並ぶスクール形式で、席順は名簿順とランダムから選べます。用紙に合わせて自動で調整し、A4の1枚に収めるので、2ページに分かれません。会社名・役職（肩書き）・フリガナ・名前を1マスに並べ、敬称は様・さん・先生から選べます。Excelの名簿から複数の列をそのまま貼り付けでき、通し番号の向きも指定できます。印刷とPDFもこのページから。名簿はブラウザの中だけで処理し、AIの学習にも使われません。">
-<link rel="stylesheet" href="../style.css?v=101">
+<link rel="stylesheet" href="../style.css?v=105">
 <link rel="stylesheet" href="seki.css?v=20">
 <link rel="stylesheet" href="../print.css?v=54" media="print">
+<style>
+/* 🔴「1つ戻す」とドラッグの説明を1行に（2026-09-03 本人・座席表と同じ） */
+.drag-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
+.drag-row .drag-note{margin:0;flex:1 1 260px}
+</style>
 </head>
 <body>
 
@@ -45,6 +50,8 @@
   <h1>席次表メーカー</h1>
   <p class="catch">会議も研修も、名簿を貼るだけ</p>
   <p class="lead"><strong>用紙に合わせて自動で調整し、A4の1枚に収めます。</strong>会社名・役職・フリガナ・名前を並べた席次表が、そのまま印刷できます。Excelの名簿から複数の列をまとめて貼り付けられるので、打ち直しはいりません。</p>
+  <p class="tip-guide noprint"><span class="tip-mark"></span> のしるしを押すと、くわしい説明が出ます。</p>
+
 
     <section class="card noprint">
       <h2><span class="step">1</span>Excelの名簿の貼り付け&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h2>
@@ -188,7 +195,12 @@
       <button id="again" type="button">もう一度 作り直す</button>
       <button id="screenOn" type="button">📺 モニターに映す</button>
     </div>
-    <p class="hint drag-note noprint">席は自由に動かせます</p>
+    <!-- 🔴「1つ戻す」は案のタブと同じ行に置かない（2026-09-03 本人）。
+         本人「同じ行にあったら埋もれて気づかない」。席をさわる話と同じ行にする -->
+    <div class="drag-row noprint">
+      <button id="undo" type="button" disabled>↩ 1つ戻す</button>
+      <p class="hint drag-note">席は自由に動かせます</p>
+    </div>
 
     <div id="sheetBox">
     <div class="sheet" id="sheet">
@@ -281,7 +293,7 @@
         <p>色は印刷にも画像にもそのまま出ます。</p>
       </div>
       <p class="note-sm">
-        席は<strong>ドラッグで動かせます</strong>。グループ記号を押すと、その席のグループと色を変えられます。
+        席は<strong>ドラッグで動かせます</strong>（スマホ・タブレットは長押ししてから）。グループ記号を押すと、その席のグループと色を変えられます。
       </p>
       <label class="chk-inline">
         <input type="checkbox" id="grpOn"> グループに分ける
@@ -424,10 +436,10 @@
     <p class="safe">🔒 <strong>使ってる機器の中だけで完結します。</strong>保存したものはネット上に流れません。</p>
 
     <div class="cls-box">
-      <h3>名簿に名前を付けて保存（<span id="clsCount">0／10件</span>）</h3>
+      <h3>名簿に名前を付けて保存（<span id="clsCount">0／20件</span>）</h3>
       <p class="hint">名簿・会場の形・条件・見た目の設定を、まとめて残すときに使います。</p>
       <p class="btn-row">
-        <button class="mini" id="clsNew" type="button">新しく保存</button>
+        <button class="mini" id="clsNew" type="button">新しい名前で保存</button>
         <button class="mini" id="clsSave" type="button">上書き</button>
         <button class="mini" id="clsDel" type="button">削除</button>
       </p>
@@ -537,12 +549,12 @@
 <div class="rotate-tip noprint">横向きにすると大きく見えます</div>
 
 <footer class="noprint">
-  <div class="wrap"><span class="fnav"><a href="../contact/">お問い合わせ</a>　<a href="../privacy/">プライバシーポリシー</a></span>
+  <div class="wrap"><span class="fnav"><a href="../about/">運営者情報</a>　<a href="../contact/">お問い合わせ</a>　<a href="../privacy/">プライバシーポリシー</a></span>
     <span class="copy">© 2026 さくら先生の座席表</span></div>
 </footer>
 
 <script src="../seating.js?v=54"></script>
-<script src="seki.js?v=41"></script>
+<script src="seki.js?v=46"></script>
 <!-- 🔴 印刷用の1枚絵の置き場。⚠body の直下に置くこと -->
 <div id="printImgWrap"></div>
 </body>

@@ -58,7 +58,14 @@
 .t-col.r h2{color:var(--midori)}
 .t-col .who{font-size:.8rem;color:var(--ink-soft);margin:0 0 22px}
 
-.t-tool{display:block;text-decoration:none;color:var(--ink);margin-bottom:20px}
+.t-tool{
+  display:block;text-decoration:none;color:var(--ink);margin-bottom:20px;
+  /* ⚠ スマホで長押しすると、リンクのウィンドウ（コンテキストメニュー）が出てしまう。
+     絵を触って確かめたい人の邪魔になるので止める（2026-09-03 本人） */
+  -webkit-touch-callout:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.t-tool img{-webkit-touch-callout:none;-webkit-user-drag:none;user-select:none;-webkit-user-select:none}
 /* 🔴 カードの中の完成画像（2026-09-01）。
    ⚠2枚の縦横比が少し違う（座席表1.293／席次表1.320）ので、枠を1.3:1に固定して中に収める。
      こうすると、あとで撮り直しても2つのカードは同じ形のまま
@@ -67,7 +74,12 @@
 .t-shot{
   display:block;width:100%;height:auto;aspect-ratio:1.3 / 1;
   object-fit:contain;background:#fff;
-  border:1px solid var(--line);border-radius:10px;margin:0 0 12px;
+  border:0;border-radius:10px;margin:0 0 14px;
+  /* 🔴 スマホには「マウスを乗せる」が無い＝触った時点でもう押した後（2026-09-03 本人）。
+     だから**触る前から押せる板に見せる**。常に影を敷いて浮かせておく。
+     ⚠ 線は付けない（本人「ピンクの線（緑の線）はなしにしてみて」）。
+       輪郭は影だけで出す＝そのぶん影は強めにする */
+  box-shadow:0 5px 16px rgba(0,0,0,.17), 0 1px 3px rgba(0,0,0,.10);
 }
 .t-tool .nm{font-size:1.08rem;font-weight:700;display:block;margin-bottom:5px}
 .t-tool .ds{font-size:.86rem;color:var(--ink-soft);display:block;line-height:1.7}
@@ -82,6 +94,25 @@
 .t-col.l .t-tool .go{background:var(--pink)}
 .t-col.r .t-tool .go{background:var(--midori)}
 .t-tool:hover .go{opacity:.88}
+
+/* 🔴 絵を押せることが分かるようにする（2026-09-03 本人）。
+   本人「絵をタップしたら動くっていうイメージがないんじゃないかな。
+        マウスポインタを置くと影とか光るとか、そういう仕組みにして」
+   ⚠ hover:hover ＝マウスがある機器だけ。付けないと、スマホで触ったあと色が残り続ける */
+.t-tool{transition:transform .18s ease, box-shadow .18s ease}
+.t-shot{transition:box-shadow .18s ease, border-color .18s ease, filter .18s ease}
+@media (hover:hover){
+  .t-tool:hover{transform:translateY(-3px)}
+  /* マウスを乗せたら、さらに高く浮かせる */
+  .t-tool:hover .t-shot{
+    box-shadow:0 14px 30px rgba(0,0,0,.22), 0 2px 5px rgba(0,0,0,.12);
+    filter:brightness(1.02);
+  }
+  .t-tool:hover .go{opacity:1;filter:brightness(.93)}
+}
+/* ⭐ 押した瞬間は沈ませる（指の人には、これが「押せた」の合図になる） */
+.t-tool:active{transform:scale(.985)}
+.t-tool:active .t-shot{box-shadow:0 1px 4px rgba(0,0,0,.16)}
 
 /* じゅんび中は、枠を作らず文字だけ。できているものと見分けがつくように */
 .t-soon{border-top:1px solid var(--line);margin-top:22px;padding-top:16px}

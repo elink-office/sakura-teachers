@@ -14,7 +14,9 @@
   //   ⚠置き場はドメイン単位なので、/seat/ で保存したものを /seki/ から読める
   var KEYC = 'sakura-teachers-rosters-v1';
   var KEYOLD = 'sakura-seat-classes-v1';   // 前の置き場。初回に引き継いで、そのまま残しておく
-  var MAXC = 10;   // クラス（名簿）は10件まで＝担任6＋専科・他大学など
+  // 🔴 10 → 20 に増やした（2026-09-01 本人）。理科室・図工室の専科は10クラスほど受け持つ。
+  //   ⚠3つのツールで同じ置き場を見ているので、上限は seat / seki / group を同時に直す
+  var MAXC = 20;   // 名簿は20件まで
   var MAXR = 20;   // 記録は20件まで（月1回とはかぎらないため。2026-08-31 本人）
 
   var state = {
@@ -23,10 +25,13 @@
     plans: [], cur: 0, seats: null,
     sex: {},                        // 名前 -> 'm' / 'f'（名前をキーにするので名簿を貼り直しても残る）
     sample: false, sampleNames: [],  // サンプルは名簿欄に入れない（消す手間が出るので）
-    grp: { on: false, size: 4, style: 'block', look: 'both', num: true, mark: false },
+    grp: { on: false, size: 4, style: 'block', look: 'both', num: true, mark: false, ignoreLead: false },
     gmap: null, gcount: 0,
     gfix: {},                       // 先生が手で変えた班（席の番号 → 班の番号）
-    leaders: {},                    // 班長（名簿に ★ を付けた人）名前 -> true
+    leaders: {},                    // ★（班に1人ずつにする人）名前 -> true。名簿の★＋条件でえらんだ人
+    nums: {},                       // 出席番号 名前 -> '12'（名簿に番号が無ければ名簿の順）
+    numOn: false,                   // 席に出席番号を出すか（出席番号順をえらぶと自動で入る）
+    hist: [],                       // 「1つ戻す」用。入れ替える前の並びを積んでいく
     lastRaw: null,                  // 前に読んだ名簿の文字列（男女を入れ直しすぎないため）
     avoid: { on: false, back: 3 }   // 前の班と同じメンバーをさける／何回さかのぼるか
   };
@@ -80,16 +85,25 @@
   // 手で「11 佐藤 はなこ 男」のように空白で区切って書く人むけ
   var LEAD_NUM = /^[0-9０-９]+[ 　]+/;
   var TAIL_SEX = /[ 　]+(男子|女子|男|女)$/;
+  // 🔴 出席番号は捨てずに持っておく（2026-09-03 本人・現場の先生の要望）。
+  //   ⚠これまでは「数字だけの列＝出席番号」を読み捨てていた（名前だけあればよかったため）。
+  //     席に出すようになったので、拾って out.num に入れる。名前の判定は今までどおり
+  function toHalf(s) {
+    return s.replace(/[０-９]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 0xFEE0); });
+  }
   function parseLine(line) {
     // ⚠タブは名簿の欄に打てないので、カンマでも列に分ける（2026-09-01 本人）。
     //   ⚠空白は区切りにしない。名前に空白が入る（やまだ たろう）ため
     var cells = line.split(/[\t,，]/)
       .map(function (x) { return x.replace(/^[\s　]+/, '').replace(/[\s　]+$/, ''); })
       .filter(function (x) { return x.length; });
-    var out = { name: '', lead: false, sex: '' };
+    var out = { name: '', lead: false, sex: '', num: '' };
     if (cells.length && cells.every(function (c) { return HEAD_WORD.test(c); })) return out;
     if (cells.length === 1) {
-      var one = cells[0].replace(LEAD_NUM, '');
+      var one = cells[0];
+      // 「11 佐藤 はなこ」の先頭の数字＝出席番号。外す前に控えておく
+      var ln = one.match(LEAD_NUM);
+      if (ln) { out.num = toHalf(ln[0].replace(/[ 　]+$/, '')); one = one.replace(LEAD_NUM, ''); }
       var m = one.match(TAIL_SEX);
       if (m) {
         out.sex = (m[1].charAt(0) === '女') ? 'f' : 'm';
@@ -102,14 +116,24 @@
       if (MARK_ONLY.test(c)) { out.lead = true; continue; }
       if (SEX_M.test(c)) { out.sex = 'm'; continue; }
       if (SEX_F.test(c)) { out.sex = 'f'; continue; }
-      if (NUM_ONLY.test(c)) continue;
+      // ⚠数字だけの列は出席番号。いちばん最初のものを使う（2つあることは無いが念のため）
+      if (NUM_ONLY.test(c)) { if (!out.num) out.num = toHalf(c); continue; }
       if (!out.name) out.name = c;
     }
     if (isLeadName(out.name)) { out.lead = true; out.name = stripLead(out.name); }
     return out;
   }
+  // 「詳しい条件」の「班に1人ずつにする人」でえらんだ人（名簿の★と同じ扱い）
+  function condLeaders() {
+    var out = {}, el = $('leadList');
+    if (!el) return out;
+    Array.prototype.forEach.call(el.querySelectorAll('select.nameSel'), function (s) {
+      if (s.value) out[s.value] = true;
+    });
+    return out;
+  }
   function readNames() {
-    var out = [], lead = {};
+    var out = [], lead = {}, nums = {}, seq = 0;
     // ⚠男女を入れるのは、名簿を貼り直したときだけ。
     //   毎回入れ直すと、③で手で変えたぶんが元にもどってしまう
     var raw = $('names').value;
@@ -118,10 +142,17 @@
       var p = parseLine(line);
       if (!p.name) return;
       out.push(p.name);
+      seq++;
+      // 名簿に番号があればその番号。無ければ名簿にならんでいる順（1・2・3…）
+      nums[p.name] = p.num || String(seq);
       if (p.lead) lead[p.name] = true;
       if (fresh && p.sex) state.sex[p.name] = p.sex;
     });
     state.lastRaw = raw;
+    state.nums = nums;
+    // 名簿に★を書かずに、条件のほうでえらんだ人も合わせる（2026-09-03）
+    var cl = condLeaders();
+    for (var k in cl) lead[k] = true;
     state.leaders = lead;
     return out;
   }
@@ -130,6 +161,10 @@
     var typed = readNames();
     if (state.sample && !typed.length) {
       state.names = state.sampleNames;
+      // サンプルにも出席番号を付けておく（並んでいる順）
+      var sn = {};
+      state.names.forEach(function (n, i) { sn[n] = String(i + 1); });
+      state.nums = sn;
       $('count').textContent = 'サンプル ' + state.names.length + '人';
     } else {
       state.names = typed;
@@ -381,6 +416,61 @@
     $('fixList').appendChild(wrap);
   }
 
+  // 🔴 ★（班に1人ずつにする人）を、名簿を書きかえずにえらぶ（2026-09-03 本人）。
+  //   ⚠名簿の★と合わせて効く。消したいときは、この行を削除する
+  function addLeadRow(name) {
+    var wrap = document.createElement('div');
+    wrap.className = 'pair';
+    var n = document.createElement('select'); n.className = 'nameSel ph';
+    n.dataset.ph = '人をえらぶ'; fillNames(n);
+    // 保存から戻すとき。⚠この時点ではまだ名簿を読み込んでいないことがあるので、
+    //   その名前を自分で足してからえらぶ（あとで名簿が入れば、そのまま残る）
+    if (name) {
+      var has = false, i;
+      for (i = 0; i < n.options.length; i++) if (n.options[i].value === name) has = true;
+      if (!has) n.add(new Option(name, name));
+      n.value = name;
+      n.classList.remove('ph');
+    }
+    n.addEventListener('change', function () {
+      n.classList.toggle('ph', !n.value);
+      leadChanged();
+    });
+    var del = document.createElement('button');
+    del.type = 'button'; del.className = 'mini'; del.textContent = '削除';
+    del.onclick = function () { wrap.remove(); leadChanged(); };
+    wrap.appendChild(n); wrap.appendChild(del);
+    $('leadList').appendChild(wrap);
+    updateLeadCount();
+  }
+  // えらび直したら、その場で散らし直す（席替えを押し直さなくてよい）
+  function leadChanged() {
+    refreshNames();
+    if (state.seats && state.opt) {
+      state.seats = spreadLeaders(state.seats);
+      drawSheet();
+    }
+    updateLeadCount();
+  }
+  // ★を気にせず班に分ける、を入れたときの案内（2026-09-03）
+  function leadIgnoreNote() {
+    var el = $('leadIgnoreNote'); if (!el) return;
+    var on = $('leadIgnore') ? $('leadIgnore').checked : false;
+    el.hidden = !on;
+    if (on) el.innerHTML = '★は班に1人になるように設定しています。いまの並びは★で分けたままです。' +
+      '必要に応じて<strong>もう一度「席替えする」を押してください。</strong>';
+  }
+
+  // 🔴 何人えらんでいるかだけを、ボタンの右に出す（2026-09-03 本人）。
+  //   ⚠班の数と見くらべる文は出さない。本人「班じゃないこともあるから」
+  //     ＝★を班分け以外の目じるしに使う先生がいる。
+  //   （★のいない班の知らせは、これまでどおり④の知らせに出る）
+  function updateLeadCount() {
+    var el = $('leadCount'); if (!el) return;
+    var n = Object.keys(condLeaders()).length;
+    el.textContent = n ? n + '人選択中' : '';
+  }
+
   // ============================================================
   //  班長・前の班・クラスの保存（2026-08-31）
   // ============================================================
@@ -406,6 +496,8 @@
   // ⚠条件（離す・隣にする・席を決める）を壊さない相手を先に探す。
   //   どうしても壊れるときは班長を優先する＝そのときは赤い印で先生に見える
   function spreadLeaders(seats) {
+    // 🔴「★を気にせず班に分ける」なら、何もしない（2026-09-03 知り合いの先生の要望）
+    if (state.grp.ignoreLead) return seats;
     if (!state.grp.on || !hasLeaders() || !state.opt) return seats;
     var o = state.opt, s2 = seats.slice(), loop, i;
     for (loop = 0; loop < 30; loop++) {
@@ -518,13 +610,25 @@
 
   // 画面に出すための情報（班長のいない班／前回も同じ班／前回と同じ席）
   function checkInfo(gm) {
-    var out = { noLead: [], dup: {}, dupText: [], same: 0 };
+    var out = { noLead: [], dup: {}, dupText: [], same: 0, sizeNote: null };
     var i, g, mem = {}, seats = state.seats;
     if (!seats) return out;
     if (gm) {
       for (i = 0; i < seats.length; i++) {
         g = gm[i];
         if (g && seats[i]) (mem[g] = mem[g] || []).push(seats[i]);
+      }
+      // 🔴 指定した人数の班にならなかったときだけ知らせる（2026-09-02 本人）。
+      //   ⚠決め打ちで出さない。**実際にできた班を数えて**、届かなかったときだけ。
+      //   理由＝机のかたまりは2列ずつの帯で切るので、帯の人数が指定で割り切れないと
+      //     「多い班は作らない」の決まりで人数が落ちる（35人・6列だと帯が12人＝5人班にならない）
+      //   ⚠「縦の列ごと」は人数で切っていないので出さない
+      if (state.grp.style !== 'col') {
+        var mx = 0, tot = 0;
+        for (g in mem) { if (mem[g].length > mx) mx = mem[g].length; tot += mem[g].length; }
+        // ⚠そもそも人数が足りないときは出さない（見れば分かることなので）
+        if (mx && tot >= state.grp.size && mx < state.grp.size)
+          out.sizeNote = { want: state.grp.size, got: mx };
       }
       if (hasLeaders()) {
         for (g in mem) {
@@ -584,10 +688,16 @@
         fix[name] = (r - 1) * state.cols + (c - 1);
       } else zone[name] = kind;
     });
+    // 🔴「隣の条件は設定しない」のチェックが入っているあいだは、
+    //   離す・隣にするの条件そのものを使わない（2026-09-03 本人）。
+    //   ⚠ラジオの4つ目にしていたのをやめて、チェックの下に3つを置く形にした。
+    //     本人「4つが同列だと、ボタンを変えたら設定が変わるってのが想像しにくい」
+    var off = $('modeOff') ? $('modeOff').checked : false;
+    var uiMode = (document.querySelector('input[name=mode]:checked') || {}).value || 'cross';
     return {
       names: state.names, cols: state.cols, rows: state.rows,
-      mode: (document.querySelector('input[name=mode]:checked') || {}).value || 'cross',
-      separate: pairs('sepList'), adjacent: pairs('adjList'),
+      mode: uiMode,
+      separate: off ? [] : pairs('sepList'), adjacent: off ? [] : pairs('adjList'),
       fixed: fix, zone: zone
     };
   }
@@ -635,6 +745,7 @@
     refreshNames();
     renderSexList();
     state.gfix = {};                // 席替えをしたら、手で変えた班は白紙に戻す
+    clearHist();                    // ここから先は別の並び。「1つ戻す」も白紙にする
     var opt = collect();
     var msg = $('msg');
     if (!opt.names.length) {
@@ -672,13 +783,18 @@
       return;
     }
     state.opt = opt;
+    // 🔴🔴 班長を先に散らしてから、前の班との重なりを数える（2026-09-02 本人）。
+    //   ⚠前は順番が逆だった＝重なりの少ない案を選んだあとに班長を入れ替えていたので、
+    //     せっかく避けたペアが、班長の入れ替えで戻ることがあった。
+    //   本人「班長はひとつの班に1人が原則。それが守られる形で」
+    //   ＝班長を1人ずつにするのが先。そのうえで、重なりのいちばん少ないものを選ぶ
+    //   ⚠ hasLeaders() が偽なら spreadLeaders は何もしないので、★を使わない先生は今までどおり
+    plans = plans.map(function (pl) { return spreadLeaders(pl); });
     if (pairs) {
       plans = plans.map(function (pl) { return { s: pl, sc: planScore(pl, pairs, opt) }; })
         .sort(function (a, b) { return a.sc - b.sc; })
         .slice(0, 3).map(function (x) { return x.s; });
     }
-    // 班長は席が決まってから散らす（班のかたちは崩さない）
-    plans = plans.map(function (pl) { return spreadLeaders(pl); });
     state.plans = plans; state.cur = 0;
     state.seats = plans[0].slice();
     $('result').hidden = false;
@@ -798,6 +914,13 @@
           var col = sexColor(name);
           if (col) sp.style.color = col;
           d.appendChild(sp);
+          // 🔴 出席番号は左下（2026-09-03）。班番号＝左上・★＝右上とぶつからない場所
+          if (state.numOn && state.nums[name]) {
+            var no = document.createElement('span');
+            no.className = 'no';
+            no.textContent = state.nums[name];
+            d.appendChild(no);
+          }
         } else d.textContent = '空';
         g.appendChild(d);
       }
@@ -860,13 +983,18 @@
       sp.style.setProperty('--nmPrint', minMm + 'mm');
     });
     }
+    // ⚠この一文は毎回ここで書きかえている。HTML側を直しても出ない（2026-09-03 に気づいた）
     var note = document.querySelector('.drag-note');
     if (note) {
+      // 🔴 文はこれだけ（2026-09-03 本人の指定）。
+      //   ⚠長押しのことも「1つ戻す」のことも、ここには書かない。
+      //     長押しは④の説明に、戻すのはこの文のすぐ左のボタンにある
       note.innerHTML = state.grp.on
-        ? '席はマグネットのように、ドラッグで入れ替えができます。<strong>班番号を押すと、席の班と色を変更できます</strong>'
-        : '席はマグネットのように、ドラッグで入れ替えができます';
+        ? '席はマグネットのように入れ替えができます。<strong>班番号を押すと、席の班と色を変更できます</strong>。'
+        : '席はマグネットのように入れ替えができます。';
     }
     drawCheck(chk, samap);
+    updateLeadCount();          // 班の数が決まったので、★の人数の案内も出し直す
     bindDrag();
     drawViolations();
     drawDeco();
@@ -879,8 +1007,14 @@
     var el = $('gInfo');
     if (!el) return;
     var li = [];
-    if (chk.noLead.length)
-      li.push('<strong>リーダー格がいない班</strong>：' + chk.noLead.join('班・') + '班');
+    // ⚠文言は本人が書いたもの（2026-09-02）。勝手に言い換えない
+    if (chk.sizeNote)
+      li.push('<strong>' + chk.sizeNote.want + '人の班になりません</strong>：' +
+        '2列ずつのまとまりで分けているからです。' + chk.sizeNote.want + '人班にしたい場合は、' +
+        '教室の形を変更するか、マスの左上の班の番号を押して班を変更してください。');
+    // ⚠「★を気にせず班に分ける」ときは出さない（気にしないと決めた人に見せる意味がない）
+    if (chk.noLead.length && !state.grp.ignoreLead)
+      li.push('<strong>★の人がいない班</strong>：' + chk.noLead.join('班・') + '班');
     if (chk.dupText.length) {
       // ⚠多いと一行が長くなりすぎるので、6組までにして残りは数で言う
       var show = chk.dupText.slice(0, 6).map(esc).join('／');
@@ -998,6 +1132,7 @@
         if (no === now) b.className = 'on';
         b.onclick = function (ev) {
           ev.stopPropagation();
+          pushHist();               // 「1つ戻す」で、班を変える前にもどせるように
           state.gfix[i] = no;
           closeGroupPick();
           drawSheet();
@@ -1049,8 +1184,50 @@
       '<br><small>このままでも印刷できます。</small></div>';
   }
 
-  // ---- 席を動かす（マウスも指も同じ動き。離すとぱちっとはまる） ----
+  // ---- 1つ戻す（2026-09-03 本人・現場の先生「手が当たっただけで入れ替わって困る」） ----
+  //   ⚠押すたびに1回ずつ、入れ替えた順にさかのぼる。
+  //     「席替えする」を押し直したら白紙にもどす（そこから先は別の並びなので）
+  function pushHist() {
+    if (!state.seats) return;
+    var g = {};
+    for (var k in state.gfix) g[k] = state.gfix[k];
+    state.hist.push({ seats: state.seats.slice(), gfix: g });
+    if (state.hist.length > 50) state.hist.shift();
+    updateUndo();
+  }
+  function clearHist() { state.hist = []; updateUndo(); }
+  function updateUndo() {
+    var b = $('undo'); if (b) b.disabled = !state.hist.length;
+  }
+  function undoOnce() {
+    var h = state.hist.pop();
+    if (!h) { updateUndo(); return; }
+    state.seats = h.seats.slice();
+    state.gfix = h.gfix;
+    drawSheet();
+    updateUndo();
+    if ($('save').checked && !state.sample) save();
+  }
+
+  // ---- 席を動かす（離すとぱちっとはまる） ----
+  // 🔴 マウスはすぐ動く／画面を触ったときは長押ししてから動く（2026-09-03 本人・現場の先生）。
+  //   ⚠タブレットでスクロールしようとして席が入れ替わる、という声。
+  //     PCでも画面を触れる機種は同じだったので、「PCか否か」ではなく
+  //     「マウスか指か」で分ける（pointerType で分かる）
   var drag = null;
+  var HOLD_MS = 350;                // これだけ押し続けたら持ち上がる（2026-09-03 本人「もう少し早く」）
+
+  // 🔴 持ち上がったあとは、ページのスクロールを止める（2026-09-03 本人）。
+  //   本人「縦に動かそうとするとスクロールも一緒に動いてしまう」。
+  //   ⚠ touch-action:manipulation は「スクロールしてよい」なので、指を縦に動かすと
+  //     席とページが両方動く。pointermove の preventDefault だけでは止まらない。
+  //   ⚠ touchmove を **passive:false** で受けて打ち消すのが確実。
+  //     長押しのあいだ指は止まっているので、この時点ではスクロールがまだ始まっておらず、打ち消せる
+  function blockScroll(e) { if (e.cancelable) e.preventDefault(); }
+  function scrollLock(on) {
+    if (on) document.addEventListener('touchmove', blockScroll, { passive: false });
+    else document.removeEventListener('touchmove', blockScroll, { passive: false });
+  }
 
   function cellAt(x, y) {
     var el = document.elementFromPoint(x, y);
@@ -1072,12 +1249,43 @@
     closeGroupPick();
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     var d = e.currentTarget;
+    var byMouse = (e.pointerType === 'mouse');
     drag = { el: d, from: +d.dataset.i, id: e.pointerId,
-             x0: e.clientX, y0: e.clientY, active: false, ghost: null, over: null };
-    try { d.setPointerCapture(e.pointerId); } catch (err) { }
+             x0: e.clientX, y0: e.clientY, active: false, ghost: null, over: null,
+             byMouse: byMouse, ready: byMouse, timer: null };
     d.addEventListener('pointermove', dragMove);
     d.addEventListener('pointerup', dragEnd);
     d.addEventListener('pointercancel', dragEnd);
+    if (byMouse) {
+      try { d.setPointerCapture(e.pointerId); } catch (err) { }
+      return;
+    }
+    // 指・ペンは長押しだけ。
+    // ⚠つかまえる（setPointerCapture）のも長押しが決まってから。
+    //   先につかまえると、スクロールにゆずれなくなる
+    drag.timer = setTimeout(function () {
+      if (!drag) return;
+      drag.timer = null;
+      drag.ready = true;
+      try { drag.el.setPointerCapture(drag.id); } catch (err) { }
+      scrollLock(true);              // ここから先はページを動かさない
+      lift(drag.x0, drag.y0);
+      // 持ち上がった合図。⚠対応していない機器では何も起きない（それでよい。浮いて見える）
+      try { if (navigator.vibrate) navigator.vibrate(12); } catch (err) { }
+    }, HOLD_MS);
+  }
+
+  // 何もせずに手を離す（スクロールにゆずる）
+  function dropDrag() {
+    if (!drag) return;
+    if (drag.timer) clearTimeout(drag.timer);
+    scrollLock(false);
+    var d = drag.el;
+    d.removeEventListener('pointermove', dragMove);
+    d.removeEventListener('pointerup', dragEnd);
+    d.removeEventListener('pointercancel', dragEnd);
+    try { d.releasePointerCapture(drag.id); } catch (err) { }
+    drag = null;
   }
 
   function lift(x, y) {
@@ -1100,7 +1308,10 @@
   function dragMove(e) {
     if (!drag) return;
     if (!drag.active) {
-      if (Math.abs(e.clientX - drag.x0) + Math.abs(e.clientY - drag.y0) < 6) return;
+      var far = Math.abs(e.clientX - drag.x0) + Math.abs(e.clientY - drag.y0);
+      // 長押しが決まる前に指が動いた＝スクロールしたいということ。席には手を付けない
+      if (!drag.ready) { if (far > 10) dropDrag(); return; }
+      if (far < 6) return;
       lift(drag.x0, drag.y0);
     }
     e.preventDefault();
@@ -1116,6 +1327,8 @@
 
   function dragEnd() {
     if (!drag) return;
+    if (drag.timer) { clearTimeout(drag.timer); drag.timer = null; }
+    scrollLock(false);
     var d = drag.el;
     d.removeEventListener('pointermove', dragMove);
     d.removeEventListener('pointerup', dragEnd);
@@ -1136,6 +1349,7 @@
       if (gh.parentNode) gh.parentNode.removeChild(gh);
       d.classList.remove('lift');
       if (to !== from) {
+        pushHist();                 // 入れ替える前の並びを残す（↩ 1つ戻す）
         var t2 = state.seats[from]; state.seats[from] = state.seats[to]; state.seats[to] = t2;
       }
       drawSheet();
@@ -1382,6 +1596,19 @@
         cols: $('cols').value, rows: $('rows').value,
         board: $('board').value,
         mode: (document.querySelector('input[name=mode]:checked') || {}).value || 'cross',
+        modeOff: $('modeOff') ? $('modeOff').checked : true,
+        // ⚠ grp の中に入れずに、ここに置く（grp は席次表とも形をそろえてあるため）
+        // 🔴「班に1人ずつにする人」も保存する（2026-09-03 本人「ページを保存すれば班長ごと保存されるよね？」）。
+        //   ⚠ほかの条件（離す・隣にする・席を決める）は保存していない。ここだけ別あつかい＝
+        //     名簿の★をやめたので、ここが残らないと毎回えらび直しになるため
+        leads: (function () {
+          var a = [], el = $('leadList');
+          if (el) Array.prototype.forEach.call(el.querySelectorAll('select.nameSel'), function (x) {
+            if (x.value) a.push(x.value);
+          });
+          return a;
+        })(),
+        numOn: $('numOn') ? $('numOn').checked : false,
         nameMode: $('nameMode').value, nameAlign: $('nameAlign') ? $('nameAlign').value : 'center',
         font: $('font').value, bold: $('bold').checked,
         showCredit: $('showCredit').checked,
@@ -1433,8 +1660,27 @@
       // ⚠えらぶ形にしたので、前に保存した 9 以上は入らない。8 におさめる
       $('cols').value = clampNum(d.cols, 6); $('rows').value = clampNum(d.rows, 6);
       $('board').value = d.board || 'top';
-      var mr = document.querySelector('input[name=mode][value="' + (d.mode || 'cross') + '"]');
+      // ⚠前に保存した人は 'cross' などを持っている。そのままにする（勝手に外さない）。
+      //   ⚠一時期 'none' で保存していた版がある。そのときは既定（前後左右）にもどす
+      var dm = d.mode || 'cross';
+      if (dm === 'none') dm = 'cross';
+      var mr = document.querySelector('input[name=mode][value="' + dm + '"]');
       if (mr) mr.checked = true;
+      // ⚠この項目を持っていない人（前の版）は「設定しない」にしておく
+      if ($('modeOff')) $('modeOff').checked = (d.modeOff === undefined) ? true : !!d.modeOff;
+      modeChanged();
+      // 「班に1人ずつにする人」を戻す（⚠いったん空にしてから入れ直す。二重に増えるのを防ぐ）
+      if ($('leadList')) {
+        $('leadList').innerHTML = '';
+        (d.leads || []).forEach(function (nm) { addLeadRow(nm); });
+        updateLeadCount();
+      }
+      // ⚠前に保存した人はこの項目を持っていない。そのときは既定（出さない）のまま
+      if (d.numOn !== undefined && $('numOn')) {
+        $('numOn').checked = !!d.numOn;
+        state.numOn = !!d.numOn;
+        state.numTouched = true;      // 前に決めたとおりにする
+      }
       if (d.nameMode) $('nameMode').value = d.nameMode;
       if (d.nameAlign && $('nameAlign')) $('nameAlign').value = d.nameAlign;
       if (d.font) $('font').value = d.font;
@@ -1465,8 +1711,11 @@
           style: d.grp.style || 'block',
           look: d.grp.look || 'both',
           num: d.grp.num !== false,
-          mark: !!d.grp.mark
+          mark: !!d.grp.mark,
+          ignoreLead: !!d.grp.ignoreLead
         };
+        if ($('leadIgnore')) $('leadIgnore').checked = state.grp.ignoreLead;
+        leadIgnoreNote();
         $('grpOn').checked = state.grp.on;
         $('grpOpts').hidden = !state.grp.on;
         $('grpNumWrap').hidden = !state.grp.on;
@@ -1596,7 +1845,7 @@
   }
   function doClsSave() {
     var st = loadStore(), c = curClass(st);
-    if (!c) { alert('先に、保存した名簿をえらんでください。はじめて残すときは「新しく保存」です。'); return; }
+    if (!c) { alert('先に、保存した名簿をえらんでください。はじめて残すときは「新しい名前で保存」です。'); return; }
     c.names = $('names').value;
     c.seat = snapshot();
     if (!saveStore(st)) return;
@@ -1720,8 +1969,29 @@
     });
   }
 
+  // 「隣の条件は設定しない」のチェックで、中身ごと開け閉めする（2026-09-03 本人）
+  var MODE_NOTE = {
+    lr: '横にならんだ<strong>左右の席だけ</strong>を「隣」とみなします。',
+    cross: '<strong>前後左右の4つの席</strong>を「隣」とみなします。',
+    king: 'ななめもふくめた<strong>まわり8つの席</strong>を「隣」とみなします。いちばんきつい決め方です。'
+  };
+  function modeChanged() {
+    var off = $('modeOff') ? $('modeOff').checked : false;
+    var box = $('modeBox');
+    if (box) box.hidden = off;
+    var m = (document.querySelector('input[name=mode]:checked') || {}).value || 'cross';
+    var note = $('modeNote');
+    if (note) note.innerHTML = MODE_NOTE[m] || '';
+  }
+
   function orderChanged() {
     var byNumber = $('order').value === 'number';
+    // 🔴 出席番号順をえらんだら、席の出席番号も自動で出す（2026-09-03 本人）。
+    //   ⚠先生が自分でチェックを触ったあとは、こちらから入れ直さない
+    if (byNumber && !state.numTouched && $('numOn') && !$('numOn').checked) {
+      $('numOn').checked = true;
+      state.numOn = true;
+    }
     // 出席番号順のときだけ使う。ふだんは押せない形にして「あること」は見せておく
     $('dir').disabled = !byNumber;
     $('dirWrap').classList.toggle('off', !byNumber);
@@ -1794,6 +2064,11 @@
       state.grp.on = this.checked;
       $('grpOpts').hidden = !this.checked;
       $('grpNumWrap').hidden = !this.checked;
+      // 🔴🔴 班に分けた「その瞬間」にも★を散らす（2026-09-03 本人の指摘で判明）。
+      //   ⚠これが無いと、班を使わずに席替えしたあとで班に分けたとき、
+      //     ★が2人の班と0人の班ができたままになる。
+      //     （席替えのときだけ散らしていた＝班が無い状態では散らしようがなかった）
+      if (state.seats && this.checked) state.seats = spreadLeaders(state.seats);
       if (state.seats) drawSheet();
       if ($('save').checked && !state.sample) save();
     });
@@ -1855,6 +2130,40 @@
     $('addSep').onclick = function () { addPairRow('sepList'); };
     $('addAdj').onclick = function () { addPairRow('adjList'); };
     $('addFix').onclick = addFixRow;
+    // ⚠ addLeadRow をそのまま渡さない。クリックの情報が第1引数（名前）に入ってしまう
+    if ($('addLead')) $('addLead').onclick = function () { addLeadRow(); };
+    if ($('undo')) $('undo').onclick = undoOnce;
+    // 🔴「隣」の考え方（2026-09-03）。チェックを外すと、3つの選びと設定の欄が出てくる
+    if ($('modeOff')) $('modeOff').addEventListener('change', function () {
+      modeChanged();
+      if ($('save').checked && !state.sample) save();
+    });
+    document.querySelectorAll('input[name=mode]').forEach(function (r) {
+      r.addEventListener('change', function () {
+        modeChanged();
+        if ($('save').checked && !state.sample) save();
+      });
+    });
+    modeChanged();
+    // 🔴「★を気にせず班に分ける」（2026-09-03 知り合いの先生の要望）
+    if ($('leadIgnore')) $('leadIgnore').addEventListener('change', function () {
+      state.grp.ignoreLead = this.checked;
+      // ⭐入れたとき＝すでに散らした並びは元にもどせないので、押し直してもらう。
+      //   外したとき＝その場で散らし直せるので、案内はいらない
+      if (!this.checked && state.seats && state.opt)
+        state.seats = spreadLeaders(state.seats);
+      leadIgnoreNote();
+      if (state.seats) drawSheet();
+      if ($('save').checked && !state.sample) save();
+    });
+
+    // 🔴 席に出席番号を出す（2026-09-03）
+    if ($('numOn')) $('numOn').addEventListener('change', function () {
+      state.numOn = this.checked;
+      state.numTouched = true;       // 自分で決めた人には、こちらから入れ直さない
+      if (state.seats) drawSheet();
+      if ($('save').checked && !state.sample) save();
+    });
     // ⚠run を直接わたさない。クリックの情報が第1引数に入って「初回」と間違われる
     $('go').onclick = function () { run(); };
     // ⚠「べつの案を出す」は座席表を見ながら押すので、画面を動かさない
