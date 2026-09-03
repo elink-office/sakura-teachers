@@ -1,0 +1,21 @@
+/* 運営者情報ページだけの見た目（2026-09-03） */
+:root{ color-scheme: light; }
+
+/* 概要の表。ラベルと中身が2列に並ぶので、どこまでが1組か分かる */
+.read .profile{
+  display:grid;
+  grid-template-columns:7em 1fr;
+  gap:10px 14px;
+  margin:14px 0 0;
+  padding-top:14px;
+  border-top:1px solid var(--line,#ece7e9);
+}
+.read .profile dt{ margin:0; font-weight:bold; color:var(--ink-soft,#7b6f74); }
+.read .profile dd{ margin:0; }
+
+/* せまい画面では2列だと窮屈なので、上下に積む */
+@media (max-width:420px){
+  .read .profile{ grid-template-columns:1fr; gap:2px 0; }
+  .read .profile dt{ margin-top:10px; }
+  .read .profile dd{ margin:0 0 0 1em; }
+}

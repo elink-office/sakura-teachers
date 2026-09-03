@@ -83,6 +83,28 @@
 .t-col.r .t-tool .go{background:var(--midori)}
 .t-tool:hover .go{opacity:.88}
 
+/* 🔴 絵を押せることが分かるようにする（2026-09-03 本人）。
+   本人「絵をタップしたら動くっていうイメージがないんじゃないかな。
+        マウスポインタを置くと影とか光るとか、そういう仕組みにして」
+   ⚠ hover:hover ＝マウスがある機器だけ。付けないと、スマホで触ったあと色が残り続ける */
+.t-tool{transition:transform .18s ease, box-shadow .18s ease}
+.t-shot{transition:box-shadow .18s ease, border-color .18s ease, filter .18s ease}
+@media (hover:hover){
+  .t-tool:hover{transform:translateY(-3px)}
+  .t-tool:hover .t-shot{
+    box-shadow:0 10px 24px rgba(0,0,0,.16);
+    filter:brightness(1.02);
+  }
+  /* 枠の色はカードの色に合わせる（左＝桜色／右＝緑） */
+  .t-col.l .t-tool:hover .t-shot{border-color:var(--pink)}
+  .t-col.r .t-tool:hover .t-shot{border-color:var(--midori)}
+  .t-tool:hover .go{opacity:1;filter:brightness(.93)}
+}
+/* ⭐ タブレット・スマホにはマウスポインタが無い。
+   触った瞬間に沈ませて「押せた」と分かるようにする（ここが指の人の合図） */
+.t-tool:active{transform:scale(.985)}
+.t-tool:active .t-shot{box-shadow:0 2px 8px rgba(0,0,0,.14)}
+
 /* じゅんび中は、枠を作らず文字だけ。できているものと見分けがつくように */
 .t-soon{border-top:1px solid var(--line);margin-top:22px;padding-top:16px}
 .t-soon p{margin:0 0 6px;font-size:.83rem;color:var(--ink-soft)}
