@@ -90,6 +90,9 @@
 .t-tool .go{
   display:inline-block;margin-top:11px;font-size:.85rem;padding:8px 18px;
   border-radius:999px;color:#fff;font-weight:700;
+  /* 🔴 絵と同じで、押せる板に見せる（2026-09-03 本人）。影はグレー */
+  box-shadow:0 3px 10px rgba(0,0,0,.18), 0 1px 2px rgba(0,0,0,.10);
+  transition:box-shadow .16s ease, transform .16s ease, filter .16s ease;
 }
 .t-col.l .t-tool .go{background:var(--pink)}
 .t-col.r .t-tool .go{background:var(--midori)}
@@ -108,11 +111,16 @@
     box-shadow:0 14px 30px rgba(0,0,0,.22), 0 2px 5px rgba(0,0,0,.12);
     filter:brightness(1.02);
   }
-  .t-tool:hover .go{opacity:1;filter:brightness(.93)}
+  /* ⚠乗せただけで暗くしない。暗くするのは「押した」の合図（2026-09-03 本人） */
+  .t-tool:hover .go{
+    opacity:1;filter:brightness(1.04);
+    box-shadow:0 8px 18px rgba(0,0,0,.24), 0 1px 3px rgba(0,0,0,.10);
+  }
 }
 /* ⭐ 押した瞬間は沈ませる（指の人には、これが「押せた」の合図になる） */
 .t-tool:active{transform:scale(.985)}
 .t-tool:active .t-shot{box-shadow:0 1px 4px rgba(0,0,0,.16)}
+.t-tool:active .go{box-shadow:0 1px 3px rgba(0,0,0,.16);transform:translateY(2px)}
 
 /* じゅんび中は、枠を作らず文字だけ。できているものと見分けがつくように */
 .t-soon{border-top:1px solid var(--line);margin-top:22px;padding-top:16px}
