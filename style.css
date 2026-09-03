@@ -115,12 +115,37 @@ button:hover{background:var(--pink-pale)}
 .primary{
   background:var(--pink);border-color:var(--pink);color:#fff;
   font-size:1.1rem;font-weight:bold;padding:14px 30px;border-radius:999px;
+  /* 🔴 押せる板に見せる（2026-09-03 本人「画像のように影つけて」）。
+     ⚠影は**グレー**にする。ページごとに色が違う（座席表＝桜色／席次表＝緑）ので、
+       色つきの影にすると片方で浮く。グレーならどちらでも合う */
+  box-shadow:0 3px 10px rgba(0,0,0,.18), 0 1px 2px rgba(0,0,0,.10);
+  transition:box-shadow .16s ease, transform .16s ease, filter .16s ease;
 }
 /* ⚠ 色を直接書かない（席次表でも桜色になってしまう）。
    ⭐ 押したときは少し濃くする＝ページの色（桜／緑）のまま暗くする。
    ⚠ 枠線も同じ色にしないと、縁だけ元の色が残る（本人の指摘） */
-.primary:hover{background:var(--pink);border-color:var(--pink);filter:brightness(.92)}
-.primary:active{filter:brightness(.85)}
+/* 🔴 マウスを乗せたときは**暗くしない**（2026-09-03 本人）。
+   本人「ボタンにマウスポインタもっていくと色が暗い。画像と同じような設定にしてほしい」
+   ＝暗くするのは「押した」の合図。乗せただけなら**浮かせて、少し明るく** */
+@media (hover:hover){
+  .primary:hover{
+    background:var(--pink);border-color:var(--pink);filter:brightness(1.04);
+    box-shadow:0 8px 18px rgba(0,0,0,.24), 0 1px 3px rgba(0,0,0,.10);
+    transform:translateY(-2px);
+  }
+}
+/* 🔴 指で使う機器では影を強くする（2026-09-03 本人「スマホ版はもう少し強いほうが浮いて見える」）。
+   ⚠ hover:none ＝マウスが無い機器（スマホ・タブレット）。
+     こちらは「乗せて浮く」が無いぶん、最初から強く浮かせておく */
+@media (hover:none){
+  .primary{box-shadow:0 6px 18px rgba(0,0,0,.28), 0 2px 4px rgba(0,0,0,.12)}
+}
+/* ⭐押した瞬間は沈ませる（指の人には、これが「押せた」の合図になる） */
+.primary:active{
+  filter:brightness(.85);
+  box-shadow:0 1px 3px rgba(0,0,0,.16);
+  transform:translateY(2px);
+}
 /* リンクをボタンと同じ見た目にする（お問い合わせのフォームボタン） */
 a.primary{display:inline-block;text-decoration:none;border:1px solid var(--pink)}
 .mini{padding:4px 10px;font-size:.85rem}

@@ -58,13 +58,17 @@
 .t-col.r h2{color:var(--midori)}
 .t-col .who{font-size:.8rem;color:var(--ink-soft);margin:0 0 22px}
 
-.t-tool{
-  display:block;text-decoration:none;color:var(--ink);margin-bottom:20px;
+/* ⚠ ここはもうリンクではない（入口は絵とボタンの2つに分かれた）。
+   見出しと説明は押しても飛ばない＝そのぶん、動く場所と押す場所が一致する */
+.t-tool{display:block;color:var(--ink);margin-bottom:20px}
+.t-tool a{
+  text-decoration:none;color:inherit;
   /* ⚠ スマホで長押しすると、リンクのウィンドウ（コンテキストメニュー）が出てしまう。
      絵を触って確かめたい人の邪魔になるので止める（2026-09-03 本人） */
   -webkit-touch-callout:none;
   -webkit-tap-highlight-color:transparent;
 }
+.t-shot-link{display:block}
 .t-tool img{-webkit-touch-callout:none;-webkit-user-drag:none;user-select:none;-webkit-user-select:none}
 /* 🔴 カードの中の完成画像（2026-09-01）。
    ⚠2枚の縦横比が少し違う（座席表1.293／席次表1.320）ので、枠を1.3:1に固定して中に収める。
@@ -89,7 +93,11 @@
 /* 「使ってみる →」のボタン。太字は 2026-08-30 に本人の希望で追加 */
 .t-tool .go{
   display:inline-block;margin-top:11px;font-size:.85rem;padding:8px 18px;
+  text-decoration:none;
   border-radius:999px;color:#fff;font-weight:700;
+  /* 🔴 絵と同じで、押せる板に見せる（2026-09-03 本人）。影はグレー */
+  box-shadow:0 3px 10px rgba(0,0,0,.18), 0 1px 2px rgba(0,0,0,.10);
+  transition:box-shadow .16s ease, transform .16s ease, filter .16s ease;
 }
 .t-col.l .t-tool .go{background:var(--pink)}
 .t-col.r .t-tool .go{background:var(--midori)}
@@ -99,20 +107,30 @@
    本人「絵をタップしたら動くっていうイメージがないんじゃないかな。
         マウスポインタを置くと影とか光るとか、そういう仕組みにして」
    ⚠ hover:hover ＝マウスがある機器だけ。付けないと、スマホで触ったあと色が残り続ける */
-.t-tool{transition:transform .18s ease, box-shadow .18s ease}
-.t-shot{transition:box-shadow .18s ease, border-color .18s ease, filter .18s ease}
+.t-shot{transition:box-shadow .18s ease, filter .18s ease, transform .18s ease}
+/* 🔴 絵とボタンは**別々に**反応する（2026-09-03 本人「個別に4つの入り口にして」）。
+   ⚠乗せたほうだけが動く。もう片方は動かない。
+   ⚠乗せただけで暗くしない。暗くするのは「押した」の合図 */
 @media (hover:hover){
-  .t-tool:hover{transform:translateY(-3px)}
-  /* マウスを乗せたら、さらに高く浮かせる */
-  .t-tool:hover .t-shot{
+  .t-shot-link:hover .t-shot{
     box-shadow:0 14px 30px rgba(0,0,0,.22), 0 2px 5px rgba(0,0,0,.12);
     filter:brightness(1.02);
+    transform:translateY(-3px);
   }
-  .t-tool:hover .go{opacity:1;filter:brightness(.93)}
+  .t-tool .go:hover{
+    opacity:1;filter:brightness(1.04);
+    box-shadow:0 8px 18px rgba(0,0,0,.24), 0 1px 3px rgba(0,0,0,.10);
+    transform:translateY(-2px);
+  }
 }
-/* ⭐ 押した瞬間は沈ませる（指の人には、これが「押せた」の合図になる） */
-.t-tool:active{transform:scale(.985)}
-.t-tool:active .t-shot{box-shadow:0 1px 4px rgba(0,0,0,.16)}
+/* 🔴 指で使う機器では影を強くする（2026-09-03 本人・「席替えする」と同じ考え方） */
+@media (hover:none){
+  .t-tool .go{box-shadow:0 6px 18px rgba(0,0,0,.28), 0 2px 4px rgba(0,0,0,.12)}
+}
+/* ⭐ 押した瞬間は沈ませる（指の人には、これが「押せた」の合図になる）。
+   ⚠押したほうだけが沈む */
+.t-shot-link:active .t-shot{box-shadow:0 1px 4px rgba(0,0,0,.16);transform:translateY(1px) scale(.995)}
+.t-tool .go:active{box-shadow:0 1px 3px rgba(0,0,0,.16);transform:translateY(2px);filter:brightness(.9)}
 
 /* じゅんび中は、枠を作らず文字だけ。できているものと見分けがつくように */
 .t-soon{border-top:1px solid var(--line);margin-top:22px;padding-top:16px}
