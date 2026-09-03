@@ -457,7 +457,7 @@
     var el = $('leadIgnoreNote'); if (!el) return;
     var on = $('leadIgnore') ? $('leadIgnore').checked : false;
     el.hidden = !on;
-    if (on) el.innerHTML = '★の指定を使っていません。いまの並びは★で分けたままなので、' +
+    if (on) el.innerHTML = '★は班に1人になるように設定しています。いまの並びは★で分けたままなので、' +
       '<strong>もう一度「席替えする」を押してください。</strong>';
   }
 
