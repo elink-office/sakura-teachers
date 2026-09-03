@@ -83,6 +83,9 @@ body.screen .seat.is-leader::after{font-size:var(--markSize,1.2em);right:5px;top
 body.screen .sheet.masked #mask{display:none}
 body.screen .sheet.masked .grid{display:grid}
 @media print{.sheet.masked #mask{display:none}.sheet.masked .grid{display:grid}}
+/* 🔴「＋人を追加」と人数を1行に（2026-09-03 本人） */
+.lead-add{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.lead-add .hint{margin:0}
 /* 🔴「1つ戻す」とドラッグの説明を1行に（2026-09-03 本人）。狭いときは折り返す */
 .drag-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
 .drag-row .drag-note{margin:0;flex:1 1 260px}
@@ -125,7 +128,7 @@ body.screen .seat.dup .nm{text-decoration:none}
 </style>
 </head>
 <body>
-<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/03 10:27</div>
+<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/03 10:42</div>
 
 <header class="site-head noprint">
   <div class="wrap">
@@ -307,9 +310,13 @@ body.screen .seat.dup .nm{text-decoration:none}
           <p>人数が班の数より少ないときは、★がいない班をお知らせします。</p>
         </div>
         <div id="leadList"></div>
-        <button class="mini" id="addLead" type="button">＋ 人を追加</button>
-        <!-- 🔴 何人えらんでいるかを出す（2026-09-03 本人）。班の数と見くらべられるように -->
-        <p class="hint" id="leadCount"></p>
+        <!-- 🔴 人数はボタンの右に、それだけ出す（2026-09-03 本人）。
+             ⚠班の数と見くらべる文は出さない。本人「班じゃないこともあるから」
+             ＝★を班分け以外の目じるしに使う先生がいる -->
+        <div class="lead-add">
+          <button class="mini" id="addLead" type="button">＋ 人を追加</button>
+          <span class="hint" id="leadCount"></span>
+        </div>
         <p class="hint">えらんだ人は、なるべく<strong>1つの班に1人ずつ</strong>になるように分かれます。⑦で画面を保存すると、この指定も一緒に残ります。</p>
       </div>
     </details>
@@ -408,6 +415,12 @@ body.screen .seat.dup .nm{text-decoration:none}
         <label class="chk-inline" style="margin-bottom:10px">
           <input type="checkbox" id="leadMark"> ★を座席表に出す（②の「詳しい条件」でえらんだ人）
         </label>
+        <!-- 🔴 ★を使わずに班を作る（2026-09-03 知り合いの先生の要望）。
+             ⚠外すのは「1班に1人ずつ散らす」ところだけ。★の指定そのものは消さない -->
+        <label class="chk-inline" style="margin-bottom:10px">
+          <input type="checkbox" id="leadIgnore"> ★を気にせず班に分ける
+        </label>
+        <p class="hint" id="leadIgnoreNote" hidden></p>
         <div class="row">
           <div><label for="grpSize">1班の人数</label>
             <span class="ctl"><input id="grpSize" type="number" min="2" max="8" value="4"><span class="unit">人</span></span></div>
@@ -696,7 +709,7 @@ body.screen .seat.dup .nm{text-decoration:none}
 </footer>
 
 <script src="../seating.js?v=54"></script>
-<script src="seat.js?v=146"></script>
+<script src="seat.js?v=148"></script>
 <!-- 🔴 印刷用の1枚絵の置き場（2026-09-01）。画面には出ない。
      ⚠**body の直下に置くこと。**中に入れると、印刷のときに親ごと隠されて白紙になる -->
 <div id="printImgWrap"></div>

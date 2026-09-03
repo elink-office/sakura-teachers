@@ -25,7 +25,7 @@
     plans: [], cur: 0, seats: null,
     sex: {},                        // 名前 -> 'm' / 'f'（名前をキーにするので名簿を貼り直しても残る）
     sample: false, sampleNames: [],  // サンプルは名簿欄に入れない（消す手間が出るので）
-    grp: { on: false, size: 4, style: 'block', look: 'both', num: true, mark: false },
+    grp: { on: false, size: 4, style: 'block', look: 'both', num: true, mark: false, ignoreLead: false },
     gmap: null, gcount: 0,
     gfix: {},                       // 先生が手で変えた班（席の番号 → 班の番号）
     leaders: {},                    // ★（班に1人ずつにする人）名前 -> true。名簿の★＋条件でえらんだ人
@@ -452,20 +452,23 @@
     }
     updateLeadCount();
   }
-  // 🔴 いま何人えらんでいるかを出す（2026-09-03 本人）。
-  //   ⭐班の数と並べて出す＝足りているか・多すぎないかが、その場で分かる
+  // ★を気にせず班に分ける、を入れたときの案内（2026-09-03）
+  function leadIgnoreNote() {
+    var el = $('leadIgnoreNote'); if (!el) return;
+    var on = $('leadIgnore') ? $('leadIgnore').checked : false;
+    el.hidden = !on;
+    if (on) el.innerHTML = '★の指定を使っていません。いまの並びは★で分けたままなので、' +
+      '<strong>もう一度「席替えする」を押してください。</strong>';
+  }
+
+  // 🔴 何人えらんでいるかだけを、ボタンの右に出す（2026-09-03 本人）。
+  //   ⚠班の数と見くらべる文は出さない。本人「班じゃないこともあるから」
+  //     ＝★を班分け以外の目じるしに使う先生がいる。
+  //   （★のいない班の知らせは、これまでどおり④の知らせに出る）
   function updateLeadCount() {
     var el = $('leadCount'); if (!el) return;
     var n = Object.keys(condLeaders()).length;
-    var g = (state.grp.on && state.gcount) ? state.gcount : 0;
-    if (!n) { el.innerHTML = ''; return; }
-    var t = 'いま <strong>' + n + '人</strong> えらんでいます';
-    if (g) {
-      t += '（班は ' + g + 'つ）。';
-      if (n > g) t += '<strong>班より多いので、2人になる班ができます。</strong>';
-      else if (n < g) t += '<strong>' + (g - n) + 'つの班には、★の人がいません。</strong>';
-    } else t += '。';
-    el.innerHTML = t;
+    el.textContent = n ? n + '人選択中' : '';
   }
 
   // ============================================================
@@ -493,6 +496,8 @@
   // ⚠条件（離す・隣にする・席を決める）を壊さない相手を先に探す。
   //   どうしても壊れるときは班長を優先する＝そのときは赤い印で先生に見える
   function spreadLeaders(seats) {
+    // 🔴「★を気にせず班に分ける」なら、何もしない（2026-09-03 知り合いの先生の要望）
+    if (state.grp.ignoreLead) return seats;
     if (!state.grp.on || !hasLeaders() || !state.opt) return seats;
     var o = state.opt, s2 = seats.slice(), loop, i;
     for (loop = 0; loop < 30; loop++) {
@@ -1007,7 +1012,8 @@
       li.push('<strong>' + chk.sizeNote.want + '人の班になりません</strong>：' +
         '2列ずつのまとまりで分けているからです。' + chk.sizeNote.want + '人班にしたい場合は、' +
         '教室の形を変更するか、マスの左上の班の番号を押して班を変更してください。');
-    if (chk.noLead.length)
+    // ⚠「★を気にせず班に分ける」ときは出さない（気にしないと決めた人に見せる意味がない）
+    if (chk.noLead.length && !state.grp.ignoreLead)
       li.push('<strong>★の人がいない班</strong>：' + chk.noLead.join('班・') + '班');
     if (chk.dupText.length) {
       // ⚠多いと一行が長くなりすぎるので、6組までにして残りは数で言う
@@ -1591,6 +1597,7 @@
         board: $('board').value,
         mode: (document.querySelector('input[name=mode]:checked') || {}).value || 'cross',
         modeOff: $('modeOff') ? $('modeOff').checked : true,
+        // ⚠ grp の中に入れずに、ここに置く（grp は席次表とも形をそろえてあるため）
         // 🔴「班に1人ずつにする人」も保存する（2026-09-03 本人「ページを保存すれば班長ごと保存されるよね？」）。
         //   ⚠ほかの条件（離す・隣にする・席を決める）は保存していない。ここだけ別あつかい＝
         //     名簿の★をやめたので、ここが残らないと毎回えらび直しになるため
@@ -1704,8 +1711,11 @@
           style: d.grp.style || 'block',
           look: d.grp.look || 'both',
           num: d.grp.num !== false,
-          mark: !!d.grp.mark
+          mark: !!d.grp.mark,
+          ignoreLead: !!d.grp.ignoreLead
         };
+        if ($('leadIgnore')) $('leadIgnore').checked = state.grp.ignoreLead;
+        leadIgnoreNote();
         $('grpOn').checked = state.grp.on;
         $('grpOpts').hidden = !state.grp.on;
         $('grpNumWrap').hidden = !state.grp.on;
@@ -2135,6 +2145,18 @@
       });
     });
     modeChanged();
+    // 🔴「★を気にせず班に分ける」（2026-09-03 知り合いの先生の要望）
+    if ($('leadIgnore')) $('leadIgnore').addEventListener('change', function () {
+      state.grp.ignoreLead = this.checked;
+      // ⭐入れたとき＝すでに散らした並びは元にもどせないので、押し直してもらう。
+      //   外したとき＝その場で散らし直せるので、案内はいらない
+      if (!this.checked && state.seats && state.opt)
+        state.seats = spreadLeaders(state.seats);
+      leadIgnoreNote();
+      if (state.seats) drawSheet();
+      if ($('save').checked && !state.sample) save();
+    });
+
     // 🔴 席に出席番号を出す（2026-09-03）
     if ($('numOn')) $('numOn').addEventListener('change', function () {
       state.numOn = this.checked;
