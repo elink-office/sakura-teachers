@@ -303,8 +303,8 @@ body.screen .seat.dup .nm{text-decoration:none}
                Excelに班長列がある先生が貼ったときに、黙って拾うためだけのもの -->
         <h3>班に1人ずつにする人&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h3>
         <div class="tip-body" hidden>
-          <p>班長・リーダー・声かけ役など、<strong>ばらけていてほしい人</strong>をえらびます。何のために分けるかは先生が決めてかまいません。</p>
-          <p>④の「班に分ける」を入れているときだけ効きます。座席表に★を出すかどうかも④でえらべます。</p>
+          <p>班長・リーダー・声かけ役など、<strong>班に1人配置したいとき</strong>に設定します。なんのために使うかは、自由に決めましょう。</p>
+          <p>④の「班に分ける」を入れているときだけ有効です。また、座席表に★を表示するかどうかも④で選べます。</p>
           <p>人数が班の数より少ないときは、★がいない班をお知らせします。</p>
         </div>
         <div id="leadList"></div>
@@ -315,7 +315,7 @@ body.screen .seat.dup .nm{text-decoration:none}
           <button class="mini" id="addLead" type="button">＋ 人を追加</button>
           <span class="hint" id="leadCount"></span>
         </div>
-        <p class="hint">えらんだ人は、なるべく<strong>1つの班に1人ずつ</strong>になるように分かれます。⑦で画面を保存すると、この指定も一緒に残ります。</p>
+        <p class="hint"><strong>④の画面</strong>で、1つの班に1人ずつになるように設定できます。<strong>★が目印です。</strong></p>
       </div>
     </details>
     </section>
@@ -400,9 +400,6 @@ body.screen .seat.dup .nm{text-decoration:none}
       <p class="note-sm">
         席は<strong>マグネットのように、ドラッグで入れ替え</strong>ができます（スマホ・タブレットは長押ししてから）。班番号を押すと、その席の班と色を変えられます。
       </p>
-      <!-- 🔴 知らせはここに置く（2026-08-31 本人）。座席表のすぐ下だと、
-           モニターに映す前に子どもに見られてしまうため -->
-      <div id="gInfo"></div>
       <label class="chk-inline">
         <input type="checkbox" id="grpOn"> 班に分ける
       </label>
@@ -410,6 +407,13 @@ body.screen .seat.dup .nm{text-decoration:none}
         <input type="checkbox" id="grpNum" checked> 班の番号を出す
       </label>
       <div id="grpOpts" hidden style="margin-top:12px">
+        <!-- 🔴 ★の話は、班に分けるを入れたときだけ出す（2026-09-03 本人）。
+             本人「班に分けるを使わなかったら、★関係ないよね」。
+             ⚠並びは 説明 → 知らせ → チェック。先に「★とは何か」が見えていないと知らせが読めない -->
+        <p class="hint" id="leadWhat" style="margin:0 0 10px"></p>
+        <!-- 🔴 知らせはここに置く（2026-08-31 本人）。座席表のすぐ下だと、
+             モニターに映す前に子どもに見られてしまうため -->
+        <div id="gInfo"></div>
         <div style="margin-bottom:6px">
           <label class="chk-inline">
             <input type="checkbox" id="leadIgnore"> ★を気にせず班に分ける
@@ -420,7 +424,7 @@ body.screen .seat.dup .nm{text-decoration:none}
              決める話が先、見せる話があと（2026-09-03 本人の並び順） -->
         <div style="margin-bottom:10px">
           <label class="chk-inline">
-            <input type="checkbox" id="leadMark"> ★を座席表に出す（②の「詳しい条件」でえらんだ人）
+            <input type="checkbox" id="leadMark"> ★を座席表に出す
           </label>
         </div>
         <div class="row">
@@ -710,7 +714,7 @@ body.screen .seat.dup .nm{text-decoration:none}
 </footer>
 
 <script src="../seating.js?v=54"></script>
-<script src="seat.js?v=150"></script>
+<script src="seat.js?v=158"></script>
 <!-- 🔴 印刷用の1枚絵の置き場（2026-09-01）。画面には出ない。
      ⚠**body の直下に置くこと。**中に入れると、印刷のときに親ごと隠されて白紙になる -->
 <div id="printImgWrap"></div>

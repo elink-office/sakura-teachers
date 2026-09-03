@@ -37,7 +37,7 @@
 </style>
 </head>
 <body>
-<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/03 16:25</div>
+<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/03 21:09</div>
 
 <header class="site-head noprint">
   <div class="wrap">
@@ -147,8 +147,8 @@
              ⚠名簿の★の読み取りは残してあるが、画面では案内しない -->
         <h3 style="margin-top:16px">班に1人ずつにする人&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h3>
         <div class="tip-body" hidden>
-          <p>班長・リーダー・声かけ役など、<strong>ばらけていてほしい人</strong>をえらびます。何のために分けるかは先生が決めてかまいません。</p>
-          <p>★を表に出すかどうかは、下の「見た目」でえらべます。人数が班の数より少ないときは、いない班をお知らせします。</p>
+          <p>班長・リーダー・声かけ役など、<strong>班に1人配置したいとき</strong>に設定します。なんのために使うかは、自由に決めましょう。</p>
+          <p>★を表に出すかどうかは、下の「見た目」で選べます。人数が班の数より少ないときは、いない班をお知らせします。</p>
         </div>
         <div id="leadList"></div>
         <!-- 🔴 人数はボタンの右に（座席表と同じ形・2026-09-03 本人） -->
@@ -156,7 +156,7 @@
           <button class="mini" id="addLead" type="button">＋ 人を追加</button>
           <span class="hint" id="leadCount"></span>
         </div>
-        <p class="hint">えらんだ人は、なるべく<strong>1つの台に1人ずつ</strong>になるように分かれます。画面を保存すると、この指定も一緒に残ります。</p>
+        <p class="hint"><strong>「班を作る」を押すと</strong>、1つの台に1人ずつになるように分かれます。画面を保存すると、この指定も一緒に残ります。</p>
         <!-- 🔴 ★を使わずに班を作る（2026-09-03 知り合いの先生の要望・座席表と同じ） -->
         <label class="chk-inline" style="margin-top:8px">
           <input type="checkbox" id="leadIgnore"> ★を気にせず班に分ける
@@ -253,7 +253,7 @@
         <p style="margin-top:10px">
           <label class="chk-inline"><input type="checkbox" id="dtOff"> 日付・自由記入を入れない</label>
           <label class="chk-inline gap"><input type="checkbox" id="gnum" checked> 班の番号を出す</label>
-          <label class="chk-inline gap"><input type="checkbox" id="leadMark"> ★を表に出す（班に1人ずつにした人）</label>
+          <label class="chk-inline gap"><input type="checkbox" id="leadMark"> ★を表に出す（②の「詳しい条件」でえらんだ人）</label>
           <label class="chk-inline gap"><input type="checkbox" id="showCredit" checked> 右下にサイト名を入れる</label>
         </p>
       </div>
@@ -386,7 +386,7 @@
     <span class="copy">© 2026 さくら先生の座席表</span></div>
 </footer>
 
-<script src="group.js?v=10"></script>
+<script src="group.js?v=13"></script>
 <!-- 🔴 印刷用の1枚絵の置き場。画面には出ない。
      ⚠body の直下に置くこと。中に入れると、印刷のときに親ごと隠されて白紙になる -->
 <div id="printImgWrap"></div>

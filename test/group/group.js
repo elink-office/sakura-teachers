@@ -284,8 +284,8 @@
     var el = $('leadIgnoreNote'); if (!el) return;
     var on = $('leadIgnore') ? $('leadIgnore').checked : false;
     el.hidden = !on;
-    if (on) el.innerHTML = '★は班に1人になるように設定しています。いまの並びは★で分けたままです。' +
-      '必要に応じて<strong>もう一度「班を作る」を押してください。</strong>';
+    if (on) el.innerHTML = '今表示している班は、★の人が1人になる設定になっています。' +
+      '「★を気にせず班に分ける」にチェックを入れたら、<strong>もう一度「班を作る」を押すのがおすすめです。</strong>';
   }
   function readLeads() {
     var out = [], el = $('leadList');

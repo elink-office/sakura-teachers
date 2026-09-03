@@ -123,6 +123,38 @@
     if (isLeadName(out.name)) { out.lead = true; out.name = stripLead(out.name); }
     return out;
   }
+  // 🔴 保存のために、条件の行をそのまま読む（2026-09-03）
+  function readPairRows(listId) {
+    var out = [], el = $(listId);
+    if (!el) return out;
+    Array.prototype.forEach.call(el.querySelectorAll('.pair'), function (w) {
+      var sel = w.querySelectorAll('select');
+      if (sel[0].value && sel[1].value) out.push([sel[0].value, sel[1].value]);
+    });
+    return out;
+  }
+  function readFixRows() {
+    var out = [], el = $('fixList');
+    if (!el) return out;
+    Array.prototype.forEach.call(el.querySelectorAll('.pair'), function (w) {
+      var sel = w.querySelectorAll('select');
+      if (!sel[0].value) return;
+      out.push({
+        name: sel[0].value, kind: sel[1].value,
+        col: sel[2] ? sel[2].value : '', row: sel[3] ? sel[3].value : ''
+      });
+    });
+    return out;
+  }
+  function readLeadRows() {
+    var out = [], el = $('leadList');
+    if (!el) return out;
+    Array.prototype.forEach.call(el.querySelectorAll('select.nameSel'), function (x) {
+      if (x.value) out.push(x.value);
+    });
+    return out;
+  }
+
   // 「詳しい条件」の「班に1人ずつにする人」でえらんだ人（名簿の★と同じ扱い）
   function condLeaders() {
     var out = {}, el = $('leadList');
@@ -365,30 +397,54 @@
   }
 
   // ---- 条件の行 ----
-  function addPairRow(listId) {
+  // 🔴 条件の行は「値ごと」作れるようにする（2026-09-03 本人）。
+  //   本人「②を名簿と一緒に全部保存した方が、理科室と一緒だからいい」
+  //   ⚠保存から戻すときは、まだ名簿を読む前のことがある。
+  //     その名前が選べないと消えてしまうので、無ければ option を自分で足す
+  function pickName(sel, name) {
+    if (!name) return;
+    var has = false, i;
+    for (i = 0; i < sel.options.length; i++) if (sel.options[i].value === name) has = true;
+    if (!has) sel.add(new Option(name, name));
+    sel.value = name;
+    sel.classList.remove('ph');
+  }
+  function addPairRow(listId, a0, b0) {
     var wrap = document.createElement('div');
     wrap.className = 'pair';
     var a = document.createElement('select'); a.className = 'nameSel'; a.dataset.ph = 'Aさんを選ぶ';
     var b = document.createElement('select'); b.className = 'nameSel'; b.dataset.ph = 'Bさんを選ぶ';
     fillNames(a); fillNames(b);
     a.classList.add('ph'); b.classList.add('ph');
+    pickName(a, a0); pickName(b, b0);
     [a, b].forEach(function (e) {
-      e.addEventListener('change', function () { e.classList.toggle('ph', !e.value); });
+      e.addEventListener('change', function () {
+        e.classList.toggle('ph', !e.value);
+        if ($('save').checked && !state.sample) save();
+      });
     });
     var sep = document.createElement('span'); sep.textContent = 'と';
     var del = document.createElement('button');
     del.type = 'button'; del.className = 'mini'; del.textContent = '削除';
-    del.onclick = function () { wrap.remove(); };
+    del.onclick = function () {
+      wrap.remove();
+      if ($('save').checked && !state.sample) save();
+    };
     wrap.appendChild(a); wrap.appendChild(sep); wrap.appendChild(b); wrap.appendChild(del);
     $(listId).appendChild(wrap);
   }
 
-  function addFixRow() {
+  function addFixRow(d) {
+    d = d || {};
     var wrap = document.createElement('div');
     wrap.className = 'pair';
     var n = document.createElement('select'); n.className = 'nameSel ph';
     n.dataset.ph = 'Aさんを選ぶ'; fillNames(n);
-    n.addEventListener('change', function () { n.classList.toggle('ph', !n.value); });
+    pickName(n, d.name);
+    n.addEventListener('change', function () {
+      n.classList.toggle('ph', !n.value);
+      if ($('save').checked && !state.sample) save();
+    });
     var kind = document.createElement('select');
     kind.innerHTML = '<option value="front">を 前のほうに</option>' +
       '<option value="back">を うしろのほうに</option>' +
@@ -408,10 +464,23 @@
       var on = kind.value === 'seat';
       [col, row, lab1, lab2, lab3].forEach(function (e) { e.hidden = !on; });
       if (on) fillNum();
+      if ($('save').checked && !state.sample) save();
     };
+    // 保存から戻す（「この席に」なら列と段も）
+    if (d.kind) {
+      kind.value = d.kind;
+      if (d.kind === 'seat') {
+        [col, row, lab1, lab2, lab3].forEach(function (e) { e.hidden = false; });
+        if (d.col) col.value = d.col;
+        if (d.row) row.value = d.row;
+      }
+    }
     var del = document.createElement('button');
     del.type = 'button'; del.className = 'mini'; del.textContent = '削除';
-    del.onclick = function () { wrap.remove(); };
+    del.onclick = function () {
+      wrap.remove();
+      if ($('save').checked && !state.sample) save();
+    };
     [n, kind, lab1, col, lab2, row, lab3, del].forEach(function (e) { wrap.appendChild(e); });
     $('fixList').appendChild(wrap);
   }
@@ -457,8 +526,8 @@
     var el = $('leadIgnoreNote'); if (!el) return;
     var on = $('leadIgnore') ? $('leadIgnore').checked : false;
     el.hidden = !on;
-    if (on) el.innerHTML = '★は班に1人になるように設定しています。いまの並びは★で分けたままです。' +
-      '必要に応じて<strong>もう一度「席替えする」を押してください。</strong>';
+    if (on) el.innerHTML = '今表示している座席は、★の人が1人になる設定になっています。' +
+      '「★を気にせず班に分ける」にチェックを入れたら、<strong>もう一度「席替えする」を押すのがおすすめです。</strong>';
   }
 
   // 🔴 何人えらんでいるかだけを、ボタンの右に出す（2026-09-03 本人）。
@@ -466,9 +535,14 @@
   //     ＝★を班分け以外の目じるしに使う先生がいる。
   //   （★のいない班の知らせは、これまでどおり④の知らせに出る）
   function updateLeadCount() {
-    var el = $('leadCount'); if (!el) return;
     var n = Object.keys(condLeaders()).length;
-    el.textContent = n ? n + '人選択中' : '';
+    var el = $('leadCount');
+    if (el) el.textContent = n ? n + '人選択中' : '';
+    // 🔴 ④にも、★が何でどこでえらぶのかを出す（2026-09-03 本人「？を読まずに理解できるように」）。
+    //   ⚠下の2つのチェックの**両方**にかかるので、チェックの上に1行だけ置く
+    var w = $('leadWhat');
+    if (w) w.innerHTML = '★＝②<strong>「詳しい条件」</strong>の中の<strong>「班に1人ずつにする人」</strong>で設定することができます。' +
+      '今★は<strong>' + n + '人</strong>です';
   }
 
   // ============================================================
@@ -905,7 +979,9 @@
         if (name) {
           // ⚠クラス名を 'lead' にしてはいけない。style.css の .lead（リード文＝灰色・小さい字）が
           //   座席にまで効いて、名前が灰色になり、文字の大きさまで変わってしまう（2026-08-31）
-          if (state.leaders[name] && state.grp.mark) d.classList.add('is-leader');
+          // ⚠班に分けていないときは★を出さない（2026-09-03 本人が発見）。
+          //   これまでは「★を座席表に出す」のチェックが残っていると、班を外しても★だけ出ていた
+          if (state.grp.on && state.grp.mark && state.leaders[name]) d.classList.add('is-leader');
           if (samap && samap[i]) d.classList.add('same');          // 前回と同じ席
           if (chk.dup[name]) d.classList.add('dup');               // 前回も同じ班
           var sp = document.createElement('span');
@@ -1598,16 +1674,16 @@
         mode: (document.querySelector('input[name=mode]:checked') || {}).value || 'cross',
         modeOff: $('modeOff') ? $('modeOff').checked : true,
         // ⚠ grp の中に入れずに、ここに置く（grp は席次表とも形をそろえてあるため）
-        // 🔴「班に1人ずつにする人」も保存する（2026-09-03 本人「ページを保存すれば班長ごと保存されるよね？」）。
-        //   ⚠ほかの条件（離す・隣にする・席を決める）は保存していない。ここだけ別あつかい＝
-        //     名簿の★をやめたので、ここが残らないと毎回えらび直しになるため
-        leads: (function () {
-          var a = [], el = $('leadList');
-          if (el) Array.prototype.forEach.call(el.querySelectorAll('select.nameSel'), function (x) {
-            if (x.value) a.push(x.value);
-          });
-          return a;
-        })(),
+        // 🔴 ②の条件は**ぜんぶ名簿と一緒に保存する**（2026-09-03 本人）。
+        //   本人「逆にね、②を名簿と一緒に全部保存した方が、理科室と一緒だからいい」
+        //   ＝理科室（group）と同じ形にそろえた。⑧の名簿ごとの保存にも自動で入る
+        //     （クラス保存は snapshot() をそのまま持つ作りのため）
+        cond: {
+          sep: readPairRows('sepList'),
+          adj: readPairRows('adjList'),
+          fix: readFixRows(),
+          leads: readLeadRows()
+        },
         numOn: $('numOn') ? $('numOn').checked : false,
         nameMode: $('nameMode').value, nameAlign: $('nameAlign') ? $('nameAlign').value : 'center',
         font: $('font').value, bold: $('bold').checked,
@@ -1669,12 +1745,28 @@
       // ⚠この項目を持っていない人（前の版）は「設定しない」にしておく
       if ($('modeOff')) $('modeOff').checked = (d.modeOff === undefined) ? true : !!d.modeOff;
       modeChanged();
-      // 「班に1人ずつにする人」を戻す（⚠いったん空にしてから入れ直す。二重に増えるのを防ぐ）
+      // 🔴 ②の条件を戻す（⚠いったん空にしてから入れ直す。二重に増えるのを防ぐ）
+      var c = d.cond || {};
+      if ($('sepList')) {
+        $('sepList').innerHTML = '';
+        (c.sep || []).forEach(function (x) { addPairRow('sepList', x[0], x[1]); });
+      }
+      if ($('adjList')) {
+        $('adjList').innerHTML = '';
+        (c.adj || []).forEach(function (x) { addPairRow('adjList', x[0], x[1]); });
+      }
+      if ($('fixList')) {
+        $('fixList').innerHTML = '';
+        (c.fix || []).forEach(function (x) { addFixRow(x); });
+      }
       if ($('leadList')) {
         $('leadList').innerHTML = '';
-        (d.leads || []).forEach(function (nm) { addLeadRow(nm); });
+        (c.leads || []).forEach(function (nm) { addLeadRow(nm); });
         updateLeadCount();
       }
+      // 条件が1つでも入っていたら、②の「詳しい条件」を開いておく（気づいてもらうため）
+      if ($('condBlock') && ((c.sep && c.sep.length) || (c.adj && c.adj.length) ||
+          (c.fix && c.fix.length) || (c.leads && c.leads.length))) $('condBlock').open = true;
       // ⚠前に保存した人はこの項目を持っていない。そのときは既定（出さない）のまま
       if (d.numOn !== undefined && $('numOn')) {
         $('numOn').checked = !!d.numOn;
@@ -2129,7 +2221,8 @@
     });
     $('addSep').onclick = function () { addPairRow('sepList'); };
     $('addAdj').onclick = function () { addPairRow('adjList'); };
-    $('addFix').onclick = addFixRow;
+    // ⚠ addFixRow をそのまま渡さない。クリックの情報が第1引数に入ってしまう
+    $('addFix').onclick = function () { addFixRow(); };
     // ⚠ addLeadRow をそのまま渡さない。クリックの情報が第1引数（名前）に入ってしまう
     if ($('addLead')) $('addLead').onclick = function () { addLeadRow(); };
     if ($('undo')) $('undo').onclick = undoOnce;
