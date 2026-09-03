@@ -102,25 +102,31 @@
    本人「絵をタップしたら動くっていうイメージがないんじゃないかな。
         マウスポインタを置くと影とか光るとか、そういう仕組みにして」
    ⚠ hover:hover ＝マウスがある機器だけ。付けないと、スマホで触ったあと色が残り続ける */
-.t-tool{transition:transform .18s ease, box-shadow .18s ease}
-.t-shot{transition:box-shadow .18s ease, border-color .18s ease, filter .18s ease}
+.t-shot{transition:box-shadow .18s ease, filter .18s ease, transform .18s ease}
+/* ⚠ カードごと動かさない（2026-09-03 本人「文字まで浮かぶ。ボタンと絵だけでいい」）。
+   浮かせるのは**絵とボタンだけ**。見出しと説明は動かさない */
 @media (hover:hover){
-  .t-tool:hover{transform:translateY(-3px)}
   /* マウスを乗せたら、さらに高く浮かせる */
   .t-tool:hover .t-shot{
     box-shadow:0 14px 30px rgba(0,0,0,.22), 0 2px 5px rgba(0,0,0,.12);
     filter:brightness(1.02);
+    transform:translateY(-3px);
   }
   /* ⚠乗せただけで暗くしない。暗くするのは「押した」の合図（2026-09-03 本人） */
   .t-tool:hover .go{
     opacity:1;filter:brightness(1.04);
     box-shadow:0 8px 18px rgba(0,0,0,.24), 0 1px 3px rgba(0,0,0,.10);
+    transform:translateY(-2px);
   }
 }
-/* ⭐ 押した瞬間は沈ませる（指の人には、これが「押せた」の合図になる） */
-.t-tool:active{transform:scale(.985)}
-.t-tool:active .t-shot{box-shadow:0 1px 4px rgba(0,0,0,.16)}
-.t-tool:active .go{box-shadow:0 1px 3px rgba(0,0,0,.16);transform:translateY(2px)}
+/* 🔴 指で使う機器では影を強くする（2026-09-03 本人・「席替えする」と同じ考え方） */
+@media (hover:none){
+  .t-tool .go{box-shadow:0 6px 18px rgba(0,0,0,.28), 0 2px 4px rgba(0,0,0,.12)}
+}
+/* ⭐ 押した瞬間は沈ませる（指の人には、これが「押せた」の合図になる）。
+   ⚠ここもカードごとではなく、絵とボタンだけ */
+.t-tool:active .t-shot{box-shadow:0 1px 4px rgba(0,0,0,.16);transform:translateY(1px) scale(.995)}
+.t-tool:active .go{box-shadow:0 1px 3px rgba(0,0,0,.16);transform:translateY(2px);filter:brightness(.9)}
 
 /* じゅんび中は、枠を作らず文字だけ。できているものと見分けがつくように */
 .t-soon{border-top:1px solid var(--line);margin-top:22px;padding-top:16px}

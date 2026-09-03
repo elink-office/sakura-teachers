@@ -134,6 +134,12 @@ button:hover{background:var(--pink-pale)}
     transform:translateY(-2px);
   }
 }
+/* 🔴 指で使う機器では影を強くする（2026-09-03 本人「スマホ版はもう少し強いほうが浮いて見える」）。
+   ⚠ hover:none ＝マウスが無い機器（スマホ・タブレット）。
+     こちらは「乗せて浮く」が無いぶん、最初から強く浮かせておく */
+@media (hover:none){
+  .primary{box-shadow:0 6px 18px rgba(0,0,0,.28), 0 2px 4px rgba(0,0,0,.12)}
+}
 /* ⭐押した瞬間は沈ませる（指の人には、これが「押せた」の合図になる） */
 .primary:active{
   filter:brightness(.85);
