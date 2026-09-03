@@ -18,6 +18,7 @@
 
   var state = {
     names: [], sex: {}, leaders: {}, lastRaw: null,
+    ignoreLead: false,              // ★を気にせず班に分ける（2026-09-03）
     tcols: 2, tnum: 'auto', gsize: 5, board: 'top', order: 'random',
     sep: [], adj: [],
     sizes: [], plans: [], cur: 0, seats: null,
@@ -258,17 +259,32 @@
     }
     n.addEventListener('change', function () {
       n.classList.toggle('ph', !n.value);
-      refreshNames();
+      refreshNames(); updateLeadCount();
       if ($('save') && $('save').checked) save();
     });
     var del = document.createElement('button');
     del.type = 'button'; del.className = 'mini'; del.textContent = '削除';
     del.onclick = function () {
-      wrap.remove(); refreshNames();
+      wrap.remove(); refreshNames(); updateLeadCount();
       if ($('save') && $('save').checked) save();
     };
     wrap.appendChild(n); wrap.appendChild(del);
     $('leadList').appendChild(wrap);
+    updateLeadCount();
+  }
+  // 🔴 何人えらんでいるかを、ボタンの右に出す（2026-09-03 本人・座席表と同じ）
+  function updateLeadCount() {
+    var el = $('leadCount'); if (!el) return;
+    var n = Object.keys(condLeaders()).length;
+    el.textContent = n ? n + '人選択中' : '';
+  }
+  // ★を気にせず班に分ける、を入れたときの案内（2026-09-03）
+  function leadIgnoreNote() {
+    var el = $('leadIgnoreNote'); if (!el) return;
+    var on = $('leadIgnore') ? $('leadIgnore').checked : false;
+    el.hidden = !on;
+    if (on) el.innerHTML = '★の指定を使っていません。いまの並びは★で分けたままなので、' +
+      '<strong>もう一度「班を作る」を押してください。</strong>';
   }
   function readLeads() {
     var out = [], el = $('leadList');
@@ -349,8 +365,11 @@
       });
       c += Math.abs(m - f);
     }
-    var L = tab.concat(add).filter(function (n) { return state.leaders[n]; }).length;
-    if (L > 1) c += (L - 1) * 4;
+    // 🔴「★を気にせず班に分ける」なら、★は数えない（2026-09-03）
+    if (!state.ignoreLead) {
+      var L = tab.concat(add).filter(function (n) { return state.leaders[n]; }).length;
+      if (L > 1) c += (L - 1) * 4;
+    }
     return c;
   }
 
@@ -367,7 +386,8 @@
         if (state.leaders[n]) L++;
       });
       if (bal) s += Math.abs(m - f) * 2;
-      if (L > 1) s += (L - 1) * 6;
+      // 🔴「★を気にせず班に分ける」なら、★のかたよりは点にしない（2026-09-03）
+      if (L > 1 && !state.ignoreLead) s += (L - 1) * 6;
     });
     return s;
   }
@@ -617,7 +637,8 @@
     });
     if (bad.length) out.push('<div class="notice warn">条件どおりにできなかったところ：' + esc(bad.join('／')) + '</div>');
 
-    var L = Object.keys(state.leaders).length;
+    // ⚠「★を気にせず班に分ける」ときは出さない（気にしないと決めた人に見せる意味がない）
+    var L = state.ignoreLead ? 0 : Object.keys(state.leaders).length;
     if (L) {
       var T = state.sizes.length, none = [];
       for (var t = 0; t < T; t++) {
@@ -982,6 +1003,7 @@
       board: $('board').value, order: $('order').value,
       sep: readPairs('sepList'), adj: readPairs('adjList'),
       leads: readLeads(),             // 🔴 班に1人ずつにする人（2026-09-03）
+      ignoreLead: state.ignoreLead,   // 🔴 ★を気にせず班に分ける（2026-09-03）
       sex: state.sex,
       sexBal: $('sexBal').checked, sexPrint: $('sexPrint').checked,
       colM: $('colM').value, colF: $('colF').value,
@@ -1028,6 +1050,10 @@
     (d.adj || []).forEach(function (p) { addPairRow('adjList', p[0], p[1]); });
     (d.leads || []).forEach(function (n) { addLeadRow(n); });
     refreshNames();                   // ★の指定を入れ直したので、もう一度合流させる
+    state.ignoreLead = !!d.ignoreLead;
+    if ($('leadIgnore')) $('leadIgnore').checked = state.ignoreLead;
+    leadIgnoreNote();
+    updateLeadCount();
     if ((d.sep && d.sep.length) || (d.adj && d.adj.length) || (d.leads && d.leads.length))
       $('condBlock').open = true;
     state.board = $('board').value;
@@ -1260,6 +1286,13 @@
     $('addAdj').onclick = function () { addPairRow('adjList'); };
     // ⚠ addLeadRow をそのまま渡さない。クリックの情報が第1引数（名前）に入ってしまう
     if ($('addLead')) $('addLead').onclick = function () { addLeadRow(); };
+    // 🔴「★を気にせず班に分ける」（2026-09-03 知り合いの先生の要望）
+    if ($('leadIgnore')) $('leadIgnore').addEventListener('change', function () {
+      state.ignoreLead = this.checked;
+      leadIgnoreNote();
+      if (state.seats) drawSheet();
+      if ($('save') && $('save').checked) save();
+    });
     $('go').onclick = function () { run(false); };
     $('again').onclick = function () { run(false); };
     $('doPrint').onclick = doPrint;

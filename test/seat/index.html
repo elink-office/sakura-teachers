@@ -128,7 +128,7 @@ body.screen .seat.dup .nm{text-decoration:none}
 </style>
 </head>
 <body>
-<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/03 10:42</div>
+<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/03 10:46</div>
 
 <header class="site-head noprint">
   <div class="wrap">
@@ -413,14 +413,14 @@ body.screen .seat.dup .nm{text-decoration:none}
       </label>
       <div id="grpOpts" hidden style="margin-top:12px">
         <label class="chk-inline" style="margin-bottom:10px">
-          <input type="checkbox" id="leadMark"> ★を座席表に出す（②の「詳しい条件」でえらんだ人）
-        </label>
-        <!-- 🔴 ★を使わずに班を作る（2026-09-03 知り合いの先生の要望）。
-             ⚠外すのは「1班に1人ずつ散らす」ところだけ。★の指定そのものは消さない -->
-        <label class="chk-inline" style="margin-bottom:10px">
           <input type="checkbox" id="leadIgnore"> ★を気にせず班に分ける
         </label>
         <p class="hint" id="leadIgnoreNote" hidden></p>
+        <!-- ⚠ 上が「★で分けるかどうか」、下が「★を紙に出すかどうか」。
+             決める話が先、見せる話があと（2026-09-03 本人の並び順） -->
+        <label class="chk-inline" style="margin-bottom:10px">
+          <input type="checkbox" id="leadMark"> ★を座席表に出す（②の「詳しい条件」でえらんだ人）
+        </label>
         <div class="row">
           <div><label for="grpSize">1班の人数</label>
             <span class="ctl"><input id="grpSize" type="number" min="2" max="8" value="4"><span class="unit">人</span></span></div>
