@@ -58,7 +58,14 @@
 .t-col.r h2{color:var(--midori)}
 .t-col .who{font-size:.8rem;color:var(--ink-soft);margin:0 0 22px}
 
-.t-tool{display:block;text-decoration:none;color:var(--ink);margin-bottom:20px}
+.t-tool{
+  display:block;text-decoration:none;color:var(--ink);margin-bottom:20px;
+  /* ⚠ スマホで長押しすると、リンクのウィンドウ（コンテキストメニュー）が出てしまう。
+     絵を触って確かめたい人の邪魔になるので止める（2026-09-03 本人） */
+  -webkit-touch-callout:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.t-tool img{-webkit-touch-callout:none;-webkit-user-drag:none;user-select:none;-webkit-user-select:none}
 /* 🔴 カードの中の完成画像（2026-09-01）。
    ⚠2枚の縦横比が少し違う（座席表1.293／席次表1.320）ので、枠を1.3:1に固定して中に収める。
      こうすると、あとで撮り直しても2つのカードは同じ形のまま
@@ -67,8 +74,15 @@
 .t-shot{
   display:block;width:100%;height:auto;aspect-ratio:1.3 / 1;
   object-fit:contain;background:#fff;
-  border:1px solid var(--line);border-radius:10px;margin:0 0 12px;
+  border:1.5px solid var(--line);border-radius:10px;margin:0 0 12px;
+  /* 🔴 スマホには「マウスを乗せる」が無い＝触った時点でもう押した後（2026-09-03 本人）。
+     だから**触る前から押せる板に見せる**。常に影を敷いて浮かせておく */
+  box-shadow:0 2px 8px rgba(0,0,0,.10);
 }
+/* 枠の色はカードの色に合わせる（左＝桜色／右＝緑）。
+   ⚠ 濃いままだと主張が強すぎるので、うすめた色にしてある */
+.t-col.l .t-shot{border-color:#e6b3c6}
+.t-col.r .t-shot{border-color:#a9cfbb}
 .t-tool .nm{font-size:1.08rem;font-weight:700;display:block;margin-bottom:5px}
 .t-tool .ds{font-size:.86rem;color:var(--ink-soft);display:block;line-height:1.7}
 
@@ -95,15 +109,14 @@
     box-shadow:0 10px 24px rgba(0,0,0,.16);
     filter:brightness(1.02);
   }
-  /* 枠の色はカードの色に合わせる（左＝桜色／右＝緑） */
+  /* マウスを乗せたときは、枠の色をはっきりさせる */
   .t-col.l .t-tool:hover .t-shot{border-color:var(--pink)}
   .t-col.r .t-tool:hover .t-shot{border-color:var(--midori)}
   .t-tool:hover .go{opacity:1;filter:brightness(.93)}
 }
-/* ⭐ タブレット・スマホにはマウスポインタが無い。
-   触った瞬間に沈ませて「押せた」と分かるようにする（ここが指の人の合図） */
+/* ⭐ 押した瞬間は沈ませる（指の人には、これが「押せた」の合図になる） */
 .t-tool:active{transform:scale(.985)}
-.t-tool:active .t-shot{box-shadow:0 2px 8px rgba(0,0,0,.14)}
+.t-tool:active .t-shot{box-shadow:0 1px 3px rgba(0,0,0,.14)}
 
 /* じゅんび中は、枠を作らず文字だけ。できているものと見分けがつくように */
 .t-soon{border-top:1px solid var(--line);margin-top:22px;padding-top:16px}

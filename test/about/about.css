@@ -19,3 +19,22 @@
   .read .profile dt{ margin-top:10px; }
   .read .profile dd{ margin:0 0 0 1em; }
 }
+
+/* 現場の声 */
+.read .voices{ margin:8px 0 0; padding-left:1.2em; }
+.read .voices li{ margin:6px 0; }
+
+/* できること。名前と中身が2列に並ぶ */
+.read .tools{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:8px 14px;
+  margin:12px 0 0;
+}
+.read .tools dt{ margin:0; font-weight:bold; white-space:nowrap; }
+.read .tools dd{ margin:0; color:var(--ink-soft,#7b6f74); }
+@media (max-width:420px){
+  .read .tools{ grid-template-columns:1fr; gap:2px 0; }
+  .read .tools dt{ margin-top:10px; }
+  .read .tools dd{ margin:0 0 0 1em; }
+}
