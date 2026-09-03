@@ -1606,7 +1606,7 @@
   }
   function doClsSave() {
     var st = loadStore(), c = curClass(st);
-    if (!c) { alert('上書きする名簿をえらんでください。はじめて残すときは「新しく保存」です。'); return; }
+    if (!c) { alert('上書きする名簿をえらんでください。はじめて残すときは「新しい名前で保存」です。'); return; }
     c.names = $('names').value;
     c.seki = snapshot();
     if (!saveStore(st)) return;

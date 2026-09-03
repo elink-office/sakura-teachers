@@ -106,6 +106,16 @@
     return out;
   }
 
+  // 「詳しい条件」の「班に1人ずつにする人」でえらんだ人（2026-09-03 本人）。
+  //   ⚠名簿の★の読み取りも残してあるが、画面では案内していない
+  function condLeaders() {
+    var out = {}, el = $('leadList');
+    if (!el) return out;
+    Array.prototype.forEach.call(el.querySelectorAll('select.nameSel'), function (s) {
+      if (s.value) out[s.value] = true;
+    });
+    return out;
+  }
   function readNames() {
     var out = [], lead = {};
     var raw = $('names').value;
@@ -118,6 +128,8 @@
       if (fresh && p.sex) state.sex[p.name] = p.sex;
     });
     state.lastRaw = raw;
+    var cl = condLeaders();
+    for (var k in cl) lead[k] = true;
     state.leaders = lead;
     return out;
   }
@@ -229,6 +241,41 @@
     del.onclick = function () { wrap.remove(); };
     wrap.appendChild(a); wrap.appendChild(sep); wrap.appendChild(b); wrap.appendChild(del);
     $(listId).appendChild(wrap);
+  }
+  // 🔴 ★（班に1人ずつにする人）をえらぶ行（2026-09-03）
+  function addLeadRow(name) {
+    var wrap = document.createElement('div');
+    wrap.className = 'pair';
+    var n = document.createElement('select'); n.className = 'nameSel ph';
+    n.dataset.ph = '人をえらぶ'; fillNames(n);
+    // ⚠保存から戻すときは、まだ名簿を読む前のことがある。その名前を自分で足してからえらぶ
+    if (name) {
+      var has = false, i;
+      for (i = 0; i < n.options.length; i++) if (n.options[i].value === name) has = true;
+      if (!has) n.add(new Option(name, name));
+      n.value = name;
+      n.classList.remove('ph');
+    }
+    n.addEventListener('change', function () {
+      n.classList.toggle('ph', !n.value);
+      refreshNames();
+      if ($('save') && $('save').checked) save();
+    });
+    var del = document.createElement('button');
+    del.type = 'button'; del.className = 'mini'; del.textContent = '削除';
+    del.onclick = function () {
+      wrap.remove(); refreshNames();
+      if ($('save') && $('save').checked) save();
+    };
+    wrap.appendChild(n); wrap.appendChild(del);
+    $('leadList').appendChild(wrap);
+  }
+  function readLeads() {
+    var out = [], el = $('leadList');
+    if (el) Array.prototype.forEach.call(el.querySelectorAll('select.nameSel'), function (s) {
+      if (s.value) out.push(s.value);
+    });
+    return out;
   }
   function readPairs(listId) {
     var out = [];
@@ -934,6 +981,7 @@
       tcols: $('tcols').value, tnum: $('tnum').value, gsize: $('gsize').value,
       board: $('board').value, order: $('order').value,
       sep: readPairs('sepList'), adj: readPairs('adjList'),
+      leads: readLeads(),             // 🔴 班に1人ずつにする人（2026-09-03）
       sex: state.sex,
       sexBal: $('sexBal').checked, sexPrint: $('sexPrint').checked,
       colM: $('colM').value, colF: $('colF').value,
@@ -973,11 +1021,15 @@
     chk('printTeacher', d.printTeacher);
     state.sex = d.sex || {};
     $('sepList').innerHTML = ''; $('adjList').innerHTML = '';
+    if ($('leadList')) $('leadList').innerHTML = '';
     state.lastRaw = d.names;          // 貼り直しとみなさない＝男女の指定を消さない
     refreshNames();
     (d.sep || []).forEach(function (p) { addPairRow('sepList', p[0], p[1]); });
     (d.adj || []).forEach(function (p) { addPairRow('adjList', p[0], p[1]); });
-    if ((d.sep && d.sep.length) || (d.adj && d.adj.length)) $('condBlock').open = true;
+    (d.leads || []).forEach(function (n) { addLeadRow(n); });
+    refreshNames();                   // ★の指定を入れ直したので、もう一度合流させる
+    if ((d.sep && d.sep.length) || (d.adj && d.adj.length) || (d.leads && d.leads.length))
+      $('condBlock').open = true;
     state.board = $('board').value;
     refreshRoom();
     // ⚠ 席は作り直さない。作り直すと、保存したときと違う並びが出る
@@ -1206,6 +1258,8 @@
 
     $('addSep').onclick = function () { addPairRow('sepList'); };
     $('addAdj').onclick = function () { addPairRow('adjList'); };
+    // ⚠ addLeadRow をそのまま渡さない。クリックの情報が第1引数（名前）に入ってしまう
+    if ($('addLead')) $('addLead').onclick = function () { addLeadRow(); };
     $('go').onclick = function () { run(false); };
     $('again').onclick = function () { run(false); };
     $('doPrint').onclick = doPrint;

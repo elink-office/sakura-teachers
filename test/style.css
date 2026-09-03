@@ -379,7 +379,11 @@ select.ph option{color:var(--ink)}
    （2026-09-03 本人）。＝16px前後におさめる */
 /* ⚠ ？を丸のまんなかに置くため、line-height で寄せずに flex で中央にする。
    大きさは 14px 固定（アイコンなので em で伸び縮みさせない）。2026-09-03 本人の指定 */
-.tip-btn::before{
+/* 🔴 文中に「？」のしるしだけを出すための入れもの（2026-09-03 本人）。
+   本人「誰も気づかないかもって言われた」＝押せることに気づいてもらう案内に使う */
+.tip-mark{display:inline-block;line-height:1;color:var(--ink-soft);vertical-align:middle}
+.tip-guide{font-size:.84rem;color:var(--ink-soft);margin:0 0 14px}
+.tip-btn::before,.tip-mark::before{
   content:"?";
   display:inline-flex;align-items:center;justify-content:center;
   box-sizing:border-box;width:14px;height:14px;

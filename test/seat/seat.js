@@ -418,11 +418,20 @@
 
   // 🔴 ★（班に1人ずつにする人）を、名簿を書きかえずにえらぶ（2026-09-03 本人）。
   //   ⚠名簿の★と合わせて効く。消したいときは、この行を削除する
-  function addLeadRow() {
+  function addLeadRow(name) {
     var wrap = document.createElement('div');
     wrap.className = 'pair';
     var n = document.createElement('select'); n.className = 'nameSel ph';
     n.dataset.ph = '人をえらぶ'; fillNames(n);
+    // 保存から戻すとき。⚠この時点ではまだ名簿を読み込んでいないことがあるので、
+    //   その名前を自分で足してからえらぶ（あとで名簿が入れば、そのまま残る）
+    if (name) {
+      var has = false, i;
+      for (i = 0; i < n.options.length; i++) if (n.options[i].value === name) has = true;
+      if (!has) n.add(new Option(name, name));
+      n.value = name;
+      n.classList.remove('ph');
+    }
     n.addEventListener('change', function () {
       n.classList.toggle('ph', !n.value);
       leadChanged();
@@ -657,15 +666,15 @@
         fix[name] = (r - 1) * state.cols + (c - 1);
       } else zone[name] = kind;
     });
-    // 🔴「設定しない」を足した（2026-09-03）。えらばれているあいだは、
-    //   離す・隣にするの条件そのものを使わない。
-    //   ⚠ seating.js には 'none' という考え方が無いので、中では今までどおり cross を渡し、
-    //     条件のほうを空にする（＝どこを隣とみなすかが意味を持たなくなる）
-    var uiMode = (document.querySelector('input[name=mode]:checked') || {}).value || 'none';
-    var off = (uiMode === 'none');
+    // 🔴「隣の条件は設定しない」のチェックが入っているあいだは、
+    //   離す・隣にするの条件そのものを使わない（2026-09-03 本人）。
+    //   ⚠ラジオの4つ目にしていたのをやめて、チェックの下に3つを置く形にした。
+    //     本人「4つが同列だと、ボタンを変えたら設定が変わるってのが想像しにくい」
+    var off = $('modeOff') ? $('modeOff').checked : false;
+    var uiMode = (document.querySelector('input[name=mode]:checked') || {}).value || 'cross';
     return {
       names: state.names, cols: state.cols, rows: state.rows,
-      mode: off ? 'cross' : uiMode,
+      mode: uiMode,
       separate: off ? [] : pairs('sepList'), adjacent: off ? [] : pairs('adjList'),
       fixed: fix, zone: zone
     };
@@ -955,12 +964,12 @@
     // ⚠この一文は毎回ここで書きかえている。HTML側を直しても出ない（2026-09-03 に気づいた）
     var note = document.querySelector('.drag-note');
     if (note) {
-      note.innerHTML = (state.grp.on
-        ? '席はマグネットのように、ドラッグで入れ替えができます。<strong>班番号を押すと、席の班と色を変更できます</strong>'
-        : '席はマグネットのように、ドラッグで入れ替えができます')
-        // 🔴 長押しにしたので、そのことを画面に書く（2026-09-03 本人・現場の先生）
-        + '<br>スマホ・タブレットは<strong>席を長押ししてから</strong>動かします。' +
-        'まちがえたら<strong>「↩ 1つ戻す」</strong>で戻せます。';
+      // 🔴 文はこれだけ（2026-09-03 本人の指定）。
+      //   ⚠長押しのことも「1つ戻す」のことも、ここには書かない。
+      //     長押しは④の説明に、戻すのはこの文のすぐ左のボタンにある
+      note.innerHTML = state.grp.on
+        ? '席はマグネットのように入れ替えができます。<strong>班番号を押すと、席の班と色を変更できます</strong>。'
+        : '席はマグネットのように入れ替えができます。';
     }
     drawCheck(chk, samap);
     bindDrag();
@@ -1562,7 +1571,18 @@
         month: $('month') ? $('month').value : '',
         cols: $('cols').value, rows: $('rows').value,
         board: $('board').value,
-        mode: (document.querySelector('input[name=mode]:checked') || {}).value || 'none',
+        mode: (document.querySelector('input[name=mode]:checked') || {}).value || 'cross',
+        modeOff: $('modeOff') ? $('modeOff').checked : true,
+        // 🔴「班に1人ずつにする人」も保存する（2026-09-03 本人「ページを保存すれば班長ごと保存されるよね？」）。
+        //   ⚠ほかの条件（離す・隣にする・席を決める）は保存していない。ここだけ別あつかい＝
+        //     名簿の★をやめたので、ここが残らないと毎回えらび直しになるため
+        leads: (function () {
+          var a = [], el = $('leadList');
+          if (el) Array.prototype.forEach.call(el.querySelectorAll('select.nameSel'), function (x) {
+            if (x.value) a.push(x.value);
+          });
+          return a;
+        })(),
         numOn: $('numOn') ? $('numOn').checked : false,
         nameMode: $('nameMode').value, nameAlign: $('nameAlign') ? $('nameAlign').value : 'center',
         font: $('font').value, bold: $('bold').checked,
@@ -1615,10 +1635,20 @@
       // ⚠えらぶ形にしたので、前に保存した 9 以上は入らない。8 におさめる
       $('cols').value = clampNum(d.cols, 6); $('rows').value = clampNum(d.rows, 6);
       $('board').value = d.board || 'top';
-      // ⚠前に保存した人は 'cross' などを持っている。そのままにする（勝手に外さない）
-      var mr = document.querySelector('input[name=mode][value="' + (d.mode || 'none') + '"]');
+      // ⚠前に保存した人は 'cross' などを持っている。そのままにする（勝手に外さない）。
+      //   ⚠一時期 'none' で保存していた版がある。そのときは既定（前後左右）にもどす
+      var dm = d.mode || 'cross';
+      if (dm === 'none') dm = 'cross';
+      var mr = document.querySelector('input[name=mode][value="' + dm + '"]');
       if (mr) mr.checked = true;
+      // ⚠この項目を持っていない人（前の版）は「設定しない」にしておく
+      if ($('modeOff')) $('modeOff').checked = (d.modeOff === undefined) ? true : !!d.modeOff;
       modeChanged();
+      // 「班に1人ずつにする人」を戻す（⚠いったん空にしてから入れ直す。二重に増えるのを防ぐ）
+      if ($('leadList')) {
+        $('leadList').innerHTML = '';
+        (d.leads || []).forEach(function (nm) { addLeadRow(nm); });
+      }
       // ⚠前に保存した人はこの項目を持っていない。そのときは既定（出さない）のまま
       if (d.numOn !== undefined && $('numOn')) {
         $('numOn').checked = !!d.numOn;
@@ -1786,7 +1816,7 @@
   }
   function doClsSave() {
     var st = loadStore(), c = curClass(st);
-    if (!c) { alert('先に、保存した名簿をえらんでください。はじめて残すときは「新しく保存」です。'); return; }
+    if (!c) { alert('先に、保存した名簿をえらんでください。はじめて残すときは「新しい名前で保存」です。'); return; }
     c.names = $('names').value;
     c.seat = snapshot();
     if (!saveStore(st)) return;
@@ -1910,11 +1940,19 @@
     });
   }
 
-  // 「隣」の考え方が「設定しない」なら、離す・隣にするの欄そのものを隠す
+  // 「隣の条件は設定しない」のチェックで、中身ごと開け閉めする（2026-09-03 本人）
+  var MODE_NOTE = {
+    lr: '横にならんだ<strong>左右の席だけ</strong>を「隣」とみなします。',
+    cross: '<strong>前後左右の4つの席</strong>を「隣」とみなします。',
+    king: 'ななめもふくめた<strong>まわり8つの席</strong>を「隣」とみなします。いちばんきつい決め方です。'
+  };
   function modeChanged() {
-    var m = (document.querySelector('input[name=mode]:checked') || {}).value || 'none';
-    var box = $('pairBlocks');
-    if (box) box.hidden = (m === 'none');
+    var off = $('modeOff') ? $('modeOff').checked : false;
+    var box = $('modeBox');
+    if (box) box.hidden = off;
+    var m = (document.querySelector('input[name=mode]:checked') || {}).value || 'cross';
+    var note = $('modeNote');
+    if (note) note.innerHTML = MODE_NOTE[m] || '';
   }
 
   function orderChanged() {
@@ -2058,9 +2096,14 @@
     $('addSep').onclick = function () { addPairRow('sepList'); };
     $('addAdj').onclick = function () { addPairRow('adjList'); };
     $('addFix').onclick = addFixRow;
-    if ($('addLead')) $('addLead').onclick = addLeadRow;
+    // ⚠ addLeadRow をそのまま渡さない。クリックの情報が第1引数（名前）に入ってしまう
+    if ($('addLead')) $('addLead').onclick = function () { addLeadRow(); };
     if ($('undo')) $('undo').onclick = undoOnce;
-    // 🔴「隣」の考え方（2026-09-03）。「設定しない」のあいだは、離す・隣にするの欄を出さない
+    // 🔴「隣」の考え方（2026-09-03）。チェックを外すと、3つの選びと設定の欄が出てくる
+    if ($('modeOff')) $('modeOff').addEventListener('change', function () {
+      modeChanged();
+      if ($('save').checked && !state.sample) save();
+    });
     document.querySelectorAll('input[name=mode]').forEach(function (r) {
       r.addEventListener('change', function () {
         modeChanged();

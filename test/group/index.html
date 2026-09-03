@@ -25,11 +25,11 @@
 </script>
 <title>【テスト】理科室の座席表メーカー｜図工室・家庭科室の班の席をA4の1枚に｜さくら先生の座席表</title>
 <meta name="description" content="理科室・図工室・家庭科室の座席表を無料で作成。名簿を貼るだけで、実験台ごとの班分けと、台のどこに座るかまで決まります。1台4〜6人、台は2列でも3列でも。男女を均す・この2人は離す、も指定できます。名簿は20クラスまで残せるので、専科の先生でも貼り直しが要りません。印刷とPDFはA4の1枚に収まります。">
-<link rel="stylesheet" href="../style.css?v=104">
+<link rel="stylesheet" href="../style.css?v=105">
 <link rel="stylesheet" href="group.css?v=1">
 </head>
 <body>
-<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/03 08:10</div>
+<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/03 09:09</div>
 
 <header class="site-head noprint">
   <div class="wrap">
@@ -46,13 +46,14 @@
   <h1>理科室・図工室の座席表メーカー</h1>
   <p class="catch">班も、台のどこに座るかも、A4の1枚に</p>
   <p class="lead">名簿を貼るだけ。理科室・図工室・家庭科室のように、大きな台をかこんで座る教室のための座席表です。名簿は20クラスまで残せるので、いくつも受け持つ先生でも貼り直しが要りません。使った名簿は外に送っていないので、<strong>AIの学習に使われることもありません</strong>。</p>
+  <p class="tip-guide noprint"><span class="tip-mark"></span> のしるしを押すと、くわしい説明が出ます。</p>
+
 
   <section class="card noprint">
     <h2><span class="step">1</span>名簿を入力&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h2>
     <div class="tip-body" hidden>
       <ul>
         <li><strong>1行に1人</strong>です。Excelからそのまま貼れます。番号や性別の列がいっしょでもかまいません。</li>
-        <li>名前の前か後ろに ★ を付けると、その人が<strong>1つの班に1人ずつ</strong>になるように散らします。班長・リーダー・声かけ役など、使い方は自由です。</li>
         <li>男女の列（男／女）があれば読み取ります。無いときは③で1人ずつ指定できます。</li>
       </ul>
     </div>
@@ -64,7 +65,7 @@
         <button class="mini" id="clsLoad2" type="button">この名簿を自動入力</button></div>
     </div>
 
-    <textarea id="names" placeholder="ここをクリック → Excelからコピペ（手入力可）&#10;&#10;やまだ たろう★（班に1人ずつにしたい人に★）&#10;さとう はなこ&#10;すずき いちろう&#10;&#10;空のままだとサンプルが出ます"></textarea>
+    <textarea id="names" placeholder="ここをクリック → Excelからコピペ（手入力可）&#10;&#10;1,やまだ たろう,男&#10;2,さとう はなこ,女&#10;すずき いちろう（名前だけでもOK）&#10;&#10;空のままだとサンプルが出ます"></textarea>
 
     <div class="row tight" style="margin-top:10px">
       <div><label for="nameMode">名前の見せ方</label>
@@ -122,7 +123,7 @@
     </div>
 
     <details class="opt sub noprint" id="condBlock">
-      <summary>詳しい条件（離す・同じ班にする）</summary>
+      <summary>詳しい条件（離す・同じ班にする・班に1人ずつ）</summary>
       <div class="body">
         <h3>離す組み合わせ</h3>
         <p class="hint">同じ台にしない組み合わせです。</p>
@@ -133,6 +134,17 @@
         <p class="hint">同じ台にする組み合わせです。</p>
         <div id="adjList"></div>
         <button class="mini" id="addAdj" type="button">＋ 組を追加</button>
+
+        <!-- 🔴 ★は名簿に書かず、ここでえらぶ形にした（2026-09-03 本人「名簿に班長とは書かない」）。
+             ⚠名簿の★の読み取りは残してあるが、画面では案内しない -->
+        <h3 style="margin-top:16px">班に1人ずつにする人&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h3>
+        <div class="tip-body" hidden>
+          <p>班長・リーダー・声かけ役など、<strong>ばらけていてほしい人</strong>をえらびます。何のために分けるかは先生が決めてかまいません。</p>
+          <p>★を表に出すかどうかは、下の「見た目」でえらべます。人数が班の数より少ないときは、いない班をお知らせします。</p>
+        </div>
+        <div id="leadList"></div>
+        <button class="mini" id="addLead" type="button">＋ 人を追加</button>
+        <p class="hint">えらんだ人は、なるべく<strong>1つの台に1人ずつ</strong>になるように分かれます。画面を保存すると、この指定も一緒に残ります。</p>
       </div>
     </details>
 
@@ -284,7 +296,7 @@
       <h3>名簿に名前を付けて保存（<span id="clsCount">0／20件</span>）</h3>
       <p class="hint">名簿・部屋の形・条件・男女の指定を、まとめて残すときに使います。</p>
       <p class="btn-row">
-        <button class="mini" id="clsNew" type="button">新しく保存</button>
+        <button class="mini" id="clsNew" type="button">新しい名前で保存</button>
         <button class="mini" id="clsSave" type="button">上書き</button>
         <button class="mini" id="clsDel" type="button">削除</button>
       </p>
@@ -330,7 +342,7 @@
       <dt>クラスをいくつも受け持っています</dt>
       <dd><strong>名簿は20クラスまで残せます。</strong>次に開いたときは、選んで呼び出すだけです。座席表メーカー・席次表メーカーで保存した名簿も、ここに出ます。</dd>
       <dt>班長になる人を1つの班に1人ずつにできますか？</dt>
-      <dd>できます。名簿の名前の前か後ろに <strong>★</strong> を付けてください。★が2人になった班と、1人もいない班のあいだで入れかえます。★の数が班の数より少ないときは、いない班をお知らせします。班長でなくても、声かけ役・そうじのリーダーなど、分けたい人なら何にでも使えます。</dd>
+      <dd>できます。②の「詳しい条件」にある<strong>「班に1人ずつにする人」</strong>でえらんでください。その人が2人になった班と、1人もいない班のあいだで入れかえます。人数が班の数より少ないときは、いない班をお知らせします。班長でなくても、声かけ役・そうじのリーダーなど、分けたい人なら何にでも使えます。</dd>
       <dt>前と同じ班にならないようにできますか？</dt>
       <dd>いまはできません。気になるところは、名前をつまんで入れかえてください。</dd>
       <dt>1台に7人以上座らせたいのですが</dt>
@@ -353,7 +365,7 @@
     <span class="copy">© 2026 さくら先生の座席表</span></div>
 </footer>
 
-<script src="group.js?v=5"></script>
+<script src="group.js?v=6"></script>
 <!-- 🔴 印刷用の1枚絵の置き場。画面には出ない。
      ⚠body の直下に置くこと。中に入れると、印刷のときに親ごと隠されて白紙になる -->
 <div id="printImgWrap"></div>
