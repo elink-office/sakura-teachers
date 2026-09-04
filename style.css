@@ -94,6 +94,24 @@ input[type=text],input[type=number],textarea,select{
   font:inherit;padding:8px 10px;border:1px solid var(--line);
   border-radius:8px;background:#fff;color:var(--ink);
 }
+/* 🔴 マウスを乗せたら枠が色づく（2026-09-04 本人）。
+   本人「ちょっと色がつくのはとても分かりやすくていいなと思って」
+   ⚠スピンボタン（数字の上下の矢印）そのものはブラウザが描いていて色を変えられない。
+     枠を色づけるほうが確実で、どの機器でも同じに見える。
+   ⚠ hover:hover ＝マウスがある機器だけ。付けないとスマホで触ったあと色が残る。
+   ⚠色は変数を通す＝席次表（seki.css で --pink を緑に上書き）では緑になる */
+@media (hover:hover){
+  input[type=text]:hover,input[type=number]:hover,textarea:hover,select:hover{
+    /* ⚠乗せたときは**細い線の色だけ**（2026-09-04 本人）。
+       うすく塗るのはボタンだけにする＝入力欄とボタンの役割を見た目で分ける */
+    border-color:var(--pink);
+  }
+}
+/* 選んでいるあいだ＝枠だけ色づけて、中は白にもどす（打っている字が読みやすいように）。
+   ⚠ :focus-visible の枠（キーボード操作の目印）は消さない */
+input[type=text]:focus,input[type=number]:focus,textarea:focus,select:focus{
+  border-color:var(--pink);background:#fff;
+}
 textarea{width:100%;min-height:170px;resize:vertical;line-height:1.6}
 input[type=number]{width:5em}
 .row{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}

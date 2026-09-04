@@ -25,17 +25,77 @@
 </script>
 <title>【テスト】席次表メーカー｜会議・研修・大学の席次表を無料で自動作成</title>
 <meta name="description" content="席次表の作り方は簡単。名簿を貼るだけで、会議・研修・セミナー・大学の席次表が自動で作れる無料ツールです。前を向いて並ぶスクール形式で、席順は名簿順とランダムから選べます。用紙に合わせて自動で調整し、A4の1枚に収めるので、2ページに分かれません。会社名・役職（肩書き）・フリガナ・名前を1マスに並べ、敬称は様・さん・先生から選べます。Excelの名簿から複数の列をそのまま貼り付けでき、通し番号の向きも指定できます。印刷とPDFもこのページから。名簿はブラウザの中だけで処理し、AIの学習にも使われません。">
-<link rel="stylesheet" href="../style.css?v=108">
+<link rel="stylesheet" href="../style.css?v=111">
 <link rel="stylesheet" href="seki.css?v=20">
 <link rel="stylesheet" href="../print.css?v=54" media="print">
 <style>
+/* 🔴 見本は押すと大きくなる（2026-09-04 本人）。
+   本人「クリックしたら大きくなって見本って表示されるようにできる？
+        で、サイズを小さくしといたほうがいいかも。
+        あと幅を小さくしたときは、リード文が↓のほうがいいわ」
+   ⚠狭い画面では、絵が大きいと①（名簿の欄）がうんと下に行く。
+     だから狭いときは**小さくして、文章より上**に置く */
+.samp-btn{display:block;width:100%;padding:0;border:0;background:none;cursor:zoom-in}
+.samp-btn img{
+  display:block;width:100%;height:auto;border-radius:10px;background:#fff;
+  box-shadow:0 5px 16px rgba(0,0,0,.17), 0 1px 3px rgba(0,0,0,.10);
+  transition:box-shadow .18s ease, transform .18s ease;
+}
+@media (hover:hover){
+  .samp-btn:hover img{box-shadow:0 14px 30px rgba(0,0,0,.22), 0 2px 5px rgba(0,0,0,.12);transform:translateY(-3px)}
+}
+.samp-btn:active img{box-shadow:0 1px 4px rgba(0,0,0,.16);transform:translateY(1px) scale(.995)}
+/* 狭い画面＝絵を小さくして、文章より上に出す */
+/* 押したときに開く大きい見本 */
+.samp-view{
+  position:fixed;inset:0;z-index:9600;background:rgba(0,0,0,.86);
+  overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px;
+}
+.samp-view .samp-head{
+  display:flex;align-items:center;gap:12px;color:#fff;font-weight:bold;flex:0 0 auto;
+}
+.samp-view .samp-head button{margin-left:auto}
+.samp-view img{
+  display:block;max-width:100%;height:auto;margin:auto;
+  background:#fff;border-radius:8px;
+}
+/* 🔴 広い画面では、文章の右に見本を置く（2026-09-04 本人）。
+   ⚠クラス名を .hero にしてはいけない。共通の style.css に別物の .hero がある
+     （白い箱＋桜色の枠）。名前がぶつかって枠が出た。ここは .intro を使う。
+   本人「全画面表示にした時、幅が小さいのが気になる…でも幅広げると大きすぎる」
+   ＝余白を絵で埋めつつ、①（名簿の欄）を上のほうに残す。
+   ⚠狭い画面では自動で縦に積む（絵が下）。並べるのは 860px より広いときだけ */
+/* 🔴 できること（2026-09-04 本人）。⚠ .can は共通CSSが別に使っているので .can-do にする */
+.can-do{margin:12px 0 10px;padding-left:1.1em;font-size:.86rem;color:var(--ink-soft);line-height:1.9}
+.can-do li{margin-bottom:2px}
+.can-do li::marker{color:var(--midori,#3b8f6b)}
+.intro{margin:0 0 20px}
+.intro .t-sample{margin:0}
+@media (min-width:860px){
+  .intro{display:flex;align-items:flex-start;gap:26px}
+  .intro .intro-txt{flex:1 1 0;min-width:0}
+  .intro .t-sample{flex:0 0 46%;max-width:460px}
+  /* ⚠文章の1行目と絵の上端をそろえる（見出しの行の高さぶん下げない） */
+  .intro .intro-txt > *:first-child{margin-top:0}
+}
+/* ⚠狭い画面の指定は、上の .intro .t-sample{margin:0} より**あと**に置く */
+@media (max-width:859px){
+  .intro{display:flex;flex-direction:column}
+  .intro .t-sample{order:-1;max-width:220px;margin:0 auto 16px}
+}
+/* 🔴 できあがりの見本（2026-09-04 本人）。⚠大きくしすぎない。①が画面の外に出てしまう */
+.t-sample{margin:0 0 20px;max-width:520px}
+.t-sample img{
+  display:block;width:100%;height:auto;border-radius:10px;background:#fff;
+  box-shadow:0 5px 16px rgba(0,0,0,.17), 0 1px 3px rgba(0,0,0,.10);
+}
 /* 🔴「1つ戻す」とドラッグの説明を1行に（2026-09-03 本人・座席表と同じ） */
 .drag-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
 .drag-row .drag-note{margin:0;flex:1 1 260px}
 </style>
 </head>
 <body>
-<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/03 21:09</div>
+<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/04 17:37</div>
 
 <header class="site-head noprint">
   <div class="wrap">
@@ -51,8 +111,32 @@
 <main class="wrap">
   <h1>席次表メーカー</h1>
   <p class="catch">会議も研修も、名簿を貼るだけ</p>
-  <p class="lead"><strong>用紙に合わせて自動で調整し、A4の1枚に収めます。</strong>会社名・役職・フリガナ・名前を並べた席次表が、そのまま印刷できます。Excelの名簿から複数の列をまとめて貼り付けられるので、打ち直しはいりません。</p>
-  <p class="tip-guide noprint"><span class="tip-mark"></span> のしるしを押すと、くわしい説明が出ます。</p>
+
+  <div class="intro">
+    <div class="intro-txt">
+      <p class="lead"><strong>用紙に合わせて自動で調整し、A4の1枚に収めます。</strong>会社名・役職・フリガナ・名前を並べた席次表が、そのまま印刷できます。Excelの名簿から複数の列をまとめて貼り付けられるので、打ち直しはいりません。</p>
+      <!-- 🔴 できること（2026-09-04 本人・座席表と同じ形） -->
+      <ul class="can-do">
+        <li><strong>10人でも100人でも</strong>。用紙に合わせて自動で調整</li>
+        <li><strong>会社名・役職・フリガナ・名前</strong>をひとマスに</li>
+        <li>大学なら<strong>学科・学籍番号</strong>も</li>
+        <li>印刷とPDFは<strong>A4の1枚</strong>に収まります</li>
+      </ul>
+      <p class="tip-guide noprint"><span class="tip-mark"></span> のしるしを押すと、くわしい説明が出ます。</p>
+    </div>
+    <figure class="t-sample noprint">
+      <button type="button" class="samp-btn" aria-label="見本を大きく見る">
+        <img src="../img/seki-sample.png?v=2" width="1080" height="818" alt="会社名と役職を並べた研修の席次表の完成見本">
+      </button>
+    </figure>
+  </div>
+
+  <!-- 🔴 押すと開く大きい見本（2026-09-04 本人）。⚠紙にも画像にも出さない -->
+  <div class="samp-view noprint" id="sampView" hidden>
+    <div class="samp-head">見本<button type="button" id="sampClose">✕ とじる</button></div>
+    <img src="../img/seki-sample.png?v=2" alt="会社名と役職を並べた研修の席次表の完成見本">
+  </div>
+
 
 
     <section class="card noprint">
@@ -559,5 +643,22 @@
 <script src="seki.js?v=46"></script>
 <!-- 🔴 印刷用の1枚絵の置き場。⚠body の直下に置くこと -->
 <div id="printImgWrap"></div>
+<script>
+// 🔴 見本を押すと大きく出す（2026-09-04 本人）。⚠外側・✕・Esc のどれでも閉じる
+(function () {
+  var b = document.querySelector('.samp-btn'),
+      v = document.getElementById('sampView'),
+      c = document.getElementById('sampClose');
+  if (!b || !v || !c) return;
+  function open() { v.hidden = false; document.body.style.overflow = 'hidden'; c.focus(); }
+  function close() { v.hidden = true; document.body.style.overflow = ''; b.focus(); }
+  b.addEventListener('click', open);
+  c.addEventListener('click', close);
+  v.addEventListener('click', function (e) { if (e.target === v) close(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !v.hidden) close();
+  });
+})();
+</script>
 </body>
 </html>

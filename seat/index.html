@@ -25,7 +25,7 @@
 <meta name="google-site-verification" content="PfjmCGxUaN1hzuj_dRw3e4PTY6xepghfXM_CrU_sO-A" />
 <title>教室の座席表メーカー｜席替えを簡単に・30人40人・4列〜8列対応</title>
 <meta name="description" content="教室の座席表の作り方は簡単。名簿を貼るだけで席替えができるフリーツールです。新年度の出席番号順にも対応。小学校・中学校・高校のどのクラスでも、30人・35人・40人、4列・5列・6列・8列の教室席配置に対応。生徒に見せる向きと、先生が教卓から見る向きを切り替えられます。班分けと色分けもそのまま印刷・PDFにできます。Excelテンプレートは不要です。名簿はブラウザの中だけで処理し、AIの学習にも使われません。">
-<link rel="stylesheet" href="../style.css?v=108">
+<link rel="stylesheet" href="../style.css?v=111">
 <link rel="stylesheet" href="seat.css?v=1">
 <link rel="stylesheet" href="../print.css?v=54" media="print">
 <style>
@@ -82,6 +82,68 @@ body.screen .seat.is-leader::after{font-size:var(--markSize,1.2em);right:5px;top
 body.screen .sheet.masked #mask{display:none}
 body.screen .sheet.masked .grid{display:grid}
 @media print{.sheet.masked #mask{display:none}.sheet.masked .grid{display:grid}}
+/* 🔴 見本は押すと大きくなる（2026-09-04 本人）。
+   本人「クリックしたら大きくなって見本って表示されるようにできる？
+        で、サイズを小さくしといたほうがいいかも。
+        あと幅を小さくしたときは、リード文が↓のほうがいいわ」
+   ⚠狭い画面では、絵が大きいと①（名簿の欄）がうんと下に行く。
+     だから狭いときは**小さくして、文章より上**に置く */
+.samp-btn{display:block;width:100%;padding:0;border:0;background:none;cursor:zoom-in}
+.samp-btn img{
+  display:block;width:100%;height:auto;border-radius:10px;background:#fff;
+  box-shadow:0 5px 16px rgba(0,0,0,.17), 0 1px 3px rgba(0,0,0,.10);
+  transition:box-shadow .18s ease, transform .18s ease;
+}
+@media (hover:hover){
+  .samp-btn:hover img{box-shadow:0 14px 30px rgba(0,0,0,.22), 0 2px 5px rgba(0,0,0,.12);transform:translateY(-3px)}
+}
+.samp-btn:active img{box-shadow:0 1px 4px rgba(0,0,0,.16);transform:translateY(1px) scale(.995)}
+/* 狭い画面＝絵を小さくして、文章より上に出す */
+/* 押したときに開く大きい見本 */
+.samp-view{
+  position:fixed;inset:0;z-index:9600;background:rgba(0,0,0,.86);
+  overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px;
+}
+.samp-view .samp-head{
+  display:flex;align-items:center;gap:12px;color:#fff;font-weight:bold;flex:0 0 auto;
+}
+.samp-view .samp-head button{margin-left:auto}
+.samp-view img{
+  display:block;max-width:100%;height:auto;margin:auto;
+  background:#fff;border-radius:8px;
+}
+/* 🔴 広い画面では、文章の右に見本を置く（2026-09-04 本人）。
+   ⚠クラス名を .hero にしてはいけない。共通の style.css に別物の .hero がある
+     （白い箱＋桜色の枠）。名前がぶつかって枠が出た。ここは .intro を使う。
+   本人「全画面表示にした時、幅が小さいのが気になる…でも幅広げると大きすぎる」
+   ＝余白を絵で埋めつつ、①（名簿の欄）を上のほうに残す。
+   ⚠狭い画面では自動で縦に積む（絵が下）。並べるのは 860px より広いときだけ */
+/* 🔴 できること（2026-09-04 本人）。左の高さを埋めつつ、中身も増やす */
+/* ⚠ .can は下の「できること」の節がもう使っている（白い箱）。ここは別名にする */
+.can-do{margin:12px 0 10px;padding-left:1.1em;font-size:.86rem;color:var(--ink-soft);line-height:1.9}
+.can-do li{margin-bottom:2px}
+.can-do li::marker{color:var(--pink)}
+.intro{margin:0 0 20px}
+.intro .t-sample{margin:0}
+@media (min-width:860px){
+  .intro{display:flex;align-items:flex-start;gap:26px}
+  .intro .intro-txt{flex:1 1 0;min-width:0}
+  .intro .t-sample{flex:0 0 46%;max-width:460px}
+  /* ⚠文章の1行目と絵の上端をそろえる（見出しの行の高さぶん下げない） */
+  .intro .intro-txt > *:first-child{margin-top:0}
+}
+/* ⚠狭い画面の指定は、上の .intro .t-sample{margin:0} より**あと**に置く。
+   先に書くと margin:0 に上書きされて、絵が左に寄る（2026-09-04 実際に起きた） */
+@media (max-width:859px){
+  .intro{display:flex;flex-direction:column}
+  .intro .t-sample{order:-1;max-width:220px;margin:0 auto 16px}
+}
+/* 🔴 できあがりの見本（2026-09-04 本人）。⚠大きくしすぎない。①が画面の外に出てしまう */
+.t-sample{margin:0 0 20px;max-width:520px}
+.t-sample img{
+  display:block;width:100%;height:auto;border-radius:10px;background:#fff;
+  box-shadow:0 5px 16px rgba(0,0,0,.17), 0 1px 3px rgba(0,0,0,.10);
+}
 /* 🔴「＋人を追加」と人数を1行に（2026-09-03 本人） */
 .lead-add{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .lead-add .hint{margin:0}
@@ -141,9 +203,35 @@ body.screen .seat.dup .nm{text-decoration:none}
 
 <main class="wrap">
   <h1>教室の座席表メーカー</h1>
-  <p class="catch">8列でも、40人でも、隣同士の組み合わせも自由自在</p>
-  <p class="lead">名簿を貼ってボタンひとつ。もう<strong>エクセルテンプレート</strong>は不要です。「この2人は離す」「この子は前のほうに」を入れたまま席替えできて、そのまま印刷・PDFにできます。</p>
-  <p class="tip-guide noprint"><span class="tip-mark"></span> のしるしを押すと、くわしい説明が出ます。</p>
+  <p class="catch">8列でも40人でも、隣同士の組み合わせも自由自在</p>
+
+  <div class="intro">
+    <div class="intro-txt">
+      <p class="lead">名簿を貼ってボタンひとつ。もう<strong>エクセルテンプレート</strong>は不要です。「この2人は離す」「この子は前のほうに」を入れたまま席替えできて、そのまま印刷・PDFにできます。</p>
+      <!-- 🔴 できること（2026-09-04 本人）。
+           ⚠サーチコンソールで上位に出ているのは「座席表 40人／30人／35人」＝
+             人数の数字が入ると順位が上がる。その言葉をここで使う。
+             ⭐32人・33人は検索されないが、**自分のクラスも大丈夫と分かる**ために書く（本人の判断） -->
+      <ul class="can-do">
+        <li><strong>30人・35人・40人</strong>はもちろん、32人・33人のような数でも</li>
+        <li>4列でも8列でも。<strong>班分けと色分け</strong>もそのまま</li>
+        <li>印刷とPDFは<strong>A4の1枚</strong>に収まります</li>
+      </ul>
+      <p class="tip-guide noprint"><span class="tip-mark"></span> のしるしを押すと、くわしい説明が出ます。</p>
+    </div>
+    <figure class="t-sample noprint">
+      <button type="button" class="samp-btn" aria-label="見本を大きく見る">
+        <img src="../img/seat-sample.png?v=2" width="980" height="758" alt="班ごとに色分けした教室の座席表の完成見本">
+      </button>
+    </figure>
+  </div>
+
+  <!-- 🔴 押すと開く大きい見本（2026-09-04 本人）。⚠紙にも画像にも出さない -->
+  <div class="samp-view noprint" id="sampView" hidden>
+    <div class="samp-head">見本<button type="button" id="sampClose">✕ とじる</button></div>
+    <img src="../img/seat-sample.png?v=2" alt="班ごとに色分けした教室の座席表の完成見本">
+  </div>
+
 
 
     <section class="card noprint">
@@ -718,5 +806,22 @@ body.screen .seat.dup .nm{text-decoration:none}
 <!-- 🔴 印刷用の1枚絵の置き場（2026-09-01）。画面には出ない。
      ⚠**body の直下に置くこと。**中に入れると、印刷のときに親ごと隠されて白紙になる -->
 <div id="printImgWrap"></div>
+<script>
+// 🔴 見本を押すと大きく出す（2026-09-04 本人）。⚠外側・✕・Esc のどれでも閉じる
+(function () {
+  var b = document.querySelector('.samp-btn'),
+      v = document.getElementById('sampView'),
+      c = document.getElementById('sampClose');
+  if (!b || !v || !c) return;
+  function open() { v.hidden = false; document.body.style.overflow = 'hidden'; c.focus(); }
+  function close() { v.hidden = true; document.body.style.overflow = ''; b.focus(); }
+  b.addEventListener('click', open);
+  c.addEventListener('click', close);
+  v.addEventListener('click', function (e) { if (e.target === v) close(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !v.hidden) close();
+  });
+})();
+</script>
 </body>
 </html>
