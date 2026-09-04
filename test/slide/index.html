@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta name="robots" content="noindex,nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="さくら先生の座席表">
+<meta property="og:title" content="簡単スライド｜パワーポイントの代わりに、文字と写真をモニターへ">
+<meta property="og:description" content="打った文字と写真を、そのまま大きくモニターに映せます。今日のめあて、問題文、作品の写真、発表者の名前に。パワーポイントでスライドを作らなくていいので、思いついたその場で出せます。登録なし・無料。">
+<meta property="og:url" content="https://sakura-teachers.com/slide/">
+<meta property="og:image" content="https://sakura-teachers.com/ogp.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5047272666003169" crossorigin="anonymous"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GCK29PTKBG"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GCK29PTKBG');
+</script>
+<title>【テスト】簡単スライド｜パワーポイントの代わりに、文字と写真をモニターへ｜さくら先生の座席表</title>
+<meta name="description" content="パワーポイントの代わりに、文字と写真をそのまま大きくモニターに映せる無料の道具です。今日のめあて、問題文、作品の写真、発表する子の名前に。スライドを作り込まなくていいので、思いついたその場で出せます。写真の上に文字を重ねることもできます。名簿は座席表・班分けと共通。登録なし・インストールなし・写真も名簿も外に送りません。">
+<link rel="stylesheet" href="../style.css?v=111">
+<link rel="stylesheet" href="slide.css?v=1">
+</head>
+<body>
+<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/05 08:55</div>
+
+<header class="site-head noprint">
+  <div class="wrap">
+    <a class="logo" href="../">🌸 さくら先生の座席表</a>
+    <nav>
+      <a href="../">トップ</a>
+      <a href="../seat/">座席表</a>
+      <a href="../seki/">席次表</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>簡単スライド</h1>
+  <p class="catch">パワーポイントの代わりに、文字と写真をモニターへ</p>
+  <p class="lead">
+    打った文字と写真が、そのまま大きく映ります。今日のめあて、問題文、注意のひとこと、作品の写真、発表する子の名前。
+    <strong>スライドを作り込まなくていい</strong>ので、思いついたその場で出せます。写真の上に文字を重ねることもできます。
+    名簿は座席表・班分けと同じものが使えます。写真も文字も名簿も、<strong>外には送っていません</strong>。
+  </p>
+
+  <!-- 準備（子どもに見せたくないものは全部この中。閉じれば一度に隠れる） -->
+  <details class="opt" id="d1" open>
+    <summary>先生の準備</summary>
+    <div class="body">
+
+      <div class="modes" id="kind">
+        <label><input type="radio" name="kind" value="text" checked> 文字を出す</label>
+        <label><input type="radio" name="kind" value="list"> 発表者を出す</label>
+      </div>
+
+      <!-- ===== 文字を出す ===== -->
+      <div id="paneText">
+        <p class="hint" style="margin-bottom:10px">
+          出したい文字を打って、<b>「入れる」</b>を押してください。<b>1行が1枚</b>になります。
+          1枚の中で改行したいときは、改行したいところに <code>/</code>（スラッシュ）を入れてください。
+        </p>
+        <textarea id="lines" placeholder="今日のめあて/分数のたし算ができる
+教科書 42ページ
+となりの人と 話し合ってみよう
+のこり 5分"></textarea>
+        <div class="row" style="margin-top:12px">
+          <button id="addText">入れる</button>
+          <button id="sampleText">お手本を入れる</button>
+        </div>
+
+        <hr class="sep">
+        <h3 class="sub">写真を入れる</h3>
+        <p class="hint" style="margin-bottom:10px">
+          作品の写真や、見せたい画面の写真を入れられます。写真の上に文字を重ねることもできます。<br>
+          <b>写真はどこにも保存しません。</b>このページを閉じると消えるので、次に開いたときは入れ直してください。
+        </p>
+        <div class="row">
+          <label class="filebtn">写真をえらぶ<input type="file" id="pics" accept="image/*" multiple hidden></label>
+          <span class="hint" style="margin:0" id="picNote">いくつでも選べます</span>
+        </div>
+
+        <hr class="sep">
+        <h3 class="sub">出す順番</h3>
+        <div class="tools">
+          <button id="clearText">ぜんぶ消す</button>
+        </div>
+        <div class="tbl" id="sheets"><p class="empty">まだ何も入れていません。</p></div>
+      </div>
+
+      <!-- ===== 発表者を出す ===== -->
+      <div id="paneList" hidden>
+
+        <h3 class="sub"><span class="step">1</span>名簿</h3>
+
+        <div id="clsBox" hidden>
+          <p class="notice">座席表・班分けで保存したクラスが使えます。</p>
+          <div class="row" style="margin-bottom:14px">
+            <select id="clsSel"></select>
+            <button id="clsLoad">このクラスを読み込む</button>
+          </div>
+        </div>
+
+        <p class="hint" style="margin-bottom:10px">
+          Excelで名前の列を選んでコピー → 下の枠に貼り付け。
+          1行目が「名前」「作品名」「班」などの見出しなら自動で読み分けます。見出しがなければ <b>1列目＝名前・2列目＝作品名</b>。
+        </p>
+        <textarea id="paste" placeholder="名前	作品名	班
+さくら	わたしの家族	1班
+たろう	わたしの家族	1班
+はなこ	海の生きもの	2班"></textarea>
+        <div class="row" style="margin-top:12px">
+          <button id="read">読み込む</button>
+          <button id="sample">お手本を入れる</button>
+          <button id="clear">消す</button>
+        </div>
+        <p class="notice warn" id="warn" hidden></p>
+
+        <hr class="sep">
+        <h3 class="sub"><span class="step">2</span>作品名と順番</h3>
+
+        <div class="modes" id="modes" hidden>
+          <label><input type="radio" name="mode" value="one" checked> 1人ずつ映す</label>
+          <label><input type="radio" name="mode" value="group"> 班ごとにまとめて映す</label>
+        </div>
+        <p class="hint" style="margin-bottom:10px">
+          作品名はここで直せます。長いときは、改行したいところに <code>/</code> を入れてください。<br>
+          ▲▼で順番を入れ替え。チェックを外すと、その子（その班）は映りません。
+        </p>
+        <div class="tools" id="tools" hidden>
+          <button id="shuffle">順番をシャッフル</button>
+          <button id="reset">読み込んだ順に戻す</button>
+          <button id="allon">ぜんぶ映す</button>
+        </div>
+        <div class="tbl" id="list"><p class="empty">まだ名簿を読み込んでいません。</p></div>
+      </div>
+
+      <hr class="sep">
+      <h3 class="sub">見た目</h3>
+      <div class="look">
+        <div><label for="font">書体</label>
+          <select id="font">
+            <option value="gothic" selected>ゴシック体</option>
+            <option value="maru">丸文字（Windows・iPadのみ）</option>
+            <option value="mincho">明朝体</option>
+          </select>
+        </div>
+        <div><label for="vpos">文字の位置</label>
+          <select id="vpos">
+            <option value="top">上</option>
+            <option value="mid" selected>まん中</option>
+            <option value="bottom">下</option>
+          </select>
+        </div>
+      </div>
+
+    </div>
+  </details>
+
+  <!-- 出す（ここは折りたたまない） -->
+  <div class="card">
+    <h2>大きく出す</h2>
+    <p class="hint" style="margin-bottom:12px">全画面になります。<span class="kbd">→</span> か <span class="kbd">スペース</span> で次へ、<span class="kbd">←</span> で戻る、<span class="kbd">Esc</span> で終わり。</p>
+    <button class="primary" id="start" disabled>大きく出す</button>
+    <p class="count" id="count"></p>
+  </div>
+
+  <!-- 使い方 -->
+  <details class="opt">
+    <summary>使い方</summary>
+    <div class="body howto">
+      <p>パワーポイントの代わりに、文字と写真を大きくモニターに映すための道具です。登録もインストールもいりません。このページを開くだけで使えます。作ったものは残さないので、その場で打って、その場で出せます。</p>
+
+      <h3>こんなときに</h3>
+      <ul>
+        <li>今日のめあてを出しておく</li>
+        <li>教科書のページ・問題文・キーワードを出す</li>
+        <li>「となりの人と話してみよう」のような指示を出す</li>
+        <li>参観日やグループ発表で、発表する子の名前と作品名を出す</li>
+      </ul>
+
+      <h3>文字を出す</h3>
+      <ul>
+        <li>枠に打って「入れる」を押すと、<b>1行が1枚</b>になって下の一覧に並びます。何行でもまとめて入れられます（<span class="kbd">Ctrl</span>＋<span class="kbd">Enter</span> でも入ります）。</li>
+        <li>1枚の中で改行したいときは、改行したいところに <code>/</code> を入れてください。<br>
+          例：<code>今日のめあて/分数のたし算ができる</code></li>
+        <li>文字の大きさは、長さに合わせて自動で変わります。</li>
+        <li>一覧の <b>▲▼</b> で出す順番を入れ替え、<b>×</b> で1枚だけ消せます。</li>
+      </ul>
+
+      <h3>写真を出す</h3>
+      <ul>
+        <li>「写真をえらぶ」から、いくつでも入れられます。えらんだ順に並びます。</li>
+        <li>一覧の文字の欄に打つと、<b>写真の上に文字が重なります</b>。文字の後ろには白い帯が付くので、写真の上でも読めます。</li>
+        <li>写真は切れません。画面に収まるように、全部が入る大きさで出ます。</li>
+        <li>⚠<b>写真は保存されません。</b>このページを閉じると消えるので、次のときは入れ直してください。もちろん、どこにも送っていません。</li>
+      </ul>
+
+      <h3>書体と、文字の位置</h3>
+      <ul>
+        <li>書体は<b>ゴシック体・丸文字・明朝体</b>から選べます（座席表と同じです）。<br>
+          丸文字はWindowsとiPad・Macだけです。入っていない機器では、静かにゴシック体になります。</li>
+        <li>文字の位置は<b>上・まん中・下</b>から選べます。写真の上に文字を置くとき、写真の中身に重ならない位置にできます。</li>
+      </ul>
+
+      <h3>発表者を出す</h3>
+      <ul>
+        <li><b>座席表や班分けで保存したクラス</b>があれば、選ぶだけで名前が入ります。班分けをしてあれば、班も一緒に入ります。</li>
+        <li>Excelから貼り付けることもできます。名前だけの1列でも大丈夫です。</li>
+        <li>作品名を入れると、作品名が大きく、名前が下に出ます。名前は覚えているので、作品名を主役にしてあります。</li>
+        <li>「班ごとにまとめて映す」を選ぶと、班名・その班の作品名・メンバー全員の名前が一緒に出ます。</li>
+      </ul>
+
+      <h3>順番を変えたい・今日いない子を外したい</h3>
+      <ul>
+        <li>一覧の <b>▲▼</b> で順番を入れ替えられます。</li>
+        <li><b>チェックを外す</b>と、その子（その班）は映りません。</li>
+        <li><b>順番をシャッフル</b>で、発表の順をランダムにします。班ごとに映すときは班の順が入れ替わり、班の中はそのままです。</li>
+      </ul>
+
+      <h3>子どもに設定を見せたくない</h3>
+      <p>「先生の準備」を閉じると、中身がまとめて隠れます。<b>「大きく出す」を押したときも自動で閉じます</b>ので、映し終わって戻ったときに、順番やシャッフルが子どもに見えることはありません。</p>
+
+      <h3>打った文字は、どこにも送られません</h3>
+      <p>打った文字と名簿は、この端末のブラウザの中だけに残ります。どこかのサーバーに送ることはありません。ネットにつながっていなくても動きます。<b>映している画面には、広告は出ません。</b></p>
+    </div>
+  </details>
+</main>
+
+<footer class="noprint">
+  <div class="wrap"><span class="fnav"><a href="../about/">運営者情報</a>　<a href="../contact/">お問い合わせ</a>　<a href="../privacy/">プライバシーポリシー</a></span>
+    <span class="copy">© 2026 さくら先生の座席表</span></div>
+</footer>
+
+<!-- 映す画面。⚠ここには広告を絶対に置かない -->
+<div id="show">
+  <div id="stage">
+    <img id="pic" alt="" hidden>
+    <div id="box">
+      <div id="group"></div>
+      <div id="title"></div>
+      <div id="name"></div>
+    </div>
+  </div>
+  <div id="bar">
+    <span id="pos"></span>
+    <span class="row">
+      <button id="prev">◀ もどる</button>
+      <button class="primary" id="next">つぎへ ▶</button>
+      <button id="close">おわり</button>
+    </span>
+  </div>
+</div>
+
+<script src="slide.js?v=1"></script>
+</body>
+</html>
