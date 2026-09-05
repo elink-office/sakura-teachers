@@ -1574,7 +1574,9 @@
     [sel, $('clsSel2')].forEach(function (el) {
       if (!el) return;
       el.innerHTML = '<option value="">－</option>';
+      // 🔴 簡単スライドで作った「文字のセット」は名簿ではないので出さない（2026-09-05）
       st.classes.forEach(function (c) {
+        if (c.kind === 'slide') return;
         var o = document.createElement('option');
         o.value = c.id; o.textContent = c.label;
         el.appendChild(o);

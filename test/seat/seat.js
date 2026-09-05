@@ -1842,7 +1842,9 @@
     [sel, $('clsSel2')].forEach(function (el) {
       if (!el) return;
       el.innerHTML = '<option value="">－</option>';
+      // 🔴 簡単スライドで作った「文字のセット」は名簿ではないので出さない（2026-09-05）
       st.classes.forEach(function (c) {
+        if (c.kind === 'slide') return;
         var o = document.createElement('option');
         o.value = c.id; o.textContent = c.label;
         el.appendChild(o);
@@ -1852,8 +1854,9 @@
     });
     // ⚠残したものが無いうちは、①の呼び出し欄を出さない
     if ($('quickLoad')) $('quickLoad').hidden = !st.classes.length;
-    $('clsCount').textContent = st.classes.length
-      ? st.classes.length + '／' + MAXC + '件'
+    var nCls = st.classes.filter(function (c) { return c.kind !== 'slide'; }).length;
+    $('clsCount').textContent = nCls
+      ? nCls + '／' + MAXC + '件'
       : '0／' + MAXC + '件・まだ保存していません';
     refreshRecUI();
   }

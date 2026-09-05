@@ -25,7 +25,7 @@
 </script>
 <title>【テスト】理科室の座席表メーカー｜図工室・家庭科室の班の席をA4の1枚に｜さくらツール</title>
 <meta name="description" content="理科室・図工室・家庭科室の座席表を無料で作成。名簿を貼るだけで、実験台ごとの班分けと、台のどこに座るかまで決まります。1台4〜6人、台は2列でも3列でも。男女を均す・この2人は離す、も指定できます。名簿は20クラスまで残せるので、専科の先生でも貼り直しが要りません。印刷とPDFはA4の1枚に収まります。">
-<link rel="stylesheet" href="../style.css?v=111">
+<link rel="stylesheet" href="../style.css?v=112">
 <link rel="stylesheet" href="group.css?v=1">
 <style>
 /* 🔴「＋人を追加」と人数を1行に（2026-09-03 本人・座席表と同じ） */
@@ -37,7 +37,7 @@
 </style>
 </head>
 <body>
-<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/05 13:08</div>
+<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/05 18:56</div>
 
 <header class="site-head noprint">
   <div class="wrap">
@@ -53,7 +53,7 @@
 <main class="wrap">
   <h1>理科室・図工室の座席表メーカー</h1>
   <p class="catch">班も、台のどこに座るかも、A4の1枚に</p>
-  <p class="lead">名簿を貼るだけ。理科室・図工室・家庭科室のように、大きな台をかこんで座る教室のための座席表です。名簿は20クラスまで残せるので、いくつも受け持つ先生でも貼り直しが要りません。使った名簿は外に送っていないので、<strong>AIの学習に使われることもありません</strong>。</p>
+  <p class="lead">名簿を貼るだけ。理科室・図工室・家庭科室のように、大きな台をかこんで座る教室のための座席表です。名簿は20クラスまで残せるので、いくつも受け持つ先生でも貼り直しが要りません。使った名簿は外部には送っていないので、<strong>AIの学習に使われることもありません</strong>。<br>名簿は、<strong>さくらツールで利用しているデータ</strong>がそのまま使えます。</p>
   <p class="tip-guide noprint"><span class="tip-mark"></span> のしるしを押すと、くわしい説明が出ます。</p>
 
 
@@ -73,7 +73,7 @@
         <button class="mini" id="clsLoad2" type="button">この名簿を自動入力</button></div>
     </div>
 
-    <textarea id="names" placeholder="ここをクリック → Excelからコピペ（手入力可）&#10;&#10;1,やまだ たろう,男&#10;2,さとう はなこ,女&#10;すずき いちろう（名前だけでもOK）&#10;&#10;空のままだとサンプルが出ます"></textarea>
+    <textarea id="names" placeholder="ここをクリック→エクセルデータを貼り付け（手入力可）&#10;&#10;1,やまだ たろう,男&#10;2,さとう はなこ,女&#10;すずき いちろう（名前だけでもOK）&#10;&#10;空のままだとサンプルが出ます"></textarea>
 
     <div class="row tight" style="margin-top:10px">
       <div><label for="nameMode">名前の見せ方</label>
@@ -291,25 +291,27 @@
     <label style="font-weight:normal">
       <input type="checkbox" id="save"> この機器に画面を保存する
     </label>
-    <p class="hint">チェックを入れると次回もこのまま表示されます。外すと次回は最初からの設定になります。サーバーには送信されません。</p>
+    <p class="hint">チェックを入れると次回もこのまま表示されます。外すと次回は最初からの設定になります。外部には出ません。</p>
     <p><span class="saving" id="savingLabel"></span></p>
   </section>
 
   <div id="msg2" class="noprint"></div>
 
   <section class="card noprint">
-    <h2><span class="step">7</span>保存した名簿の利用&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h2>
+    <h2><span class="step">7</span>保存したデータの利用&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h2>
     <div class="tip-body" hidden>
       <ul>
         <li><strong>名前を付けて、いくつも保存できます。</strong>ボタンを押したときだけ増えます。</li>
         <li>残るのは使ってる機器のブラウザの中だけです。どこにも送信されません。</li>
       </ul>
-      <p class="tip-h">座席表・席次表と共通です</p>
+      <p class="tip-h">さくらツールの中で共通です</p>
       <ul>
-        <li><strong>ほかのツールで保存した名簿も、ここに出ます。</strong>逆もできます。同じ機器なら、名簿を貼り直す必要はありません。</li>
+        <li><strong>ほかの道具で保存した名簿も、ここに出ます。</strong>逆もできます。同じ機器なら、名簿を貼り直す必要はありません。</li>
         <li>名簿は共通ですが、部屋の形や班の設定は<strong>ツールごと</strong>に覚えます。混ざることはありません。</li>
       </ul>
     </div>
+
+    <p class="hint">保存した名簿は、<b>さくらツール上で利用できます</b>。保存できるのは<b>文字情報のみ</b>です（写真や画像は残りません）。</p>
 
     <p class="safe">🔒 <strong>使ってる機器の中だけで完結します。</strong>保存したものはネット上に流れません。</p>
 
@@ -354,7 +356,7 @@
 
     <h2>よくある質問</h2>
     <dl>
-      <dt>ネットにつながっているのに、本当に外に出ないのですか？</dt>
+      <dt>ネットにつながっているのに、本当に外部に出ないのですか？</dt>
       <dd><strong>普段お使いの機器で、名簿を開くのと同じです。</strong>ネットにつながっていても、このページは名簿を受け取っていません。ブラウザの中だけで処理して、そのまま印刷やPDFにしています。だから、外に晒されることも、漏れることも、AIの学習に使われることもありません。<strong>いつもの仕事と同じように、安心して使えます。</strong></dd>
       <dt>理科室の座席表を作りたい</dt>
       <dd>このページがそのまま使えます。実験台の短い辺が黒板を向いた形で、1台に4〜6人を割り振ります。台は2列でも3列でも選べます。</dd>
@@ -377,7 +379,7 @@
     </ul>
 
     <h2>このツールについて</h2>
-    <p><strong>使ってる機器の中だけで完結できます。</strong>使った名簿がネット上に流れることはありません。外に送っていないので、AIの学習に使われることも、個人情報が漏れることもありません。安心して使えます。「画面の保存」をオンにしたときだけ、いま使っている機器の中に残ります。オフのままなら、ページを閉じた時点で消えます。インストールも会員登録もいりません。</p>
+    <p><strong>使ってる機器の中だけで完結できます。</strong>使った名簿がネット上に流れることはありません。外部には送っていないので、AIの学習に使われることも、個人情報が漏れることもありません。安心して使えます。「画面の保存」をオンにしたときだけ、いま使っている機器の中に残ります。オフのままなら、ページを閉じた時点で消えます。インストールも会員登録もいりません。</p>
   </section>
 </main>
 
@@ -386,7 +388,7 @@
     <span class="copy">さくらツール　© 2026 SAKURA TOOLS</span></div>
 </footer>
 
-<script src="group.js?v=13"></script>
+<script src="group.js?v=14"></script>
 <!-- 🔴 印刷用の1枚絵の置き場。画面には出ない。
      ⚠body の直下に置くこと。中に入れると、印刷のときに親ごと隠されて白紙になる -->
 <div id="printImgWrap"></div>

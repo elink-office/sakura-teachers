@@ -32,9 +32,10 @@ h3.sub{font-size:1.02rem;margin:0 0 12px;display:flex;align-items:center}
 /* 作成中（出したあとも設定を開いたままにする） */
 /* 作成中。⚠一度下に置いたが、本人の指示で上へ戻した
    （2026-09-05「できるだけ出す順番のウィンドウとみるボタンを近づけたい」） */
+/* ⚠細く・軽く（2026-09-05 本人「細い線に」）。一覧のじゃまをしない */
 .editmode{
   display:inline-flex;align-items:center;gap:7px;cursor:pointer;
-  margin:0 0 16px;font-size:.92rem;color:var(--ink);
+  margin:0 0 14px;font-size:.84rem;color:var(--ink-soft);font-weight:normal;
 }
 .editmode input{width:17px;height:17px;cursor:pointer}
 
@@ -47,7 +48,8 @@ h3.sub{font-size:1.02rem;margin:0 0 12px;display:flex;align-items:center}
 
 
 /* 保存（いちばん下の枠。座席表と同じ考え方） */
-.saving{color:var(--ok);font-size:.85rem}
+/* ⚠.saving は共通の style.css（桃色・太字）に任せる。ここで緑にしていたのをやめた
+   （2026-09-05 本人「画面の保存したら、緑色で文字が出る。これも座席表と同じにして」） */
 .look > div{display:flex;flex-direction:column;gap:4px}
 .look label{font-size:.85rem;color:var(--ink-soft)}
 
@@ -71,34 +73,36 @@ h3.sub{font-size:1.02rem;margin:0 0 12px;display:flex;align-items:center}
   border-radius:6px;cursor:pointer;
 }
 .picadd:hover{background:var(--pink-pale);color:var(--pink);border-color:var(--pink-light)}
-.tbl td.pic{width:74px}
-.tbl td.sel{width:96px}
+.tbl td.pic{width:66px}
+.tbl td.sel{width:74px}
+.tbl td.grp{width:78px}
+.tbl th.grp{width:78px}
 .mini-sel{
-  font:inherit;font-size:.82rem;padding:4px 6px;
+  font:inherit;font-size:.82rem;padding:4px 3px;
   border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);
-  max-width:92px;
+  max-width:100%;
 }
 #sheets tr.off td:not(.chk){opacity:.32}
 /* 空のときの案内の行（中身はまだ無い） */
 #sheets tr.ghost td{background:var(--bg)}
 #sheets tr.ghost .members{color:var(--ink-soft)}
-.tbl td.del{width:52px;text-align:center}
+.tbl td.del{width:46px;text-align:center}
 .count{font-size:.9rem;color:var(--ink-soft);margin:12px 0 0;font-weight:normal}
 .empty{color:var(--ink-soft);font-size:.92rem;padding:6px 0;margin:0}
 
 /* 一覧 */
 .tbl{overflow-x:auto}
 .tbl table{border-collapse:collapse;width:100%;font-size:.92rem}
-.tbl th,.tbl td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:middle}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px 6px;text-align:left;vertical-align:middle}
 .tbl th{background:var(--pink-pale);font-weight:bold;font-size:.82rem}
-.tbl td.idx{width:38px;color:var(--ink-soft);text-align:center;font-variant-numeric:tabular-nums}
-.tbl td.chk{width:48px;text-align:center}
-.tbl td.mv{width:78px;white-space:nowrap;text-align:center}
+.tbl td.idx{width:32px;color:var(--ink-soft);text-align:center;font-variant-numeric:tabular-nums}
+.tbl td.chk{width:42px;text-align:center}
+.tbl td.mv{width:70px;white-space:nowrap;text-align:center}
 .tbl tr.off td:not(.chk){opacity:.32}
-.tbl tr.off td b{text-decoration:line-through}
+/* ⚠取り消し線はやめた（2026-09-05 本人「名前に入る取り消し線はやめて」）。うすくするだけ */
 .tbl input[type=checkbox]{width:17px;height:17px;cursor:pointer}
 .tbl input.ttl{
-  width:100%;min-width:170px;font:inherit;font-size:.92rem;
+  width:100%;min-width:120px;font:inherit;font-size:.92rem;
   border:1px solid transparent;border-radius:6px;padding:4px 7px;
   background:var(--bg);color:var(--ink);
 }
@@ -172,7 +176,9 @@ h3.sub{font-size:1.02rem;margin:0 0 12px;display:flex;align-items:center}
 #show.f-mincho #box{font-family:"Yu Mincho",YuMincho,"Hiragino Mincho ProN","MS PMincho",serif}
 #show.f-maru   #box{font-family:"HG丸ｺﾞｼｯｸM-PRO",HGMaruGothicMPRO,"Hiragino Maru Gothic ProN","Yu Gothic",sans-serif}
 /* 班名（発表者のときだけ出る） */
-#group{font-size:clamp(20px,3.2vw,54px);color:var(--pink);font-weight:800;letter-spacing:.06em}
+/* 🔴 班は大きく出す（2026-09-05 本人「班ごとにまとめて映した時は、班はもっと大きくしたい」）。
+   ⚠班が入るのは「班ごとにまとめて映す」のときだけ（1人ずつのときは空） */
+#group{font-size:clamp(30px,5.5vw,110px);color:var(--pink);font-weight:800;letter-spacing:.06em;line-height:1.15}
 
 /* 主役の文字。長さで4段階に自動で縮む（いちばん長い行で決める） */
 #title{
@@ -218,16 +224,117 @@ h3.sub{font-size:1.02rem;margin:0 0 12px;display:flex;align-items:center}
 #stage.noTitle #name[data-n="5"] span{font-size:clamp(30px,5.6vw,96px)}
 #stage.noTitle #name[data-n="many"] span{font-size:clamp(26px,4.6vw,80px)}
 
+/* 🔴 フッターは3つの列（2026-09-05 本人「2/5は…ボタンの近くに。文字を中央にしてほしい」）。
+   ⭐左に「ボタンと同じ幅の空き」を作ると、まん中の文字が画面のまん中に来る。
+   ⚠flex で並べると、文字はボタンをのぞいた残りのまん中になってしまう（画面の中央からずれる） */
 #bar{
-  display:flex;align-items:center;justify-content:space-between;
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;
   padding:10px 18px;border-top:1px solid var(--line);background:#fff;
   flex:none;transition:opacity .3s;
 }
-#bar .row{display:flex;gap:8px;align-items:center}
+#bar .pad{display:block}
+#bar .row{justify-self:end}
+#bar .row{display:flex;gap:8px;align-items:center;flex:none;flex-wrap:nowrap;white-space:nowrap}
 #bar .primary{font-size:1rem;padding:10px 24px}
 /* 「スライド表示にする」は、確かめているときだけ出す */
 #toFull{display:none}
 #show.check #toFull{display:inline-block}
 #pos{font-size:.9rem;color:var(--ink-soft);font-variant-numeric:tabular-nums}
 /* マウスを止めるとボタンを薄くする（映している間、下の帯が目立たないように） */
-body.hidebar #bar{opacity:0}
+/* ⚠薄くするのは操作ボタンだけ。写真の説明（#cap）は消さない（2026-09-05） */
+body.hidebar #bar #pos,
+body.hidebar #bar .row{opacity:0}
+#bar #pos,#bar .row{transition:opacity .3s}
+
+/* 🔴 一覧を横スクロールさせない（2026-09-05 本人「横スライドかスライドバーが出てきたから嫌だった」）
+   ⚠列が9つあるので、幅は「詰める」で対応する。せまい画面（600px以下）では書体の列だけ隠す＝
+   書体は全体で決めることが多く、1枚ずつ変えるのは例外のため。 */
+@media (max-width:700px){
+  #sheets th.sel:nth-of-type(5), #sheets td.sel:nth-of-type(5){display:none}
+  .tbl input.ttl{min-width:84px}
+  .tbl th,.tbl td{padding:5px 4px}
+  .tbl td.pic{width:58px}
+  .tbl td.mv{width:64px}
+}
+
+/* 🔴 保存まわりは座席表メーカーと同じ作りにする（2026-09-05 本人「レイアウトも一緒がいい」）。
+   ⚠これらは seat/index.html の中にしかない部品なので、同じ値をここにも置いた */
+.cls-box{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+.cls-box h3{margin:0 0 4px;font-size:1rem}
+.cls-box .mini{margin-right:6px}
+.btn-row{margin:8px 0 6px}
+.btn-row .mini{margin:0 8px 6px 0}
+.pick{max-width:24em}
+.pick select{width:100%}
+
+/* 🔴 写真＋位置が上・下のとき＝写真を一回り内側に入れて、空いた白いところに文字を置く
+   （2026-09-05 本人「一回り内側に入れて、上の白い部分、下の白い部分に文字を入れたい。
+    やっぱり作品に重なるのは気持ち悪くて」）。⚠まん中のときは今までどおり写真の上に重ねる（暗い帯） */
+/* ⚠img は絶対配置で上下左右を指定しても伸びない（もとの大きさのまま置かれる）。
+   ⭐高さは JS（fitBox）が、文字の量を測って決める。ここでは左右だけ決める */
+/* ⭐写真のときは、写真を映す面いっぱいに出して、文字はフッター（ボタンの行）に置く
+   （2026-09-05 本人「上に表示やめて、下に表示だけにしてさ、ボタンのフッターの部分に入れてはどうかな？
+    そうするとかなり画像が大きくなる」）。⚠まん中のときだけ、今までどおり写真の上に重ねる（暗い帯） */
+#stage.band #box{ display:none; }
+
+/* フッターの文字（写真の説明）。⭐控えめ・1行・はみ出しは「…」 */
+#cap{
+  min-width:0; max-width:100%; text-align:center;
+  font-weight:800; color:var(--ink); letter-spacing:.02em;
+  font-size:clamp(15px,2.2vw,34px); line-height:1.2;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  padding:0 12px;
+}
+#cap:empty{ display:block; }   /* ⚠中身が無くても場所は取る＝ボタンは右のまま */
+/* ⚠白いところに置くので、暗い帯と白文字はやめて、ふつうの色に戻す */
+#stage.band #box > div:not(:empty){ background:none; color:var(--ink); padding:0; border-radius:0; }
+#stage.band #group{ color:var(--pink); }
+#stage.band #title .sm{ color:var(--ink-soft); }
+#stage.band #name{ color:var(--ink-soft); }
+
+/* 名前の行分け（4人なら2＋2、5人なら3＋2）。⚠成り行きの折り返しだと 3＋1 のように偏る */
+#name i.nbr{ flex-basis:100%; height:0; margin:0; }
+
+/* 「できること」の箇条書き。⚠seat/index.html の中にしかない部品なので、同じ値をここにも置く */
+.can-do{margin:12px 0 10px;padding-left:1.1em;font-size:.86rem;color:var(--ink-soft);line-height:1.9}
+.can-do li{margin-bottom:2px}
+.can-do li::marker{color:var(--pink)}
+
+/* 🔴 せまい画面でフッターのボタンが折り返して、ぐちゃぐちゃに積み上がっていた（2026-09-05 本人）。
+   ⭐まずボタンを小さくして1行に収める。それでも足りない幅では、文字を上の段に分ける（2段の形にする）。
+   ⚠「折り返しにまかせる」と、段の数が中身しだいで変わってフッターがとても太くなる */
+@media (max-width:860px){
+  #bar{padding:8px 10px;gap:6px}
+  #bar .row{gap:6px}
+  #bar button{font-size:.85rem;padding:7px 10px}
+  #bar .primary{font-size:.9rem;padding:8px 14px}
+  #pos{font-size:.82rem}
+  #cap{font-size:clamp(14px,2.6vw,26px)}
+}
+@media (max-width:620px){
+  #bar{grid-template-columns:1fr;justify-items:center;gap:4px;padding:6px 8px}
+  #bar .pad{display:none}
+  #bar .row{justify-self:center}
+  #bar button{font-size:.8rem;padding:6px 9px}
+  #bar .primary{font-size:.85rem;padding:7px 12px}
+  #cap{font-size:clamp(13px,3.4vw,20px);padding:0 4px}
+}
+@media (max-width:470px){
+  #bar{padding:5px 6px;gap:3px}
+  #bar .row{gap:4px}
+  #bar button{font-size:.74rem;padding:5px 7px}
+  #bar .primary{font-size:.78rem;padding:6px 10px}
+  #pos{font-size:.74rem}
+}
+
+/* 🔴 ①の帯と補足は小さい字で（2026-09-05 本人「小さい字でいいと思う」） */
+.notice.mini{font-size:.82rem}
+.hint.mini{font-size:.82rem;color:var(--ink-soft)}
+
+/* 🔴 一覧の1列目は、幅があるときだけ「スライド」と出す（2026-09-05 本人「＃を幅が太くなったら『スライド』に」） */
+.tbl th.idx .wide{display:none}
+@media (min-width:900px){
+  .tbl th.idx .wide{display:inline}
+  .tbl th.idx .narrow{display:none}
+  .tbl td.idx,.tbl th.idx{width:66px}
+}

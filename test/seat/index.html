@@ -26,7 +26,7 @@
 <meta name="google-site-verification" content="PfjmCGxUaN1hzuj_dRw3e4PTY6xepghfXM_CrU_sO-A" />
 <title>【テスト】教室の座席表メーカー｜席替えを簡単に・30人40人・4列〜8列対応</title>
 <meta name="description" content="教室の座席表の作り方は簡単。名簿を貼るだけで席替えができるフリーツールです。新年度の出席番号順にも対応。小学校・中学校・高校のどのクラスでも、30人・35人・40人、4列・5列・6列・8列の教室席配置に対応。生徒に見せる向きと、先生が教卓から見る向きを切り替えられます。班分けと色分けもそのまま印刷・PDFにできます。Excelテンプレートは不要です。名簿はブラウザの中だけで処理し、AIの学習にも使われません。">
-<link rel="stylesheet" href="../style.css?v=111">
+<link rel="stylesheet" href="../style.css?v=112">
 <link rel="stylesheet" href="seat.css?v=1">
 <link rel="stylesheet" href="../print.css?v=54" media="print">
 <style>
@@ -190,7 +190,7 @@ body.screen .seat.dup .nm{text-decoration:none}
 </style>
 </head>
 <body>
-<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/05 13:08</div>
+<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/05 18:56</div>
 
 <header class="site-head noprint">
   <div class="wrap">
@@ -209,7 +209,7 @@ body.screen .seat.dup .nm{text-decoration:none}
 
   <div class="intro">
     <div class="intro-txt">
-      <p class="lead">名簿を貼ってボタンひとつ。もう<strong>エクセルテンプレート</strong>は不要です。「この2人は離す」「この子は前のほうに」を入れたまま席替えできて、そのまま印刷・PDFにできます。</p>
+      <p class="lead">名簿を貼ってボタンひとつ。もう<strong>エクセルテンプレート</strong>は不要です。「この2人は離す」「この子は前のほうに」を入れたまま席替えできて、そのまま印刷・PDFにできます。<br>名簿は、<strong>さくらツールで利用しているデータ</strong>がそのまま使えます。</p>
       <!-- 🔴 できること（2026-09-04 本人）。
            ⚠サーチコンソールで上位に出ているのは「座席表 40人／30人／35人」＝
              人数の数字が入ると順位が上がる。その言葉をここで使う。
@@ -259,7 +259,7 @@ body.screen .seat.dup .nm{text-decoration:none}
 
         <p><strong>いま出ている座席表はサンプルです。</strong>名簿を入れると、自分のクラスに変わります。入れる前でも、席を動かしたり班に分けたりして試せます。</p>
       </div>
-      <p class="safe">🔒 <strong>使ってる機器の中だけで完結できます。</strong>名簿はネット上に流れません。外に送っていないので、AIの学習に使われることも、個人情報が漏れることもありません。安心して使えます。</p>
+      <p class="safe">🔒 <strong>使ってる機器の中だけで完結できます。</strong>名簿はネット上に流れません。外部には送っていないので、AIの学習に使われることも、個人情報が漏れることもありません。安心して使えます。</p>
       <!-- 🔴 次に使うとき⑧まで下がらなくていいように、呼び出しは①に置く（2026-08-31 本人）。
            ⚠残したものが1件も無いときは出さない（はじめての人には邪魔なだけ） -->
       <div class="row tight" id="quickLoad" hidden style="margin-bottom:12px">
@@ -270,7 +270,7 @@ body.screen .seat.dup .nm{text-decoration:none}
       </div>
       <div class="in-col">
         <div>
-      <textarea id="names" placeholder="ここをクリック → Excelからコピペ（手入力可）&#10;&#10;1,やまだ たろう,男&#10;2,さとう はなこ,女&#10;すずき いちろう（名前だけでもOK）&#10;&#10;空のままだとサンプルが出ます"></textarea>
+      <textarea id="names" placeholder="ここをクリック→エクセルデータを貼り付け（手入力可）&#10;&#10;1,やまだ たろう,男&#10;2,さとう はなこ,女&#10;すずき いちろう（名前だけでもOK）&#10;&#10;空のままだとサンプルが出ます"></textarea>
       <div class="row tight" style="margin-top:10px">
         <div><label for="nameMode">名前の見せ方</label>
           <select id="nameMode">
@@ -650,7 +650,7 @@ body.screen .seat.dup .nm{text-decoration:none}
     <label style="font-weight:normal">
       <input type="checkbox" id="save"> この機器に画面を保存する
     </label>
-    <p class="hint">チェックを入れると次回もこのまま表示されます。外すと次回は最初からの設定になります。サーバーには送信されません。</p>
+    <p class="hint">チェックを入れると次回もこのまま表示されます。外すと次回は最初からの設定になります。外部には出ません。</p>
     <p><span class="saving" id="savingLabel"></span></p>
   </section>
 
@@ -659,16 +659,16 @@ body.screen .seat.dup .nm{text-decoration:none}
   <div id="msg2" class="noprint"></div>
 
   <section class="card noprint">
-    <h2><span class="step">8</span>保存した名簿の利用&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h2>
+    <h2><span class="step">8</span>保存したデータの利用&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h2>
     <div class="tip-body" hidden>
       <ul>
         <li><strong>名前を付けて、いくつも保存できます。</strong>ボタンを押したときだけ増えます。</li>
         <li>残るのは<strong>使ってる機器のブラウザの中だけ</strong>です。<strong>どこにも送信されません。</strong></li>
       </ul>
 
-      <p class="tip-h">席次表と共通です</p>
+      <p class="tip-h">さくらツールの中で共通です</p>
       <ul>
-        <li><strong>「席次表メーカー」で保存した名簿も、ここに出ます。</strong>逆もできます。同じ機器なら、名簿を貼り直す必要はありません。</li>
+        <li><strong>ほかの道具で保存した名簿も、ここに出ます。</strong>逆もできます。同じ機器なら、名簿を貼り直す必要はありません。</li>
         <li>名簿は共通ですが、<strong>教室の形や班の設定はツールごと</strong>に覚えます。混ざることはありません。</li>
       </ul>
 
@@ -685,6 +685,8 @@ body.screen .seat.dup .nm{text-decoration:none}
         <li>同じ名前で保存したときは、<strong>差し替えるか聞きます。</strong>同じものが2件できることはありません。</li>
       </ul>
     </div>
+
+    <p class="hint">保存した名簿は、<b>さくらツール上で利用できます</b>。保存できるのは<b>文字情報のみ</b>です（写真や画像は残りません）。</p>
 
     <p class="safe">🔒 <strong>使ってる機器の中だけで完結します。</strong>保存したものはネット上に流れません。</p>
 
@@ -742,12 +744,12 @@ body.screen .seat.dup .nm{text-decoration:none}
 
     <h2>よくある質問</h2>
     <dl>
-      <dt>ネットにつながっているのに、本当に外に出ないのですか？</dt>
+      <dt>ネットにつながっているのに、本当に外部に出ないのですか？</dt>
       <dd><strong>普段お使いの機器で、名簿を開くのと同じです。</strong>エクセルで名簿を開いても、書いた中身がネットに出ていかないのと同じことです。ネットにつながっていても、このページは名簿を受け取っていません。ブラウザの中だけで処理して、そのまま印刷やPDFにしています。だから、外に晒されることも、漏れることも、AIの学習に使われることもありません。<strong>いつもの仕事と同じように、安心して使えます。</strong></dd>
       <dt>名簿は外部に送られますか？</dt>
-      <dd>送りません。すべて使ってる機器の中だけで処理しています。<strong>外に出ていないので、AIの学習に使われることもありません。</strong></dd>
+      <dd>送りません。すべて使ってる機器の中だけで処理しています。<strong>外部に出ていないので、AIの学習に使われることもありません。</strong></dd>
       <dt>入力した名簿がAIの学習に使われるか心配です</dt>
-      <dd><strong>ありません。</strong>名簿はお使いの機器の中だけで処理していて、外に送っていないためです。学習させる・させない以前に、こちらが名簿を受け取っていません。学校の機器で、生徒の個人情報をあつかうときにも、安心してお使いいただけます。</dd>
+      <dd><strong>ありません。</strong>名簿はお使いの機器の中だけで処理していて、外部には送っていないためです。学習させる・させない以前に、こちらが名簿を受け取っていません。学校の機器で、生徒の個人情報をあつかうときにも、安心してお使いいただけます。</dd>
       <dt>条件を入れたら「作れません」と出ました</dt>
       <dd>条件がきつすぎて、全部を満たす配置が無い状態です。どの条件を外せば作れるかを画面に出しますので、それを外すか、「隣」の決め方をゆるくしてください。</dd>
       <dt>3つの案は何が違うのですか？</dt>
@@ -792,7 +794,7 @@ body.screen .seat.dup .nm{text-decoration:none}
     </ul>
 
     <h2>このツールについて</h2>
-    <p><strong>使ってる機器の中だけで完結できます。</strong>使った名簿がネット上に流れることはありません。外に送っていないので、AIの学習に使われることも、個人情報が漏れることもありません。安心して使えます。「名簿の保存」をオンにしたときだけ、いま使っている機器の中に残ります。オフのままなら、ページを閉じた時点で消えます。インストールも会員登録もいりません。</p>
+    <p><strong>使ってる機器の中だけで完結できます。</strong>使った名簿がネット上に流れることはありません。外部には送っていないので、AIの学習に使われることも、個人情報が漏れることもありません。安心して使えます。「名簿の保存」をオンにしたときだけ、いま使っている機器の中に残ります。オフのままなら、ページを閉じた時点で消えます。インストールも会員登録もいりません。</p>
   </section>
 </main>
 
@@ -804,7 +806,7 @@ body.screen .seat.dup .nm{text-decoration:none}
 </footer>
 
 <script src="../seating.js?v=54"></script>
-<script src="seat.js?v=158"></script>
+<script src="seat.js?v=159"></script>
 <!-- 🔴 印刷用の1枚絵の置き場（2026-09-01）。画面には出ない。
      ⚠**body の直下に置くこと。**中に入れると、印刷のときに親ごと隠されて白紙になる -->
 <div id="printImgWrap"></div>

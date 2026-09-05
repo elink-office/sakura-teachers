@@ -1136,7 +1136,10 @@
   }
   function drawClasses() {
     var st = loadStore(), keep = $('clsSel').value;
-    var opt = '<option value="">－</option>' + st.classes.map(function (c) {
+    // 🔴 簡単スライドの「文字のセット」は名簿ではないので出さない（2026-09-05）
+    var opt = '<option value="">－</option>' + st.classes.filter(function (c) {
+      return c.kind !== 'slide';
+    }).map(function (c) {
       return '<option value="' + esc(c.id) + '">' + esc(c.label) + '</option>';
     }).join('');
     $('clsSel').innerHTML = opt;
