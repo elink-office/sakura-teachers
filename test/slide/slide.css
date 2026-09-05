@@ -25,11 +25,26 @@ h3.sub{font-size:1.02rem;margin:0 0 12px;display:flex;align-items:center}
 .look label{font-size:.85rem;color:var(--ink-soft)}
 
 /* 一覧のサムネイル */
+/* 🔴 どの行も写真を持てる。空の行は「＋」、写真がある行はサムネと「×」 */
+.picwrap{position:relative;display:inline-block}
 .thumb{
   width:56px;height:40px;object-fit:cover;border-radius:6px;
-  border:1px solid var(--line);display:block;
+  border:1px solid var(--line);display:block;cursor:grab;
 }
-.tbl td.pic{width:70px}
+.picx{
+  position:absolute;top:-6px;right:-6px;
+  width:20px;height:20px;padding:0;line-height:1;font-size:12px;
+  border:1px solid var(--line);background:#fff;color:var(--ink-soft);
+  border-radius:50%;cursor:pointer;
+}
+.picx:hover{background:var(--pink-pale);color:var(--pink)}
+.picadd{
+  width:56px;height:40px;padding:0;line-height:1;font-size:18px;
+  border:1px dashed var(--line);background:#fff;color:var(--ink-soft);
+  border-radius:6px;cursor:pointer;
+}
+.picadd:hover{background:var(--pink-pale);color:var(--pink);border-color:var(--pink-light)}
+.tbl td.pic{width:74px}
 .tbl td.del{width:52px;text-align:center}
 .count{font-size:.9rem;color:var(--ink-soft);margin:12px 0 0}
 .empty{color:var(--ink-soft);font-size:.92rem;padding:6px 0;margin:0}
@@ -51,17 +66,16 @@ h3.sub{font-size:1.02rem;margin:0 0 12px;display:flex;align-items:center}
   background:var(--bg);color:var(--ink);
 }
 .tbl input.ttl:focus{outline:none;border-color:var(--pink);background:#fff}
-/* ⚠小さくて薄いと気づかれない（本人「どうやって移動するのかな？」2026-09-05）。
-   大きくして、色を付けて、押せると分かる形にした */
+/* ⚠一度大きくして桃色にしたが、本人の指示で戻した
+   （2026-09-05「ボタンはグレーのままのほうがいい。▼も前のままでいい」）。
+   気づかれなかった問題は、見た目でなく**一覧の上の説明**で解決する */
 .mvbtn{
-  border:1px solid var(--pink-light);background:#fff;border-radius:8px;
-  width:36px;height:34px;cursor:pointer;color:var(--pink);font-size:15px;
+  border:1px solid var(--line);background:#fff;border-radius:6px;
+  width:28px;height:26px;cursor:pointer;color:var(--ink-soft);font-size:11px;
   line-height:1;padding:0;
 }
 .mvbtn:hover:not(:disabled){background:var(--pink-pale)}
-.mvbtn:active:not(:disabled){background:var(--pink-light)}
-.mvbtn:disabled{opacity:.22;cursor:default;color:var(--ink-soft);border-color:var(--line)}
-.tbl td.mv{width:96px}
+.mvbtn:disabled{opacity:.25;cursor:default}
 
 /* 行をつかんで上下に動かせる（パソコンのみ） */
 #sheets tr[draggable]{cursor:grab}

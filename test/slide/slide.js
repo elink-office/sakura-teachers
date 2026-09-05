@@ -14,10 +14,13 @@
   var slides = [], pos = 0;
 
   /* 「文字を出す」で並べる1枚ぶん。
-     {type:'text', text:'…'}                     文字だけ
-     {type:'pic',  url:'blob:…', name:'', text:''} 写真（＋重ねる文字）
-     🔴 写真は保存しない（本人「保存なしでいい」2026-09-05）。
-        ブラウザのメモリに置くだけなので、ページを閉じると消える。 */
+     { text:'…', url:'blob:…', name:'' }
+     🔴 どの1枚も「文字」と「写真」の両方を持てる（2026-09-05 本人
+        「1行目のすでに入っている文字の左に、写真の枠があって横線が入ってる。
+          5行目に入った写真を、そのすでに入っている文字の左に移動したい。
+          そうすると文字を改めて入力しなくていいよね」）。
+        ＝写真は「新しい1枚」ではなく、どの1枚にも後から入れられる。
+     🔴 写真は保存しない（本人「保存なしでいい」）。メモリに置くだけ。 */
   var sheets = [];
 
   var SAMPLE_TEXT =
@@ -177,10 +180,7 @@
     slides = [];
     if (kind()==='text'){
       sheets.forEach(function(sh){
-        slides.push({
-          group:'', title:(sh.text||'').trim(), names:[],
-          pic:(sh.type==='pic' ? sh.url : '')
-        });
+        slides.push({ group:'', title:(sh.text||'').trim(), names:[], pic:(sh.url||'') });
       });
       return;
     }
@@ -209,16 +209,16 @@
       updateCount(); save(); return;
     }
     var h = '<table><tr><th class="idx">#</th><th class="pic">写真</th>'
-          + '<th>出す文字（/ で改行）</th><th class="mv">順番</th><th class="del">消す</th></tr>';
+          + '<th>出す文字（/ で改行・// で見出し）</th><th class="mv">順番</th><th class="del">消す</th></tr>';
     sheets.forEach(function(sh,i){
       h += '<tr draggable="true" data-row="'+i+'"><td class="idx">'+(i+1)+'</td>'
         +  '<td class="pic">'
-        +    (sh.type==='pic'
-              ? '<img class="thumb" src="'+esc(sh.url)+'" alt="">'
-              : '<span class="members">—</span>')
+        +    (sh.url
+              ? '<span class="picwrap"><img class="thumb" src="'+esc(sh.url)+'" alt="" draggable="true" data-pic="'+i+'" title="ドラッグでほかの行に移せます">'
+                + '<button class="picx" data-picdel="'+i+'" title="写真だけ外す">×</button></span>'
+              : '<button class="picadd" data-picadd="'+i+'" title="ここに写真を入れる">＋</button>')
         +  '</td>'
-        +  '<td><input class="ttl" type="text" data-s="'+i+'" value="'+esc(sh.text||'')+'" placeholder="'
-        +    (sh.type==='pic' ? '写真に重ねる文字（なくてもよい）' : '出す文字')+'"></td>'
+        +  '<td><input class="ttl" type="text" data-s="'+i+'" value="'+esc(sh.text||'')+'" placeholder="出す文字（写真だけでもよい）"></td>'
         +  '<td class="mv">'
         +    '<button class="mvbtn" data-smv="'+i+'" data-d="-1"'+(i===0?' disabled':'')+'>▲</button> '
         +    '<button class="mvbtn" data-smv="'+i+'" data-d="1"'+(i===sheets.length-1?' disabled':'')+'>▼</button>'
@@ -233,7 +233,7 @@
   function addLines(text){
     String(text).replace(/\r/g,'').split('\n').forEach(function(line){
       if (line.trim()==='') return;
-      sheets.push({ type:'text', text:line.trim() });
+      sheets.push({ text:line.trim(), url:'', name:'' });
     });
     $('lines').value = '';
     drawSheets();
@@ -302,7 +302,7 @@
       if (!slides.length){
         msg = 'まだ何もありません。上の枠に文字を打って「入れる」を押すか、写真をえらんでください。';
       } else {
-        var np = sheets.filter(function(s){ return s.type==='pic'; }).length;
+        var np = sheets.filter(function(s){ return !!s.url; }).length;
         msg = slides.length + '枚 出します' + (np ? '（うち写真 '+np+'枚）' : '');
       }
     } else if (!rows.length){
@@ -438,8 +438,9 @@
       localStorage.setItem(KEY, JSON.stringify({
         kind: kind(), text: $('paste').value,
         // ⚠写真は保存しない（本人「保存なしでいい」）。文字の枚だけ残す
-        sheets: sheets.filter(function(s){ return s.type==='text'; })
-                      .map(function(s){ return {type:'text', text:s.text}; }),
+        // ⚠写真は保存しない。文字だけ残す（空になる1枚は落とす）
+        sheets: sheets.filter(function(s){ return (s.text||'').trim() !== ''; })
+                      .map(function(s){ return { text:s.text, url:'', name:'' }; }),
         font: $('font').value, vpos: $('vpos').value,
         rows: rows, groupOrder: groupOrder, groupOff: groupOff,
         origRows: origRows, origGroups: origGroups,
@@ -490,24 +491,51 @@
   $('sampleText').addEventListener('click', function(){ addLines(SAMPLE_TEXT); });
   $('clearText').addEventListener('click', function(){
     // 写真のぶんはメモリを返してから消す
-    sheets.forEach(function(s){ if (s.type==='pic' && s.url) URL.revokeObjectURL(s.url); });
+    sheets.forEach(function(s){ if (s.url) URL.revokeObjectURL(s.url); });
     sheets = []; $('lines').value = ''; drawSheets();
   });
 
-  // 写真を入れる。⚠どこにも送らない・保存もしない（メモリの中だけ）
+  /* 写真を入れる。⚠どこにも送らない・保存もしない（メモリの中だけ）
+     picTarget が -1 なら末尾に新しい1枚として足す。
+     🔴 行の「＋」から呼んだときは、その行に入れる（文字を打ち直さなくていい） */
+  var picTarget = -1;
   $('pics').addEventListener('change', function(e){
     var files = e.target.files;
-    if (!files || !files.length) return;
+    if (!files || !files.length){ picTarget = -1; return; }
     for (var i=0;i<files.length;i++){
       var f = files[i];
       if (f.type.indexOf('image/') !== 0) continue;
-      sheets.push({ type:'pic', url:URL.createObjectURL(f), name:f.name, text:'' });
+      var url = URL.createObjectURL(f);
+      if (picTarget >= 0 && sheets[picTarget]){
+        if (sheets[picTarget].url) URL.revokeObjectURL(sheets[picTarget].url);
+        sheets[picTarget].url = url; sheets[picTarget].name = f.name;
+        picTarget = -1;                       // 2枚目からは末尾に足す
+      } else {
+        sheets.push({ text:'', url:url, name:f.name });
+      }
     }
+    picTarget = -1;
     e.target.value = '';   // 同じ写真をもう一度選べるように
     drawSheets();
   });
 
   $('sheets').addEventListener('click', function(e){
+    // ＋ ＝ この行に写真を入れる
+    var add = e.target.closest ? e.target.closest('.picadd') : null;
+    if (add){
+      picTarget = parseInt(add.getAttribute('data-picadd'),10);
+      $('pics').click();
+      return;
+    }
+    // × ＝ 写真だけ外す（文字は残す）
+    var px = e.target.closest ? e.target.closest('.picx') : null;
+    if (px){
+      var pi = parseInt(px.getAttribute('data-picdel'),10);
+      if (sheets[pi] && sheets[pi].url) URL.revokeObjectURL(sheets[pi].url);
+      if (sheets[pi]){ sheets[pi].url = ''; sheets[pi].name = ''; }
+      drawSheets();
+      return;
+    }
     var b = e.target.closest ? e.target.closest('.mvbtn') : null;
     if (!b || b.disabled) return;
     if (b.hasAttribute('data-smv')){
@@ -517,42 +545,57 @@
       var t = sheets[i]; sheets[i]=sheets[j]; sheets[j]=t;
     } else if (b.hasAttribute('data-sdel')){
       var k = parseInt(b.getAttribute('data-sdel'),10);
-      if (sheets[k] && sheets[k].type==='pic' && sheets[k].url) URL.revokeObjectURL(sheets[k].url);
+      if (sheets[k] && sheets[k].url) URL.revokeObjectURL(sheets[k].url);
       sheets.splice(k,1);
     }
     drawSheets();
   });
   /* 行をつかんで上下に動かす（パソコンのみ）。
      ⚠スマホ・タブレットにはドラッグが無いので、▲▼が本線。両方あってよい。 */
-  var dragFrom = -1;
+  var dragFrom = -1, picFrom = -1;
   $('sheets').addEventListener('dragstart', function(e){
+    // 🔴 写真そのものをつかんだときは「写真だけを別の行へ移す」
+    if (e.target.classList && e.target.classList.contains('thumb')){
+      picFrom = parseInt(e.target.getAttribute('data-pic'),10);
+      dragFrom = -1;
+      try{ e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain',''); }catch(err){}
+      return;
+    }
     var tr = e.target.closest ? e.target.closest('tr[data-row]') : null;
     if (!tr) return;
+    picFrom = -1;
     dragFrom = parseInt(tr.getAttribute('data-row'),10);
     tr.classList.add('dragging');
     try{ e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain',''); }catch(err){}
   });
   $('sheets').addEventListener('dragover', function(e){
     var tr = e.target.closest ? e.target.closest('tr[data-row]') : null;
-    if (!tr || dragFrom < 0) return;
+    if (!tr || (dragFrom < 0 && picFrom < 0)) return;
     e.preventDefault();
     Array.prototype.forEach.call($('sheets').querySelectorAll('tr.over'), function(x){ x.classList.remove('over'); });
     tr.classList.add('over');
   });
   $('sheets').addEventListener('drop', function(e){
     var tr = e.target.closest ? e.target.closest('tr[data-row]') : null;
-    if (!tr || dragFrom < 0) return;
+    if (!tr) return;
     e.preventDefault();
     var to = parseInt(tr.getAttribute('data-row'),10);
-    if (to !== dragFrom){
+    if (picFrom >= 0){
+      // 🔴 写真だけを移す。移した先に写真があれば入れ替え（文字はどちらも動かさない）
+      if (to !== picFrom && sheets[to] && sheets[picFrom]){
+        var u = sheets[picFrom].url, n = sheets[picFrom].name;
+        sheets[picFrom].url = sheets[to].url; sheets[picFrom].name = sheets[to].name;
+        sheets[to].url = u; sheets[to].name = n;
+      }
+    } else if (dragFrom >= 0 && to !== dragFrom){
       var item = sheets.splice(dragFrom,1)[0];
       sheets.splice(to,0,item);
     }
-    dragFrom = -1;
+    dragFrom = -1; picFrom = -1;
     drawSheets();
   });
   $('sheets').addEventListener('dragend', function(){
-    dragFrom = -1;
+    dragFrom = -1; picFrom = -1;
     Array.prototype.forEach.call($('sheets').querySelectorAll('tr.over,tr.dragging'), function(x){
       x.classList.remove('over'); x.classList.remove('dragging');
     });
