@@ -541,11 +541,14 @@
     $('prev').disabled = (pos===0);
     $('next').disabled = (pos===slides.length-1);
   }
-  function openShow(checkAt){
+  /* checkAt … 0以上なら「見る」（全画面にせず・設定もたたまない）
+     startAt … 何枚目から出すか（「この1枚から出す」用。ふつうは0） */
+  function openShow(checkAt, startAt){
     build();
     if (!slides.length) return;
     var check = (typeof checkAt === 'number' && checkAt >= 0);
-    pos = check ? Math.min(checkAt, slides.length-1) : 0;
+    pos = check ? Math.min(checkAt, slides.length-1)
+                : Math.min(Math.max(startAt|0, 0), slides.length-1);
     // 🔴「作成中」にチェックが入っているあいだは、たたまない（2026-09-05 本人
     //    「作成モードを作ったら？ チェックを入れると開きっぱなし」）
     if (!check && !$('editMode').checked){
@@ -895,6 +898,10 @@
   $('start').addEventListener('click', function(){ openShow(); });
   $('checkBtn').addEventListener('click', function(){
     openShow(parseInt($('checkNo').value,10) || 0);
+  });
+  // 🔴 パワポの「現在のスライドから表示」と同じ（2026-09-05 本人）
+  $('fromBtn').addEventListener('click', function(){
+    openShow(-1, parseInt($('checkNo').value,10) || 0);
   });
   $('next').addEventListener('click', function(){ move(1); });
   $('prev').addEventListener('click', function(){ move(-1); });

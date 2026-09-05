@@ -146,11 +146,16 @@ h3.sub{font-size:1.02rem;margin:0 0 12px;display:flex;align-items:center}
 #stage[data-pos="top"]    #box{justify-content:flex-start}
 #stage[data-pos="bottom"] #box{justify-content:flex-end}
 
-/* 写真があるときは、文字の後ろに白い帯を敷く（写真の上でも読めるように） */
+/* 🔴 写真の上の文字は、暗い帯＋白文字（2026-09-05 本人の提案）。
+   ⚠作品の写真は画用紙など白っぽいことが多いので、
+     白帯＋黒文字より**暗い帯＋白文字**のほうが確実に読める */
 #stage.hasPic #box > div:not(:empty){
-  background:rgba(255,255,255,.86);
-  border-radius:12px;padding:.1em .5em;
+  background:rgba(30,32,34,.62);
+  color:#fff;
+  border-radius:12px;padding:.12em .55em;
 }
+#stage.hasPic #group{color:#ffd9e4}
+#stage.hasPic #title .sm{color:rgba(255,255,255,.82)}
 
 /* 書体（座席表と同じ3種） */
 #show.f-gothic #box{font-family:"Yu Gothic",YuGothic,"Hiragino Sans","Meiryo",sans-serif}

@@ -26,10 +26,10 @@
 <title>【テスト】簡単スライドメーカー｜パワーポイントの代わりに、文字と写真をモニターへ｜さくら先生の座席表</title>
 <meta name="description" content="パワーポイントの代わりに、文字と写真をそのまま大きくモニターに映せる無料の道具です。今日のめあて、問題文、作品の写真、発表する子の名前に。スライドを作り込まなくていいので、思いついたその場で出せます。写真の上に文字を重ねることもできます。名簿は座席表・班分けと共通。登録なし・インストールなし・写真も名簿も外に送りません。">
 <link rel="stylesheet" href="../style.css?v=111">
-<link rel="stylesheet" href="slide.css?v=12">
+<link rel="stylesheet" href="slide.css?v=13">
 </head>
 <body>
-<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/05 10:09</div>
+<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/05 10:20</div>
 
 <header class="site-head noprint">
   <div class="wrap">
@@ -156,6 +156,9 @@
         <div class="tbl" id="list"><p class="empty">まだ名簿を読み込んでいません。</p></div>
       </div>
 
+      <hr class="sep">
+      <label class="editmode"><input type="checkbox" id="editMode"> 作成中（出したあとも、この設定を開いたままにする）</label>
+
     </div>
   </details>
 
@@ -163,30 +166,36 @@
   <div class="card" id="checkCard" hidden>
     <h2>1枚だけ見る&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h2>
     <div class="tip-body" hidden>
-      <p>選んだ1枚だけを映します。<strong>全画面にはなりません</strong>ので、見て、直して、また見る、がすぐできます。</p>
-      <p>1枚だけ出したいとき（今日のめあてを出しておく、など）にも使えます。</p>
+      <p><strong>この1枚を見る</strong>＝選んだ1枚を映します。<strong>全画面にはなりません</strong>ので、見て、直して、また見る、がすぐできます。</p>
+      <p><strong>この1枚から出す</strong>＝選んだ1枚から、全画面で出します。途中から出したいときや、1枚だけ出しておきたいときに。</p>
     </div>
     <div class="row">
       <select id="checkNo"></select>
       <button id="checkBtn">この1枚を見る</button>
+      <button id="fromBtn">この1枚から出す</button>
     </div>
   </div>
 
-  <!-- 出す（ここは折りたたまない） -->
-  <div class="card">
-    <h2>大きく出す</h2>
-    <p class="hint" style="margin-bottom:12px">全画面になります&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></p>
-    <div class="tip-body" hidden>
-      <p><span class="kbd">→</span> か <span class="kbd">スペース</span> で次へ、<span class="kbd">←</span> で戻る、<span class="kbd">Esc</span> で終わりです。</p>
-      <p>マウスを止めると、下のボタンが薄くなります。</p>
-    </div>
+  <!-- 出す。枠に入れず、ボタンと枚数だけ -->
+  <div class="startbox">
     <button class="primary" id="start" disabled>大きく出す</button>
     <p class="count" id="count"></p>
-
-    <label class="editmode"><input type="checkbox" id="editMode"> 作成中（出したあとも設定を開いたままにする）</label>
-
-
   </div>
+
+  <!-- 保存 -->
+  <section class="card">
+    <h2>保存&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h2>
+    <div class="tip-body" hidden>
+      <p>残るのは<strong>使っているこの機器のブラウザの中だけ</strong>です。<strong>どこにも送信されません。</strong></p>
+      <p>チェックを外すと、この機器に残していたものを消します。</p>
+      <p><strong>共用のパソコンでは外しておいてください。</strong>写真に子どもが写っていることがあります。</p>
+    </div>
+    <label style="font-weight:normal">
+      <input type="checkbox" id="save"> この機器に画面を保存する
+    </label>
+    <p class="hint">チェックを入れると、次に開いたときも<b>文字・順番・写真</b>がそのまま残ります。サーバーには送信されません。</p>
+    <p><span class="saving" id="savingLabel"></span></p>
+  </section>
 
   <!-- 使い方 -->
   <details class="opt">
@@ -275,20 +284,6 @@
     </div>
   </details>
 
-  <!-- 保存（いちばん下） -->
-  <section class="card">
-    <h2>保存&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h2>
-    <div class="tip-body" hidden>
-      <p>残るのは<strong>使っているこの機器のブラウザの中だけ</strong>です。<strong>どこにも送信されません。</strong></p>
-      <p>チェックを外すと、この機器に残していたものを消します。</p>
-      <p><strong>共用のパソコンでは外しておいてください。</strong>写真に子どもが写っていることがあります。</p>
-    </div>
-    <label style="font-weight:normal">
-      <input type="checkbox" id="save"> この機器に画面を保存する
-    </label>
-    <p class="hint">チェックを入れると、次に開いたときも<b>文字・順番・写真</b>がそのまま残ります。サーバーには送信されません。</p>
-    <p><span class="saving" id="savingLabel"></span></p>
-  </section>
 </main>
 
 <footer class="noprint">
@@ -316,6 +311,6 @@
   </div>
 </div>
 
-<script src="slide.js?v=12"></script>
+<script src="slide.js?v=13"></script>
 </body>
 </html>
