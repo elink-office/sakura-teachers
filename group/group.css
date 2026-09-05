@@ -1,0 +1,113 @@
+/* 理科室・図工室の座席表（/group/）専用の見た目
+   ⚠ style.css は座席表・席次表・円卓と共通なので、ここだけで完結させる。
+   ⚠ クラス名は .seat / .grid を使わない。共通の print.css と style.css が
+     それらを座席表の形に描いてしまうため（2026-09-01 の落とし穴）。 */
+
+/* ---- 部屋（台のならび）---- */
+.room{display:grid;gap:20px 16px}
+
+/* 台ひとつ＝班ひとつ。短い辺が黒板を向いている（縦長）
+   ┌ 左2人 ┬ 台 ┬ 右2人 ┐
+   └      短い辺に0〜2人   ┘ */
+.tbl{display:flex;flex-direction:column;--gLine:#c9c9c9;--gFill:#fff}
+.tbl.flip{flex-direction:column-reverse}
+.tbl .main{
+  display:grid;grid-template-columns:1fr .82fr 1fr;grid-template-rows:1fr 1fr;
+  gap:4px;
+}
+.tbl .body{
+  grid-column:2;grid-row:1 / span 2;
+  border:2px solid var(--gLine);border-radius:8px;background:var(--gFill);
+  display:flex;align-items:center;justify-content:center;
+  min-height:112px;
+}
+.tbl .tno{font-weight:bold;color:var(--gLine);line-height:1.1;text-align:center}
+.tbl .tno small{display:block;font-size:.62em;font-weight:normal}
+.tbl .edge{display:flex;justify-content:center;gap:6px;margin-top:4px}
+.tbl.flip .edge{margin:0 0 4px}
+.tbl .edge .gseat{flex:0 0 31%}
+
+/* ---- 席（名前の入る箱）---- */
+.gseat{
+  border:1.5px solid var(--gLine);border-radius:8px;background:#fff;
+  min-height:52px;display:flex;align-items:center;justify-content:center;
+  text-align:center;padding:3px;cursor:grab;overflow:hidden;position:relative;
+  -webkit-user-drag:none;
+}
+.gseat .nm{white-space:pre;line-height:1.2;display:block}
+.gseat.empty{background:#f6f6f6;border-style:dashed;color:#bbb}
+.gseat.lift{opacity:.25}
+.gseat.over{border-color:var(--pink);background:var(--pink-pale);box-shadow:0 0 0 2px var(--pink-light) inset}
+/* 班長の★は右上（班の番号は台の中なので、ぶつからない） */
+.gseat.is-leader::after{
+  content:"★";position:absolute;right:3px;top:1px;font-size:.62rem;line-height:1;
+  color:#FFC400;text-shadow:0 0 3px rgba(255,196,0,.85),0 0 1px rgba(180,120,0,.6);
+}
+/* 色を出さないとき＝枠は灰色のまま、番号だけ色を持たせない */
+.room.g-none .tbl{--gLine:#c9c9c9;--gFill:#fff}
+.room.g-none .tbl .tno{color:#555}
+/* 枠線だけ＝台の中は白 */
+.room.g-edge .tbl .body{background:#fff}
+
+/* 男女の色を画面で出さないとき */
+.sheet:not(.sexprint) .gseat .nm{color:#111 !important}
+
+/* ---- 書体 ---- */
+/* ⚠ 丸文字はWindows（HG丸ｺﾞｼｯｸM-PRO）とiPad・Mac（ヒラギノ丸ゴ ProN）だけ。
+   無い機器では静かにゴシックになる（崩れはしない） */
+.sheet.f-gothic .gseat .nm{font-family:"Yu Gothic",YuGothic,"Hiragino Sans",Meiryo,sans-serif}
+.sheet.f-mincho .gseat .nm{font-family:"Yu Mincho",YuMincho,"Hiragino Mincho ProN","MS PMincho",serif}
+.sheet.f-maru .gseat .nm{font-family:"HG丸ｺﾞｼｯｸM-PRO",HGMaruGothicMPRO,"Hiragino Maru Gothic ProN","Yu Gothic",sans-serif}
+
+/* ---- 条件の行 ---- */
+.pair{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:6px}
+.pair select{height:42px}
+.pair select.ph{color:var(--ink-soft)}
+
+/* ---- 名簿・保存まわり（座席表と同じ見た目にそろえる）---- */
+textarea#names{
+  width:100%;min-height:150px;padding:10px;font:inherit;line-height:1.7;
+  border:1.5px solid var(--line);border-radius:10px;background:#fff;
+}
+.chk-inline{font-weight:normal;display:inline-block}
+.chk-inline.gap{margin-left:18px}
+.safe{background:var(--pink-pale);border-radius:8px;padding:10px 12px;font-size:.9rem}
+.cls-box{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+.cls-box h3{margin:0 0 4px;font-size:1rem}
+.cls-box .mini{margin-right:6px}
+.del-box{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+.del-box h3{margin:0 0 4px;font-size:1rem}
+.btn-row{margin:8px 0 6px}
+.btn-row .mini{margin:0 8px 6px 0}
+.pick{max-width:24em}
+.pick select{width:100%}
+.tip-body .tip-h{font-weight:bold;margin:10px 0 2px}
+.tip-body ul{margin:0 0 6px;padding-left:1.3em}
+.tip-body li{margin-bottom:3px}
+/* 用紙の向きと2つのボタンを1行に。狭いときだけ折り返す */
+.print-line{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin:0}
+.print-line label{margin:0;font-weight:bold;white-space:nowrap}
+.print-line select{margin:0}
+
+/* ---- スマホ ---- */
+@media (max-width:520px){
+  .tbl .body{min-height:88px}
+  .gseat{min-height:44px}
+  .room{gap:14px 10px}
+}
+
+/* ---- 印刷 ---- */
+/* 🔴 紙は「画面と同じ絵」を1枚の canvas にして出す。
+   ⚠ 画面のCSSで紙に収めようとしない。端末ごとの余白が分からず、はみ出す */
+#printImgWrap{display:none}
+@media print{
+  body{background:#fff}
+  .noprint,.site-head,.read,footer,.card,details.opt,.notice,h1,.catch,.lead{display:none !important}
+  .wrap{max-width:none;padding:0;margin:0}
+  .sheet{border:none;border-radius:0;padding:0}
+  /* ⚠position:fixed も 100% も使わない。iPadでは紙の大きさとして扱われず、絵が切れる */
+  body.print-img > *:not(#printImgWrap){display:none !important}
+  body.print-img{margin:0;padding:0}
+  body.print-img #printImgWrap{display:block !important;text-align:center;background:#fff;padding:0;margin:0}
+  body.print-img #printImgWrap canvas{display:block;width:100%;max-width:100%;height:auto;margin:0}
+}

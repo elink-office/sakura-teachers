@@ -1,0 +1,213 @@
+/* 会議室の上座・下座 専用の見た目
+   ⚠ 共通の print.css は読み込まない。あちらは A4横・座席表の .seat 前提で、
+     この図（A4縦・SVG1枚）とぶつかるため。印刷の指定はこのファイルの下に書く。 */
+
+:root{
+  /* 冠婚葬祭・会社の場面なので、席次表と同じ緑にそろえる。
+     ⚠ 変数名は --pink のまま（style.css を全部直さないため） */
+  --pink:#3f7a68;
+  --pink-light:#e4efeb;
+  --pink-pale:#f1f7f4;
+}
+
+/* ---- いちばん上の断り書き ---- */
+/* 🔴 枠をやめた（2026-08-31 本人「タイトルの下の緑がグレーと合わなくて違和感」）。
+   ほかの本文と同じ、ただの文章にする */
+.notice-top{
+  margin:0 0 10px;font-size:.9rem;color:var(--ink-soft);line-height:1.8;
+}
+.notice-top strong{color:var(--ink)}
+.notice-top + .notice-top{margin-bottom:20px}
+
+/* ---- 会場ぜんたいの図 ---- */
+#venueWrap{
+  background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+  padding:14px;margin:18px 0 10px;
+}
+#venue{display:block;width:100%;height:auto}
+.v-room{fill:#fbfcfc;stroke:var(--line);stroke-width:2}
+.v-main{fill:var(--pink-light);stroke:var(--pink);stroke-width:2}
+.v-main-label{fill:var(--pink);font-size:20px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+.v-door{fill:#eef1f0;stroke:#9aa8a3;stroke-width:2}
+.v-door-label{fill:#61706b;font-size:16px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+/* 卓。押せることが分かるように、指を乗せたら色が変わる */
+.v-hit{cursor:pointer}
+.v-table{fill:#fff;stroke:#b9c4c0;stroke-width:2}
+.v-table.first{stroke:var(--pink);stroke-width:3}
+.v-table.on{fill:var(--pink);stroke:var(--pink)}
+.v-no{fill:var(--ink);font-size:26px;font-weight:700;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.v-table.on + .v-no{fill:#fff}
+@media (hover:hover){ .v-hit:hover .v-table{fill:var(--pink-pale)} }
+/* 新郎側・新婦側 */
+.v-split{stroke:var(--pink-light);stroke-width:2;stroke-dasharray:6 6}
+.v-side{fill:var(--pink);font-size:17px;font-weight:700;text-anchor:middle}
+
+/* ---- 選んだ卓の中 ---- */
+#figWrap{
+  background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+  padding:16px;margin:18px 0 12px;
+}
+#fig{display:block;width:100%;height:auto}
+
+/* 卓 */
+.e-table{fill:#fff;stroke:var(--pink);stroke-width:2}
+.e-table-label{fill:var(--ink-soft);font-size:16px;text-anchor:middle}
+.e-up-label{fill:var(--pink);font-size:15px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+
+/* 席（丸）。⚠ .seat という名前は使わない（座席表の指定に当たるため） */
+.e-seat{fill:#fff;stroke:#b9c4c0;stroke-width:2}
+.e-seat.top{fill:var(--pink);stroke:var(--pink)}
+.e-seat.low{fill:#f3f4f5;stroke:#c9ced2}
+.e-no{fill:var(--ink);font-size:19px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+.e-seat.top + .e-no{fill:#fff}
+
+/* 入口 */
+.e-door{fill:#e7edea;stroke:var(--pink);stroke-width:2}
+.e-door-label{fill:var(--pink);font-size:15px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+
+/* メインの席（高砂・ステージなど） */
+.e-main{fill:var(--pink-light);stroke:var(--pink);stroke-width:2}
+.e-main-label{fill:var(--pink);font-size:15px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+
+/* 図の下の一言。⚠ここが答えなので、本文より小さくしすぎない */
+.fig-note{margin:0 0 10px;font-size:.95rem;color:var(--ink);line-height:1.8}
+.fig-note strong{color:var(--pink)}
+.fig-note .warn{color:var(--ink-soft)}
+/* 印刷は主役ではない（2026-08-30 本人「これ、印刷メインではないと思ってる」）。
+   ⭐式場が席次表を用意してくれる。ここで欲しいのは紙ではなく「どこが上座か」 */
+.fig-print{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 22px}
+.fig-print .hint{margin:0}
+
+/* ---- 設定のならび ---- */
+.panel .row{margin-bottom:14px}
+.dirs{display:flex;flex-wrap:wrap;gap:8px}
+/* ⚠ min-width で並べると、スマホ375pxで4つめだけ折り返した。
+   幅を等分にすると1行に収まり、指で押す面も広くなる */
+.dirs button{flex:1 1 0;min-width:0;max-width:120px}
+.dirs button.on{background:var(--pink);border-color:var(--pink);color:#fff}
+
+/* ---- 印刷（A4 縦・図だけ）---- */
+@media print{
+  @page{size:A4 portrait;margin:14mm}
+  body{background:#fff}
+  .site-head,.read,footer,.noprint,h1,.catch,.lead,.notice-top{display:none !important}
+  .wrap{max-width:none;padding:0;margin:0}
+  #venueWrap,#figWrap{border:none;border-radius:0;padding:0;margin:0 0 8mm}
+  #venue,#fig{width:100%;height:auto}
+  .fig-note{font-size:9pt;color:#333;margin:0 0 6mm}
+  /* ⚠ 色は既定では紙に出ない。上座の塗りは意味を持つので、出すよう指定する */
+  .e-table,.e-seat,.e-door,.e-main,.e-no,.e-main-label,.e-door-label,
+  .v-room,.v-table,.v-no,.v-door,.v-main,.v-main-label,.v-door-label,.v-side{
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+  }
+  /* 紙は画面より濃く出るので、上座の塗りは少しだけ薄くする */
+  .e-seat.top{fill:#5b917f !important}
+  .v-table.on{fill:#5b917f !important}
+  .print-title{display:block !important}
+}
+.print-title{display:none;text-align:center;font-size:1rem;font-weight:700;margin:0 0 8px}
+
+/* ---- 会議室の机 ---- */
+.k-desk{fill:#eef2f1;stroke:#9aa8a3;stroke-width:2}
+.k-front{fill:var(--pink-light);stroke:var(--pink);stroke-width:2}
+.k-front-label{fill:var(--pink);font-size:19px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+
+/* ---- 図と設定を横に並べる（パソコンだけ）2026-08-31 本人 ----
+   ⚠設定を変えながら図を見たいのに、図が大きくてスクロールが要った。
+     横に並べると両方見える。図は列の幅に合わせて勝手に小さくなる */
+.k-two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}
+/* 🔴 並び順（2026-08-31 本人「タブレットとスマホなら、印刷最後だよね？」）
+   スマホは 図 → 設定 → 印刷 の順にしたいので、HTMLもその順に置いてある。
+   パソコンだけ、印刷を図の下（左の列）に戻す */
+.k-fig{grid-column:1;grid-row:1}
+.k-set{grid-column:2;grid-row:1 / span 2}
+.k-print{grid-column:1;grid-row:2}
+@media (max-width:900px){
+  .k-two{grid-template-columns:1fr;gap:0}
+  .k-fig,.k-set,.k-print{grid-column:auto;grid-row:auto}
+}
+@media print{ .k-two{display:block} }
+#fig{max-height:66vh}
+/* ⚠スマホは図と設定が縦に並ぶので、図を少し低くして設定が顔を出すようにする */
+@media (max-width:900px){ #fig{max-height:48vh} }
+
+/* 番号の入れ替え＝席を2つ押す */
+.e-seat{cursor:pointer}
+.e-seat.picked{stroke:var(--pink);stroke-width:4}
+#swapNote{color:var(--pink);font-weight:700}
+
+/* ---- 押して置く（2026-08-31 本人「操作感がいいもので作ってみよう」）----
+   外の四角＝壁＝入口を置く。内の四角＝スクリーン等を置く */
+.k-inner{fill:none;stroke:var(--line);stroke-width:2;stroke-dasharray:5 5}
+.k-hit{fill:transparent;cursor:pointer}
+@media (hover:hover){ .k-hit:hover{fill:var(--pink-pale)} }
+.k-hit:active{fill:var(--pink-light)}
+@media print{ .k-hit,.k-inner{display:none} }
+
+/* 🔴 置いたものは「素通し」にする（2026-08-31 本人「2回目で消せるといいね」）。
+   ⚠入口の四角が押せるマスの上にかぶさっていたので、もう一度押しても消せなかった */
+.v-door,.v-door-label,.k-front,.k-front-label,.k-desk{pointer-events:none}
+
+/* 🔴 ①を塗りつぶさない（2026-08-31 本人「番号あるから塗りつぶさなくていい」）。
+   ⭐塗りをやめると、入れ替えで選んだ席の枠が太くなるのが分かりやすくなる */
+.e-seat.top{fill:#fff;stroke:var(--pink);stroke-width:3}
+.e-seat.top + .e-no{fill:var(--ink)}
+.e-seat.low{fill:#fff;stroke:#c9ced2}
+/* ⚠ パソコンで、図の枠と設定の枠の上をそろえる */
+@media (min-width:901px){ .k-fig #figWrap{margin-top:0} }
+.fig-note{margin:8px 0 10px}
+
+/* 印刷のヘッダー（サイト名・日付）。画面には出さない */
+.print-head{display:none;text-align:center;font-size:.85rem;color:#555;margin:0 0 10px}
+@media print{
+  .print-head{display:block !important}
+  /* ⚠ 入れ替えで選んでいる印は紙に出さない（本人の指摘） */
+  .e-seat.picked{stroke:#b9c4c0 !important;stroke-width:2 !important}
+  /* ⚠ ①はもう塗らない。前の指定が残っていて紙だけ緑になっていた */
+  .e-seat.top{fill:#fff !important;stroke:#3f7a68 !important;stroke-width:3 !important}
+  .e-no{fill:#222 !important}
+}
+
+/* ---- 印刷の設定（画面）---- */
+.chk-row{display:flex;flex-wrap:wrap;gap:8px 20px}
+.name-row{display:flex;align-items:center;gap:8px;margin-top:12px;flex-wrap:wrap}
+.name-row input[type=text]{flex:1 1 14em;min-width:12em}
+.name-row input[type=text]:disabled{background:#f4f5f6;color:#aeb4b8}
+.name-tail{font-weight:700}
+#addList{margin-top:10px}
+#addList .pp-row{display:flex;align-items:center;gap:8px;font-size:.9rem;margin-top:6px}
+#addList .pp-row b{font-weight:700}
+
+/* ---- 印刷（A4縦・1枚に1つ）----
+   ⚠2つ並べる案は 2026-08-31 にやめた（本人「無理にこれしなくていいもの」）。
+     こちらで印刷プレビューを開けないので、確認が何往復も必要になるため */
+.p-date,.p-site{display:none}
+@media print{
+  @page{size:A4 portrait;margin:14mm}
+  body{background:#fff}
+  .site-head,.read,footer,.noprint,h1,.catch,.notice-top,.fig-note,.k-set{display:none !important}
+  .wrap{max-width:none;padding:0;margin:0}
+  .k-two{display:block}
+  #figWrap{border:none;border-radius:0;padding:0;margin:0}
+  #fig{width:100%;height:auto;max-height:none}
+  .print-title{
+    display:block !important;text-align:center;
+    font-size:13pt;font-weight:700;margin:0 0 4mm;
+  }
+  /* ⚠ 日付は図の上、サイト名は紙のいちばん下（フッターの位置）。どちらも右寄せ。
+     🔴position:fixed は紙で出ないことがあった。
+       代わりに、図のかたまりを紙の高さいっぱいに伸ばして、サイト名を下へ押しやる。
+     ⚠ 100vh ちょうどにすると、はみ出して白い2ページ目が出ることがあるので少し余らせる */
+  .k-fig{display:flex;flex-direction:column;min-height:100vh}
+  .p-date{display:block !important;text-align:right;margin:0 0 2mm;font-size:9pt;color:#555}
+  .p-site{display:block !important;text-align:right;margin-top:auto;font-size:9pt;color:#888}
+  /* ⚠ 入れ替えで選んでいる印は紙に出さない */
+  .e-seat.picked{stroke:#b9c4c0 !important;stroke-width:2 !important}
+  /* ⚠ ①はもう塗らない */
+  .e-seat.top{fill:#fff !important;stroke:#3f7a68 !important;stroke-width:3 !important}
+  .e-no{fill:#222 !important}
+  .k-hit,.k-inner{display:none}
+  .e-table,.e-seat,.e-no,.v-room,.v-door,.v-door-label,.k-front,.k-front-label,.k-desk{
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+  }
+}

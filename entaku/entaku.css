@@ -1,0 +1,106 @@
+/* 円卓の上座・下座 専用の見た目
+   ⚠ 共通の print.css は読み込まない。あちらは A4横・座席表の .seat 前提で、
+     この図（A4縦・SVG）とぶつかる。印刷の指定はこのファイルの下に書く。
+   🔴 会議室（/kaigishitsu/）と同じ作りにそろえてある（2026-08-31 本人） */
+
+:root{
+  /* 冠婚葬祭・会社の場面なので、席次表と同じ緑にそろえる。
+     ⚠ 変数名は --pink のまま（style.css を全部直さないため） */
+  --pink:#3f7a68;
+  --pink-light:#e4efeb;
+  --pink-pale:#f1f7f4;
+}
+
+/* ---- いちばん上の断り書き（枠は付けない）---- */
+.notice-top{
+  margin:0 0 20px;font-size:.9rem;color:var(--ink-soft);line-height:1.8;
+}
+.notice-top strong{color:var(--ink)}
+
+/* ---- 並び（2026-08-31 本人「図形を2つ横に並べたい」）----
+   パソコン  会場の図 ｜ 卓の図      その下に 設定、いちばん下に 印刷
+   スマホ    上から順に 会場 → 卓 → 設定 → 印刷
+   ⚠HTMLはスマホの順で並べてある。パソコンだけCSSで置き直す */
+.e-two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}
+.e-fig  {grid-column:1;grid-row:1}
+.e-fig2 {grid-column:2;grid-row:1}
+.e-set  {grid-column:1 / -1;grid-row:2}
+.e-print{grid-column:1 / -1;grid-row:3}
+@media (max-width:900px){
+  .e-two{grid-template-columns:1fr;gap:0}
+  .e-fig,.e-fig2,.e-set,.e-print{grid-column:auto;grid-row:auto}
+}
+
+/* ---- 図 ---- */
+#venueWrap,#figWrap{
+  background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+  padding:12px;margin:0 0 8px;
+}
+#venue,#fig{display:block;width:100%;height:auto;max-height:46vh;touch-action:none}
+@media (max-width:900px){ #venue,#fig{max-height:42vh} }
+
+/* 会場の図 */
+.v-room{fill:#fbfcfc;stroke:var(--line);stroke-width:2}
+.e-inner{fill:none;stroke:var(--line);stroke-width:2;stroke-dasharray:5 5}
+.k-hit{fill:transparent;cursor:pointer}
+@media (hover:hover){ .k-hit:hover{fill:var(--pink-pale)} }
+.k-hit:active{fill:var(--pink-light)}
+.v-main{fill:var(--pink-light);stroke:var(--pink);stroke-width:2}
+.v-main-label{fill:var(--pink);font-size:19px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+.v-door{fill:#eef1f0;stroke:#9aa8a3;stroke-width:2}
+.v-door-label{fill:#61706b;font-size:15px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+.v-hit{cursor:grab}
+.v-hit:active{cursor:grabbing}
+.v-table{fill:#fff;stroke:#b9c4c0;stroke-width:2}
+.v-table.on{fill:var(--pink-pale);stroke:var(--pink);stroke-width:4}
+.v-no{fill:var(--ink);font-size:24px;font-weight:700;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+@media (hover:hover){ .v-hit:hover .v-table{fill:var(--pink-pale)} }
+.v-split{stroke:var(--pink-light);stroke-width:2;stroke-dasharray:6 6}
+.v-side{fill:var(--pink);font-size:17px;font-weight:700;text-anchor:middle}
+
+/* 卓の中の図 */
+.e-table{fill:#fff;stroke:var(--pink);stroke-width:2}
+.e-table-label{fill:var(--ink-soft);font-size:38px;font-weight:700;text-anchor:middle}
+.e-up-label{fill:var(--pink);font-size:15px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+/* 🔴 ①は塗らない（番号があるので）。選んだ席の枠が太くなるのが分かりやすくなる */
+.e-seat{fill:#fff;stroke:#b9c4c0;stroke-width:2;cursor:pointer}
+.e-seat.top{stroke:var(--pink);stroke-width:3}
+.e-seat.picked{stroke:var(--pink);stroke-width:5}
+.e-no{fill:var(--ink);font-weight:700;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+/* 置いたものは素通し＝押す相手はいつも下のマス */
+.v-door,.v-door-label,.v-main,.v-main-label{pointer-events:none}
+
+/* 図の下の一言 */
+.fig-note{margin:0 0 10px;font-size:.9rem;color:var(--ink);line-height:1.8}
+.fig-note strong{color:var(--pink)}
+
+/* 印刷の設定（画面） */
+.chk-row{display:flex;flex-wrap:wrap;gap:8px 20px}
+.name-row{display:flex;align-items:center;gap:8px;margin-top:12px;flex-wrap:wrap}
+.name-row input[type=text]{flex:1 1 14em;min-width:12em}
+.dirs{display:flex;flex-wrap:wrap;gap:8px}
+.dirs button{flex:1 1 0;min-width:0;max-width:120px}
+.dirs button.on{background:var(--pink);border-color:var(--pink);color:#fff}
+
+/* ---- 印刷（A4縦・1枚に会場と卓）---- */
+.p-date,.p-site{display:none}
+@media print{
+  @page{size:A4 portrait;margin:14mm}
+  body{background:#fff}
+  .site-head,.read,footer,.noprint,h1,.catch,.notice-top,.e-set,.e-print{display:none !important}
+  .wrap{max-width:none;padding:0;margin:0}
+  .e-two{display:flex;flex-direction:column;min-height:100vh}
+  #venueWrap,#figWrap{border:none;border-radius:0;padding:0;margin:0 0 4mm}
+  #venue,#fig{width:100%;height:auto;max-height:none}
+  .print-title{display:block !important;text-align:center;font-size:13pt;font-weight:700;margin:0 0 4mm}
+  .p-date{display:block !important;text-align:right;margin:0 0 2mm;font-size:9pt;color:#555}
+  .p-site{display:block !important;text-align:right;margin-top:auto;font-size:9pt;color:#888}
+  .fig-note{font-size:9pt;color:#333;margin:0 0 4mm}
+  .k-hit,.e-inner{display:none}
+  .e-seat.picked{stroke:#b9c4c0 !important;stroke-width:2 !important}
+  .v-table.on{fill:#fff !important;stroke:#3f7a68 !important;stroke-width:3 !important}
+  .e-table,.e-seat,.e-no,.v-room,.v-table,.v-no,.v-door,.v-door-label,.v-main,.v-main-label,.v-side{
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+  }
+}
+.print-title{display:none}

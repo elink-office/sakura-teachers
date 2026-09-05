@@ -588,3 +588,17 @@ body.screen .seat.empty{
 .safe{
   margin:0 0 8px;font-size:.75rem;line-height:1.6;color:var(--ink-soft);
 }
+
+/* ⭐ロゴ：英字と日本語を横に並べ、上下の真ん中で揃える（2026-09-05） */
+.site-head .logo{
+  display:flex;align-items:center;
+  column-gap:.7em;line-height:1.2;white-space:nowrap;
+}
+.logo-mark{flex:0 0 auto}
+.logo-main{letter-spacing:.06em}
+.logo-sub{font-size:.72rem;font-weight:normal;color:var(--ink-soft);letter-spacing:.12em}
+/* ⭐スマホでは日本語を出さない（ロゴが幅を取りすぎてナビが崩れるため）。
+   ⭐検索には影響しない（title・構造化データ・フッターに入っている） */
+@media (max-width:560px){
+  .logo-sub{display:none}
+}

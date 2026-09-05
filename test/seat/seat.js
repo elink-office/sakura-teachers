@@ -12,7 +12,7 @@
   //   名簿は1つ。設定と記録だけツールごとに分けて持つ。
   //     { id, label, names, seat:{設定}, seki:{設定}, recs:[座席表の記録] }
   //   ⚠置き場はドメイン単位なので、/seat/ で保存したものを /seki/ から読める
-  var KEYC = 'sakura-teachers-rosters-v1';
+  var KEYC = 'sakura-tools-rosters-v1';
   var KEYOLD = 'sakura-seat-classes-v1';   // 前の置き場。初回に引き継いで、そのまま残しておく
   // 🔴 10 → 20 に増やした（2026-09-01 本人）。理科室・図工室の専科は10クラスほど受け持つ。
   //   ⚠3つのツールで同じ置き場を見ているので、上限は seat / seki / group を同時に直す
@@ -1625,7 +1625,7 @@
     }
     if (credit) {
       x.font = '15px sans-serif'; x.fillStyle = '#c3b2ba'; x.textAlign = 'right';
-      x.fillText('さくら先生の座席表　sakura-teachers.com', W - pad, H - pad - 8);
+      x.fillText('さくらツール　sakura-tools.com', W - pad, H - pad - 8);
       x.textAlign = 'left';
     }
     if (state.sample) {

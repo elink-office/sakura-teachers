@@ -1478,7 +1478,7 @@
     }
     if (credit) {
       x.font = '15px sans-serif'; x.fillStyle = '#c3b2ba'; x.textAlign = 'right';
-      x.fillText('さくら先生の座席表　sakura-teachers.com', W - pad, H - pad - 8);
+      x.fillText('さくらツール　sakura-tools.com', W - pad, H - pad - 8);
       x.textAlign = 'left';
     }
     if (state.sample) {
@@ -1520,7 +1520,7 @@
   //      { id, label, names, seat:{設定}, seki:{設定}, recs:[座席表の記録] }
   //  ⚠席次表は「1枚出して終わり」なので、決まった座席の記録はここには置かない
   // ============================================================
-  var KEYC = 'sakura-teachers-rosters-v1';
+  var KEYC = 'sakura-tools-rosters-v1';
   var KEYOLD = 'sakura-seat-classes-v1';
   // 🔴 10 → 20（2026-09-01）。⚠置き場は seat / seki / group で共通。上限は3つ同時に直す
   var MAXC = 20;
