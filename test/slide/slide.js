@@ -255,7 +255,7 @@
         if (sh.off) return;
         slides.push({
           group:'', title:(sh.text||'').trim(), names:[], pic:(sh.url||''),
-          pos:(sh.pos||''), size:(sh.size||'')
+          pos:(sh.pos||''), size:(sh.size||''), font:(sh.font||'')
         });
       });
       return;
@@ -302,9 +302,11 @@
     //    「文字の大きさ、位置ともに、デフォルトを表示しておいて、下の文字の位置は削除でいい」）
     var POS  = [['mid','まん中'],['top','上'],['bottom','下']];
     var SIZE = [['','自動'],['s','小'],['m','中'],['l','大']];
+    var FONT = [['gothic','ゴシック'],['maru','丸文字'],['mincho','明朝']];
 
     var h = '<table><tr><th class="chk">映す</th><th class="idx">#</th><th class="pic">写真</th>'
-          + '<th>出す文字（/ で改行・// で見出し）</th><th class="sel">位置</th><th class="sel">大きさ</th>'
+          + '<th>出す文字（/ で改行・// で見出し）</th>'
+          + '<th class="sel">書体</th><th class="sel">位置</th><th class="sel">大きさ</th>'
           + '<th class="mv">順番</th><th class="del">消す</th></tr>';
     sheets.forEach(function(sh,i){
       h += '<tr draggable="true" data-row="'+i+'" class="'+(sh.off?'off':'')+'">'
@@ -317,6 +319,7 @@
               : '<button class="picadd" data-picadd="'+i+'" title="ここに写真を入れる">＋</button>')
         +  '</td>'
         +  '<td><input class="ttl" type="text" data-s="'+i+'" value="'+esc(sh.text||'')+'" placeholder="出す文字（写真だけでもよい）"></td>'
+        +  '<td class="sel">'+sel('sfont', i, sh.font||'gothic', FONT)+'</td>'
         +  '<td class="sel">'+sel('spos', i, sh.pos||'mid', POS)+'</td>'
         +  '<td class="sel">'+sel('ssize', i, sh.size||'', SIZE)+'</td>'
         +  '<td class="mv">'
@@ -333,7 +336,7 @@
   function addLines(text){
     String(text).replace(/\r/g,'').split('\n').forEach(function(line){
       if (line.trim()==='') return;
-      sheets.push({ text:line.trim(), url:'', name:'', pos:'', size:'', off:false });
+      sheets.push({ text:line.trim(), url:'', name:'', pos:'', size:'', font:'', off:false });
     });
     $('lines').value = '';
     drawSheets();
@@ -427,7 +430,7 @@
      サンプル確認ができるってのが欲しい」「いちいち閉じられるのが面倒」）。
      ⚠こちらは全画面にせず、設定もたたまない。本番の「大きく出す」だけがたたむ。 */
   function fillCheck(){
-    var row = $('checkRow'), sel = $('checkNo');
+    var row = $('checkCard'), sel = $('checkNo');
     if (!slides.length){ row.hidden = true; return; }
     var keep = sel.value;
     sel.innerHTML = '';
@@ -474,16 +477,18 @@
     box.style.padding = (padY + sh * 0.018) + 'px ' + (padX + sw * 0.03) + 'px';
   }
 
-  function applyLook(){
-    var f = $('font').value;
+  /* 🔴 書体は1枚ずつ（2026-09-05 本人「フォントも、できれば行で指示したい」）。
+     全体の「見た目」の枠は無くした＝一覧と「大きく出す」が離れて見づらかったため */
+  function applyFont(f){
     var show = $('show');
     show.classList.remove('f-gothic','f-mincho','f-maru');
-    show.classList.add('f-' + f);
+    show.classList.add('f-' + (f || 'gothic'));
   }
 
   function render(){
     var s = slides[pos];
     if (!s) return;
+    applyFont(s.font);
 
     // 写真（あれば）
     var pic = $('pic');
@@ -546,7 +551,6 @@
     if (!check && !$('editMode').checked){
       $('d1').open = false;
     }
-    applyLook();
     $('show').classList.toggle('check', check);
     $('show').classList.add('on');
     render();
@@ -581,9 +585,9 @@
         // 写真そのものは IndexedDB に置く。ここには番号だけ残す
         sheets: sheets.map(function(s){
                   return { text:s.text||'', url:'', name:s.name||'', picId:s.picId||'',
-                           pos:s.pos||'', size:s.size||'', off:!!s.off };
+                           pos:s.pos||'', size:s.size||'', font:s.font||'', off:!!s.off };
                 }).filter(function(s){ return s.text.trim() !== '' || s.picId; }),
-        font: $('font').value, editMode: $('editMode').checked,
+        editMode: $('editMode').checked,
         rows: rows, groupOrder: groupOrder, groupOff: groupOff,
         origRows: origRows, origGroups: origGroups,
         mode: (document.querySelector('input[name=mode]:checked')||{}).value || 'one'
@@ -608,10 +612,9 @@
       if (Array.isArray(d.sheets)){
         sheets = d.sheets.map(function(x){
           return { text:x.text||'', url:'', name:x.name||'', picId:x.picId||'', blob:null,
-                   pos:x.pos||'', size:x.size||'', off:!!x.off };
+                   pos:x.pos||'', size:x.size||'', font:x.font||'', off:!!x.off };
         });
       }
-      if (d.font) $('font').value = d.font;
       if (Array.isArray(d.rows) && d.rows.length){
         rows = d.rows;
         groupOrder = d.groupOrder || []; groupOff = d.groupOff || {};
@@ -647,7 +650,7 @@
   $('addText').addEventListener('click', function(){ addLines($('lines').value); });
   // 🔴 空の1枚を足す。文字を打つのも、写真の「＋」を押すのも、ここから（2026-09-05 本人）
   $('addRow').addEventListener('click', function(){
-    sheets.push({ text:'', url:'', name:'', pos:'', size:'', off:false });
+    sheets.push({ text:'', url:'', name:'', pos:'', size:'', font:'', off:false });
     drawSheets();
     var list = $('sheets').querySelectorAll('input.ttl');
     if (list.length) list[list.length-1].focus();
@@ -689,7 +692,7 @@
         picTarget = -1;                       // 2枚目からは末尾に足す
       } else {
         var nid = newPicId();
-        sheets.push({ text:'', url:url, name:f.name, pos:'bottom', size:'s', off:false,
+        sheets.push({ text:'', url:url, name:f.name, pos:'bottom', size:'s', font:'', off:false,
                       blob:f, picId:nid });
         picPut(nid, f);
       }
@@ -704,7 +707,7 @@
     var add = e.target.closest ? e.target.closest('.picadd') : null;
     if (add){
       if (add.hasAttribute('data-picnew')){
-        sheets.push({ text:'', url:'', name:'', pos:'', size:'', off:false });
+        sheets.push({ text:'', url:'', name:'', pos:'', size:'', font:'', off:false });
         picTarget = 0;
       } else {
         picTarget = parseInt(add.getAttribute('data-picadd'),10);
@@ -798,6 +801,7 @@
       drawSheets(); return;
     }
     if (el.tagName === 'SELECT'){
+      if (el.hasAttribute('data-sfont')) sheets[parseInt(el.getAttribute('data-sfont'),10)].font = el.value;
       if (el.hasAttribute('data-spos'))  sheets[parseInt(el.getAttribute('data-spos'),10)].pos  = el.value;
       if (el.hasAttribute('data-ssize')) sheets[parseInt(el.getAttribute('data-ssize'),10)].size = el.value;
       updateCount(); save();
@@ -813,7 +817,6 @@
     updateCount(); save();
   });
 
-  $('font').addEventListener('change', save);
   $('editMode').addEventListener('change', save);
   $('save').addEventListener('change', function(){
     if ($('save').checked){
@@ -921,6 +924,20 @@
   try{
     if (localStorage.getItem(KEY)) $('save').checked = true;
   }catch(e){}
+
+  /* 「？」を押すと、すぐ下の説明が出る（サイトの他ページと同じ形） */
+  document.addEventListener('click', function(e){
+    var b = e.target;
+    while (b && b !== document.body && !(b.classList && b.classList.contains('tip-btn'))) b = b.parentElement;
+    if (!b || b === document.body) return;
+    var head = b.parentElement;
+    var body = head.nextElementSibling;
+    if (body && body.classList && body.classList.contains('tip-body')){
+      var open = !body.hidden;
+      body.hidden = open;
+      b.setAttribute('aria-expanded', String(!open));
+    }
+  });
 
   fillClassSelect();
   load();

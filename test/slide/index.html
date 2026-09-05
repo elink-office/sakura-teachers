@@ -26,10 +26,10 @@
 <title>【テスト】簡単スライドメーカー｜パワーポイントの代わりに、文字と写真をモニターへ｜さくら先生の座席表</title>
 <meta name="description" content="パワーポイントの代わりに、文字と写真をそのまま大きくモニターに映せる無料の道具です。今日のめあて、問題文、作品の写真、発表する子の名前に。スライドを作り込まなくていいので、思いついたその場で出せます。写真の上に文字を重ねることもできます。名簿は座席表・班分けと共通。登録なし・インストールなし・写真も名簿も外に送りません。">
 <link rel="stylesheet" href="../style.css?v=111">
-<link rel="stylesheet" href="slide.css?v=11">
+<link rel="stylesheet" href="slide.css?v=12">
 </head>
 <body>
-<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/05 09:54</div>
+<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/05 10:09</div>
 
 <header class="site-head noprint">
   <div class="wrap">
@@ -52,6 +52,8 @@
   </p>
 
   <!-- 準備（子どもに見せたくないものは全部この中。閉じれば一度に隠れる） -->
+  <p class="tip-guide noprint"><span class="tip-mark"></span> のしるしを押すと、くわしい説明が出ます。</p>
+
   <details class="opt" id="d1" open>
     <summary>先生の準備</summary>
     <div class="body">
@@ -64,10 +66,15 @@
       <!-- ===== 文字を出す ===== -->
       <div id="paneText">
         <p class="hint" style="margin-bottom:10px">
-          出したい文字を打って、<b>「入れる」</b>を押してください。<b>1行が1枚</b>になります。<br>
-          改行したいところに <code>/</code> を入れると、そこで行が変わります。
-          <code>//</code> にすると、<b>前のほうが小さい文字</b>になります（「今日のめあて」のような見出しに）。
+          打って<b>「入れる」</b>を押すと、<b>1行が1枚</b>になります&#8288;<button type="button" class="tip-btn" aria-label="説明"></button>
         </p>
+        <div class="tip-body" hidden>
+          <p><strong>改行したいところに <code>/</code></strong> を入れると、そこで行が変わります。<br>
+            例：<code>海の生きものを/しらべて分かったこと</code></p>
+          <p><strong><code>//</code> にすると、前のほうが小さい文字</strong>になります。「今日のめあて」のような見出しを付けたいときに。<br>
+            例：<code>今日のめあて//分数のたし算ができる</code></p>
+          <p><span class="kbd">Ctrl</span>＋<span class="kbd">Enter</span> でも入ります。</p>
+        </div>
         <textarea id="lines" placeholder="今日のめあて//分数のたし算ができる
 教科書 42ページ
 となりの人と 話し合ってみよう
@@ -78,22 +85,20 @@
         </div>
 
         <hr class="sep">
-        <h3 class="sub">出す順番</h3>
-        <p class="hint" style="margin-bottom:10px">
-          <b>▲▼</b>で順番を動かし、<b>×</b>でその1枚を消します。<br>
-          写真は、写真の欄の<b>＋</b>を押すとその1枚に入ります（すでに打った文字はそのまま）。写真の右上の<b>×</b>で写真だけ外せます。<br>
-          1枚ぶん足したいときは、一覧の下の<b>「＋ 行を追加」</b>から。文字でも写真でも入れられます。<br>
-          <b>位置</b>と<b>大きさ</b>は1枚ずつ変えられます。<br>
-          <b>いちばん左のチェックを外すと、その1枚は映りません。</b>1枚だけ映したいときは、ほかを外してください。<br>
-          パソコンなら、<b>行をつかんでドラッグ</b>で順番を、<b>写真をつかんでドラッグ</b>で写真だけを動かせます。
-        </p>
+        <h3 class="sub">出す順番&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h3>
+        <div class="tip-body" hidden>
+          <p><strong>▲▼</strong>で順番を動かし、<strong>×</strong>でその1枚を消します。</p>
+          <p>写真は、写真の欄の<strong>＋</strong>を押すとその1枚に入ります（すでに打った文字はそのまま）。写真の右上の<strong>×</strong>で写真だけ外せます。<strong>写真を入れると、文字は自動で「下・小」になります。</strong></p>
+          <p><strong>いちばん左のチェックを外すと、その1枚は映りません。</strong></p>
+          <p>パソコンなら、<strong>行をつかんでドラッグ</strong>で順番を、<strong>写真をつかんでドラッグ</strong>で写真だけを動かせます。</p>
+        </div>
         <div class="tools">
           <button id="clearText">ぜんぶ消す</button>
         </div>
         <div class="tbl" id="sheets"><p class="empty">まだ何も入れていません。</p></div>
         <div class="row" style="margin-top:12px">
           <button id="addRow">＋ 行を追加</button>
-          <span class="hint" style="margin:0">いちばん下に1枚ぶん足します。文字を打つか、写真の「＋」から写真を入れてください。<b>写真を入れると、文字は自動で「下・小」になります</b></span>
+          <span class="hint" style="margin:0">いちばん下に1枚ぶん足します</span>
           <input type="file" id="pics" accept="image/*" multiple hidden>
         </div>
       </div>
@@ -112,9 +117,12 @@
         </div>
 
         <p class="hint" style="margin-bottom:10px">
-          Excelで名前の列を選んでコピー → 下の枠に貼り付け。
-          1行目が「名前」「作品名」「班」などの見出しなら自動で読み分けます。見出しがなければ <b>1列目＝名前・2列目＝作品名</b>。
+          Excelで名前の列を選んでコピー → 下の枠に貼り付け&#8288;<button type="button" class="tip-btn" aria-label="説明"></button>
         </p>
+        <div class="tip-body" hidden>
+          <p>1行目が「名前」「作品名」「班」などの<strong>見出しなら、自動で読み分けます</strong>。</p>
+          <p>見出しがなければ <strong>1列目＝名前・2列目＝作品名</strong> として読みます。名前だけの1列でもかまいません。</p>
+        </div>
         <textarea id="paste" placeholder="名前	作品名	班
 さくら	わたしの家族	1班
 たろう	わたしの家族	1班
@@ -134,9 +142,12 @@
           <label><input type="radio" name="mode" value="group"> 班ごとにまとめて映す</label>
         </div>
         <p class="hint" style="margin-bottom:10px">
-          作品名はここで直せます。長いときは、改行したいところに <code>/</code> を入れてください。<br>
-          ▲▼で順番を入れ替え。チェックを外すと、その子（その班）は映りません。
+          作品名はここで直せます&#8288;<button type="button" class="tip-btn" aria-label="説明"></button>
         </p>
+        <div class="tip-body" hidden>
+          <p>長いときは、<strong>改行したいところに <code>/</code></strong> を入れてください。</p>
+          <p><strong>▲▼</strong>で順番を入れ替え。<strong>チェックを外す</strong>と、その子（その班）は映りません。</p>
+        </div>
         <div class="tools" id="tools" hidden>
           <button id="shuffle">順番をシャッフル</button>
           <button id="reset">読み込んだ順に戻す</button>
@@ -145,48 +156,36 @@
         <div class="tbl" id="list"><p class="empty">まだ名簿を読み込んでいません。</p></div>
       </div>
 
-      <hr class="sep">
-      <h3 class="sub">見た目</h3>
-      <div class="look">
-        <div><label for="font">書体</label>
-          <select id="font">
-            <option value="gothic" selected>ゴシック体</option>
-            <option value="maru">丸文字（Windows・iPadのみ）</option>
-            <option value="mincho">明朝体</option>
-          </select>
-        </div>
-      </div>
-
     </div>
   </details>
+
+  <!-- 1枚だけ見る（準備と本番のあいだ） -->
+  <div class="card" id="checkCard" hidden>
+    <h2>1枚だけ見る&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h2>
+    <div class="tip-body" hidden>
+      <p>選んだ1枚だけを映します。<strong>全画面にはなりません</strong>ので、見て、直して、また見る、がすぐできます。</p>
+      <p>1枚だけ出したいとき（今日のめあてを出しておく、など）にも使えます。</p>
+    </div>
+    <div class="row">
+      <select id="checkNo"></select>
+      <button id="checkBtn">この1枚を見る</button>
+    </div>
+  </div>
 
   <!-- 出す（ここは折りたたまない） -->
   <div class="card">
     <h2>大きく出す</h2>
-    <p class="hint" style="margin-bottom:12px">全画面になります。<span class="kbd">→</span> か <span class="kbd">スペース</span> で次へ、<span class="kbd">←</span> で戻る、<span class="kbd">Esc</span> で終わり。</p>
+    <p class="hint" style="margin-bottom:12px">全画面になります&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></p>
+    <div class="tip-body" hidden>
+      <p><span class="kbd">→</span> か <span class="kbd">スペース</span> で次へ、<span class="kbd">←</span> で戻る、<span class="kbd">Esc</span> で終わりです。</p>
+      <p>マウスを止めると、下のボタンが薄くなります。</p>
+    </div>
     <button class="primary" id="start" disabled>大きく出す</button>
     <p class="count" id="count"></p>
 
     <label class="editmode"><input type="checkbox" id="editMode"> 作成中（出したあとも設定を開いたままにする）</label>
 
-    <div class="savebox">
-      <label style="font-weight:normal">
-        <input type="checkbox" id="save"> この機器に画面を保存する
-      </label>
-      <p class="hint">
-        チェックを入れると、次に開いたときも<b>文字・順番・写真</b>がそのまま残ります。外すと、この機器に残していたものを消します。<br>
-        <b>サーバーには送信されません。</b>残るのは、使っているこの機器のブラウザの中だけです。<br>
-        ⚠<b>共用のパソコンでは、チェックを外しておいてください。</b>写真に子どもが写っていることがあります。
-      </p>
-      <p><span class="saving" id="savingLabel"></span></p>
-    </div>
 
-    <div class="checkrow" id="checkRow" hidden>
-      <span class="hint" style="margin:0">作りながら見てみる</span>
-      <select id="checkNo"></select>
-      <button id="checkBtn">この1枚を見る</button>
-      <span class="hint" style="margin:0">（見たあとも、設定は開いたままです）</span>
-    </div>
   </div>
 
   <!-- 使い方 -->
@@ -275,6 +274,21 @@
       <p>打った文字も写真も名簿も、この端末のブラウザの中だけにあります。どこかのサーバーに送ることはありません。ネットにつながっていなくても動きます。<b>映している画面には、広告は出ません。</b></p>
     </div>
   </details>
+
+  <!-- 保存（いちばん下） -->
+  <section class="card">
+    <h2>保存&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h2>
+    <div class="tip-body" hidden>
+      <p>残るのは<strong>使っているこの機器のブラウザの中だけ</strong>です。<strong>どこにも送信されません。</strong></p>
+      <p>チェックを外すと、この機器に残していたものを消します。</p>
+      <p><strong>共用のパソコンでは外しておいてください。</strong>写真に子どもが写っていることがあります。</p>
+    </div>
+    <label style="font-weight:normal">
+      <input type="checkbox" id="save"> この機器に画面を保存する
+    </label>
+    <p class="hint">チェックを入れると、次に開いたときも<b>文字・順番・写真</b>がそのまま残ります。サーバーには送信されません。</p>
+    <p><span class="saving" id="savingLabel"></span></p>
+  </section>
 </main>
 
 <footer class="noprint">
@@ -302,6 +316,6 @@
   </div>
 </div>
 
-<script src="slide.js?v=11"></script>
+<script src="slide.js?v=12"></script>
 </body>
 </html>

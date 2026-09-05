@@ -32,15 +32,11 @@ h3.sub{font-size:1.02rem;margin:0 0 12px;display:flex;align-items:center}
 /* 作成中（出したあとも設定を開いたままにする） */
 .editmode{
   display:inline-flex;align-items:center;gap:7px;cursor:pointer;
-  margin:12px 0 0;font-size:.92rem;color:var(--ink);
+  margin:14px 0 0;font-size:.92rem;color:var(--ink);
 }
 .editmode input{width:17px;height:17px;cursor:pointer}
 
-/* 保存のまとまり（座席表と同じ考え方） */
-.savebox{margin:16px 0 0;padding-top:14px;border-top:1px solid var(--line)}
-.savebox label{display:inline-flex;align-items:center;gap:7px;cursor:pointer;font-size:.92rem}
-.savebox input{width:17px;height:17px;cursor:pointer}
-.savebox .hint{margin-top:6px}
+/* 保存（いちばん下の枠。座席表と同じ考え方） */
 .saving{color:var(--ok);font-size:.85rem}
 .look > div{display:flex;flex-direction:column;gap:4px}
 .look label{font-size:.85rem;color:var(--ink-soft)}
