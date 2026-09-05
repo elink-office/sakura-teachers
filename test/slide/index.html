@@ -26,10 +26,10 @@
 <title>【テスト】簡単スライドメーカー｜パワーポイントの代わりに、文字と写真をモニターへ｜さくら先生の座席表</title>
 <meta name="description" content="パワーポイントの代わりに、文字と写真をそのまま大きくモニターに映せる無料の道具です。今日のめあて、問題文、作品の写真、発表する子の名前に。スライドを作り込まなくていいので、思いついたその場で出せます。写真の上に文字を重ねることもできます。名簿は座席表・班分けと共通。登録なし・インストールなし・写真も名簿も外に送りません。">
 <link rel="stylesheet" href="../style.css?v=111">
-<link rel="stylesheet" href="slide.css?v=8">
+<link rel="stylesheet" href="slide.css?v=11">
 </head>
 <body>
-<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/05 09:35</div>
+<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/05 09:54</div>
 
 <header class="site-head noprint">
   <div class="wrap">
@@ -81,9 +81,9 @@
         <h3 class="sub">出す順番</h3>
         <p class="hint" style="margin-bottom:10px">
           <b>▲▼</b>で順番を動かし、<b>×</b>でその1枚を消します。<br>
-          写真は、写真の欄の<b>＋</b>を押すとその1枚に入ります（すでに打った文字はそのまま）。
-          まとめて足したいときは、一覧の下の<b>「＋ 写真を追加」</b>から。写真の右上の<b>×</b>で写真だけ外せます。<br>
-          <b>位置</b>と<b>大きさ</b>は1枚ずつ変えられます。「見た目」の設定のままでよければ<b>そのまま</b>にしてください。<br>
+          写真は、写真の欄の<b>＋</b>を押すとその1枚に入ります（すでに打った文字はそのまま）。写真の右上の<b>×</b>で写真だけ外せます。<br>
+          1枚ぶん足したいときは、一覧の下の<b>「＋ 行を追加」</b>から。文字でも写真でも入れられます。<br>
+          <b>位置</b>と<b>大きさ</b>は1枚ずつ変えられます。<br>
           <b>いちばん左のチェックを外すと、その1枚は映りません。</b>1枚だけ映したいときは、ほかを外してください。<br>
           パソコンなら、<b>行をつかんでドラッグ</b>で順番を、<b>写真をつかんでドラッグ</b>で写真だけを動かせます。
         </p>
@@ -92,8 +92,9 @@
         </div>
         <div class="tbl" id="sheets"><p class="empty">まだ何も入れていません。</p></div>
         <div class="row" style="margin-top:12px">
-          <label class="filebtn">＋ 写真を追加<input type="file" id="pics" accept="image/*" multiple hidden></label>
-          <span class="hint" style="margin:0">いちばん下に足されます。<b>写真はどこにも保存しません</b>（このページを閉じると消えます）</span>
+          <button id="addRow">＋ 行を追加</button>
+          <span class="hint" style="margin:0">いちばん下に1枚ぶん足します。文字を打つか、写真の「＋」から写真を入れてください。<b>写真を入れると、文字は自動で「下・小」になります</b></span>
+          <input type="file" id="pics" accept="image/*" multiple hidden>
         </div>
       </div>
 
@@ -154,13 +155,6 @@
             <option value="mincho">明朝体</option>
           </select>
         </div>
-        <div><label for="vpos">文字の位置</label>
-          <select id="vpos">
-            <option value="top">上</option>
-            <option value="mid" selected>まん中</option>
-            <option value="bottom">下</option>
-          </select>
-        </div>
       </div>
 
     </div>
@@ -172,6 +166,27 @@
     <p class="hint" style="margin-bottom:12px">全画面になります。<span class="kbd">→</span> か <span class="kbd">スペース</span> で次へ、<span class="kbd">←</span> で戻る、<span class="kbd">Esc</span> で終わり。</p>
     <button class="primary" id="start" disabled>大きく出す</button>
     <p class="count" id="count"></p>
+
+    <label class="editmode"><input type="checkbox" id="editMode"> 作成中（出したあとも設定を開いたままにする）</label>
+
+    <div class="savebox">
+      <label style="font-weight:normal">
+        <input type="checkbox" id="save"> この機器に画面を保存する
+      </label>
+      <p class="hint">
+        チェックを入れると、次に開いたときも<b>文字・順番・写真</b>がそのまま残ります。外すと、この機器に残していたものを消します。<br>
+        <b>サーバーには送信されません。</b>残るのは、使っているこの機器のブラウザの中だけです。<br>
+        ⚠<b>共用のパソコンでは、チェックを外しておいてください。</b>写真に子どもが写っていることがあります。
+      </p>
+      <p><span class="saving" id="savingLabel"></span></p>
+    </div>
+
+    <div class="checkrow" id="checkRow" hidden>
+      <span class="hint" style="margin:0">作りながら見てみる</span>
+      <select id="checkNo"></select>
+      <button id="checkBtn">この1枚を見る</button>
+      <span class="hint" style="margin:0">（見たあとも、設定は開いたままです）</span>
+    </div>
   </div>
 
   <!-- 使い方 -->
@@ -202,17 +217,24 @@
       <h3>写真を出す</h3>
       <ul>
         <li>⭐<b>一覧の「＋」を押すと、その1枚に写真が入ります。</b>すでに打った文字はそのままなので、打ち直す必要はありません。</li>
-        <li>一覧の下の<b>「＋ 写真を追加」</b>から、いくつでもまとめて入れられます。この場合はいちばん下に足されます。</li>
+        <li>一覧の下の<b>「＋ 行を追加」</b>で1枚ぶん増やせます。文字でも写真でも入れられます。</li>
         <li>入れた写真は、<b>写真をつかんでドラッグ</b>すると、別の行へ移せます（パソコンのみ）。写真の右上の<b>×</b>で、写真だけ外せます。</li>
         <li>一覧の文字の欄に打つと、<b>写真の上に文字が重なります</b>。文字の後ろには白い帯が付くので、写真の上でも読めます。</li>
         <li>写真は切れません。画面に収まるように、全部が入る大きさで出ます。</li>
-        <li>⚠<b>写真は保存されません。</b>このページを閉じると消えるので、次のときは入れ直してください。もちろん、どこにも送っていません。</li>
+        <li>写真は<b>「この機器に画面を保存する」にチェックを入れておくと残ります</b>（下の「保存について」を見てください）。チェックが外れていると、ページを閉じたときに消えます。</li>
+      </ul>
+
+      <h3>作っているとき</h3>
+      <ul>
+        <li>⭐<b>「作成中」にチェック</b>を入れておくと、出したあとも設定が開いたままです。作りながら何度も見られます。</li>
+        <li><b>枚数を選んで「この1枚を見る」</b>を押すと、その1枚だけ確かめられます（全画面になりません）。</li>
+        <li>⚠<b>本番のときはチェックを外してください。</b>外しておくと、出したときに設定がたたまれて、子どもに見えません。</li>
       </ul>
 
       <h3>1枚ずつ変えたいとき</h3>
       <ul>
         <li>一覧の<b>位置</b>と<b>大きさ</b>で、その1枚だけ変えられます。写真によって文字を置きたい場所が違うときに使ってください。</li>
-        <li><b>そのまま</b>を選んでおくと、下の「見た目」の設定に従います。</li>
+        <li>位置は「まん中」、大きさは「自動」がはじめの値です。<b>自動</b>は、文字の長さに合わせて大きさが決まります。</li>
         <li>いちばん左の<b>チェックを外す</b>と、その1枚は映りません。<b>1枚だけ映したいときは、ほかのチェックを外してください。</b></li>
       </ul>
 
@@ -220,7 +242,7 @@
       <ul>
         <li>書体は<b>ゴシック体・丸文字・明朝体</b>から選べます（座席表と同じです）。<br>
           丸文字はWindowsとiPad・Macだけです。入っていない機器では、静かにゴシック体になります。</li>
-        <li>文字の位置は<b>上・まん中・下</b>から選べます。写真の上に文字を置くとき、写真の中身に重ならない位置にできます。</li>
+        <li>文字の位置と大きさは、<b>一覧で1枚ずつ</b>決めます。写真の上に文字を置くとき、写真の中身に重ならない位置にできます。</li>
       </ul>
 
       <h3>発表者を出す</h3>
@@ -241,8 +263,16 @@
       <h3>子どもに設定を見せたくない</h3>
       <p>「先生の準備」を閉じると、中身がまとめて隠れます。<b>「大きく出す」を押したときも自動で閉じます</b>ので、映し終わって戻ったときに、順番やシャッフルが子どもに見えることはありません。</p>
 
+      <h3>保存について</h3>
+      <ul>
+        <li>「大きく出す」の下の<b>「この機器に画面を保存する」</b>にチェックを入れると、次に開いたときも文字・順番・<b>写真</b>がそのまま残ります。</li>
+        <li>残るのは<b>使っているこの機器のブラウザの中だけ</b>です。<b>どこにも送信されません。</b></li>
+        <li>チェックを外すと、この機器に残していたものを消します。</li>
+        <li>⚠<b>共用のパソコンでは外しておいてください。</b>写真に子どもが写っていることがあります。</li>
+      </ul>
+
       <h3>打った文字は、どこにも送られません</h3>
-      <p>打った文字と名簿は、この端末のブラウザの中だけに残ります。どこかのサーバーに送ることはありません。ネットにつながっていなくても動きます。<b>映している画面には、広告は出ません。</b></p>
+      <p>打った文字も写真も名簿も、この端末のブラウザの中だけにあります。どこかのサーバーに送ることはありません。ネットにつながっていなくても動きます。<b>映している画面には、広告は出ません。</b></p>
     </div>
   </details>
 </main>
@@ -272,6 +302,6 @@
   </div>
 </div>
 
-<script src="slide.js?v=8"></script>
+<script src="slide.js?v=11"></script>
 </body>
 </html>

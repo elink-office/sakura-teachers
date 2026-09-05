@@ -43,6 +43,77 @@
     "りく\t大切な友だち\t4班";
 
   function $(id){ return document.getElementById(id); }
+
+  /* ===== 写真の置き場（この機器のブラウザの中だけ） =====
+     🔴 localStorage は 5MB ほどしかなく写真が入らないので、写真だけ IndexedDB に置く。
+        どちらも「使ってる機器の中」で、外には出ない。
+     🔴「この機器に画面を保存する」のチェックが入っているあいだだけ書き込む（座席表と同じ考え方）。 */
+  var DBNAME = 'sakura-slide', STORE = 'pics';
+  function withDB(fn){
+    try{
+      var req = indexedDB.open(DBNAME, 1);
+      req.onupgradeneeded = function(e){
+        var db = e.target.result;
+        if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE);
+      };
+      req.onsuccess = function(e){ fn(e.target.result); };
+      req.onerror   = function(){ fn(null); };
+    }catch(err){ fn(null); }
+  }
+  function picPut(id, blob){
+    if (!$('save').checked || !blob) return;
+    withDB(function(db){
+      if (!db) return;
+      try{ db.transaction(STORE,'readwrite').objectStore(STORE).put(blob, id); }catch(e){}
+    });
+  }
+  function picDel(id){
+    withDB(function(db){
+      if (!db) return;
+      try{ db.transaction(STORE,'readwrite').objectStore(STORE).delete(id); }catch(e){}
+    });
+  }
+  function picClear(){
+    withDB(function(db){
+      if (!db) return;
+      try{ db.transaction(STORE,'readwrite').objectStore(STORE).clear(); }catch(e){}
+    });
+  }
+  function picPutAll(){
+    if (!$('save').checked) return;
+    withDB(function(db){
+      if (!db) return;
+      try{
+        var st = db.transaction(STORE,'readwrite').objectStore(STORE);
+        sheets.forEach(function(sh){ if (sh.picId && sh.blob) st.put(sh.blob, sh.picId); });
+      }catch(e){}
+    });
+  }
+  function picLoadAll(cb){
+    withDB(function(db){
+      if (!db){ cb(); return; }
+      var left = 0, done = false;
+      function fin(){ if (done && left === 0) cb(); }
+      try{
+        var st = db.transaction(STORE,'readonly').objectStore(STORE);
+        sheets.forEach(function(sh){
+          if (!sh.picId) return;
+          left++;
+          var r = st.get(sh.picId);
+          r.onsuccess = function(){
+            var b = r.result;
+            if (b){ sh.blob = b; sh.url = URL.createObjectURL(b); }
+            left--; fin();
+          };
+          r.onerror = function(){ left--; fin(); };
+        });
+      }catch(e){}
+      done = true; fin();
+    });
+  }
+  function newPicId(){
+    return 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+  }
   function esc(s){
     return String(s).replace(/[&<>"]/g, function(c){
       return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
@@ -227,8 +298,10 @@
       });
       return o + '</select>';
     }
-    var POS  = [['','そのまま'],['top','上'],['mid','まん中'],['bottom','下']];
-    var SIZE = [['','そのまま'],['s','小'],['m','中'],['l','大']];
+    // 🔴「そのまま」ではなく、はじめの値をそのまま見せる（2026-09-05 本人
+    //    「文字の大きさ、位置ともに、デフォルトを表示しておいて、下の文字の位置は削除でいい」）
+    var POS  = [['mid','まん中'],['top','上'],['bottom','下']];
+    var SIZE = [['','自動'],['s','小'],['m','中'],['l','大']];
 
     var h = '<table><tr><th class="chk">映す</th><th class="idx">#</th><th class="pic">写真</th>'
           + '<th>出す文字（/ で改行・// で見出し）</th><th class="sel">位置</th><th class="sel">大きさ</th>'
@@ -244,7 +317,7 @@
               : '<button class="picadd" data-picadd="'+i+'" title="ここに写真を入れる">＋</button>')
         +  '</td>'
         +  '<td><input class="ttl" type="text" data-s="'+i+'" value="'+esc(sh.text||'')+'" placeholder="出す文字（写真だけでもよい）"></td>'
-        +  '<td class="sel">'+sel('spos', i, sh.pos||'', POS)+'</td>'
+        +  '<td class="sel">'+sel('spos', i, sh.pos||'mid', POS)+'</td>'
         +  '<td class="sel">'+sel('ssize', i, sh.size||'', SIZE)+'</td>'
         +  '<td class="mv">'
         +    '<button class="mvbtn" data-smv="'+i+'" data-d="-1"'+(i===0?' disabled':'')+'>▲</button> '
@@ -347,6 +420,28 @@
     }
     $('count').textContent = msg;
     $('start').disabled = (slides.length===0);
+    fillCheck();
+  }
+
+  /* 🔴 作りながら1枚だけ確かめる（2026-09-05 本人「大きく出すの時にスライド番号を選ぶと
+     サンプル確認ができるってのが欲しい」「いちいち閉じられるのが面倒」）。
+     ⚠こちらは全画面にせず、設定もたたまない。本番の「大きく出す」だけがたたむ。 */
+  function fillCheck(){
+    var row = $('checkRow'), sel = $('checkNo');
+    if (!slides.length){ row.hidden = true; return; }
+    var keep = sel.value;
+    sel.innerHTML = '';
+    slides.forEach(function(sl,i){
+      var o = document.createElement('option');
+      o.value = String(i);
+      var t = (sl.title||'').replace(/\/+/g,' ').trim();
+      if (!t) t = sl.pic ? '写真' : '（からっぽ）';
+      if (t.length > 14) t = t.slice(0,14) + '…';
+      o.textContent = (i+1) + '枚目　' + t;
+      sel.appendChild(o);
+    });
+    if (keep && parseInt(keep,10) < slides.length) sel.value = keep;
+    row.hidden = false;
   }
 
   /* ================= 並べ替え ================= */
@@ -374,7 +469,9 @@
     var r  = Math.min(sw / pic.naturalWidth, sh / pic.naturalHeight);
     var padX = (sw - pic.naturalWidth  * r) / 2;
     var padY = (sh - pic.naturalHeight * r) / 2;
-    box.style.padding = (padY + sh * 0.04) + 'px ' + (padX + sw * 0.04) + 'px';
+    // 🔴 上・下にしたとき、写真の中身に重ならないよう端に寄せる（2026-09-05 本人
+    //    「もっと下（上も同様）写真に重なるから邪魔にならないように」）
+    box.style.padding = (padY + sh * 0.018) + 'px ' + (padX + sw * 0.03) + 'px';
   }
 
   function applyLook(){
@@ -382,7 +479,6 @@
     var show = $('show');
     show.classList.remove('f-gothic','f-mincho','f-maru');
     show.classList.add('f-' + f);
-    $('stage').setAttribute('data-pos', $('vpos').value);
   }
 
   function render(){
@@ -426,7 +522,7 @@
     // 🔴 その1枚だけ大きさを決めてあれば、そちらを優先（2026-09-05 本人）
     if (s.size) box.setAttribute('data-size', s.size); else box.removeAttribute('data-size');
     // 🔴 その1枚だけ位置を決めてあれば、そちらを優先
-    $('stage').setAttribute('data-pos', s.pos || $('vpos').value);
+    $('stage').setAttribute('data-pos', s.pos || 'mid');
     $('stage').classList.toggle('noTitle', t==='');
 
     var nb = $('name');
@@ -440,21 +536,28 @@
     $('prev').disabled = (pos===0);
     $('next').disabled = (pos===slides.length-1);
   }
-  function openShow(){
+  function openShow(checkAt){
     build();
     if (!slides.length) return;
-    pos = 0;
-    // 🔴 映す前に準備をたたむ。終わって戻ったとき、子どもに設定が見えないように（2026-09-05 本人）
-    $('d1').open = false;
+    var check = (typeof checkAt === 'number' && checkAt >= 0);
+    pos = check ? Math.min(checkAt, slides.length-1) : 0;
+    // 🔴「作成中」にチェックが入っているあいだは、たたまない（2026-09-05 本人
+    //    「作成モードを作ったら？ チェックを入れると開きっぱなし」）
+    if (!check && !$('editMode').checked){
+      $('d1').open = false;
+    }
     applyLook();
+    $('show').classList.toggle('check', check);
     $('show').classList.add('on');
     render();
-    if (document.documentElement.requestFullscreen){
+    // ⚠確認のときは全画面にしない（開け閉めが面倒になるため）
+    if (!check && document.documentElement.requestFullscreen){
       document.documentElement.requestFullscreen().catch(function(){});
     }
   }
   function closeShow(){
     $('show').classList.remove('on');
+    $('show').classList.remove('check');
     document.body.classList.remove('hidebar');
     if (document.fullscreenElement && document.exitFullscreen){
       document.exitFullscreen().catch(function(){});
@@ -467,29 +570,48 @@
 
   /* ================= 保存（この端末のブラウザだけ） ================= */
   function save(){
+    // 🔴 チェックが外れているときは、この機器に何も残さない（座席表と同じ考え方）
+    if (!$('save').checked){
+      try{ localStorage.removeItem(KEY); }catch(e){}
+      return;
+    }
     try{
       localStorage.setItem(KEY, JSON.stringify({
         kind: kind(), text: $('paste').value,
-        // ⚠写真は保存しない（本人「保存なしでいい」）。文字の枚だけ残す
-        // ⚠写真は保存しない。文字だけ残す（空になる1枚は落とす）
-        sheets: sheets.filter(function(s){ return (s.text||'').trim() !== ''; })
-                      .map(function(s){ return { text:s.text, url:'', name:'',
-                                                 pos:s.pos||'', size:s.size||'', off:!!s.off }; }),
-        font: $('font').value, vpos: $('vpos').value,
+        // 写真そのものは IndexedDB に置く。ここには番号だけ残す
+        sheets: sheets.map(function(s){
+                  return { text:s.text||'', url:'', name:s.name||'', picId:s.picId||'',
+                           pos:s.pos||'', size:s.size||'', off:!!s.off };
+                }).filter(function(s){ return s.text.trim() !== '' || s.picId; }),
+        font: $('font').value, editMode: $('editMode').checked,
         rows: rows, groupOrder: groupOrder, groupOff: groupOff,
         origRows: origRows, origGroups: origGroups,
         mode: (document.querySelector('input[name=mode]:checked')||{}).value || 'one'
       }));
+      showSaving('この機器に保存しました');
     }catch(e){}
+  }
+
+  var savingTimer = null;
+  function showSaving(t){
+    var el = $('savingLabel');
+    if (!el) return;
+    el.textContent = t;
+    clearTimeout(savingTimer);
+    if (t) savingTimer = setTimeout(function(){ el.textContent = ''; }, 1800);
   }
   function load(){
     try{
       var d = JSON.parse(localStorage.getItem(KEY) || 'null');
       if (!d) return;
       if (d.text)  $('paste').value = d.text;
-      if (Array.isArray(d.sheets)) sheets = d.sheets;
+      if (Array.isArray(d.sheets)){
+        sheets = d.sheets.map(function(x){
+          return { text:x.text||'', url:'', name:x.name||'', picId:x.picId||'', blob:null,
+                   pos:x.pos||'', size:x.size||'', off:!!x.off };
+        });
+      }
       if (d.font) $('font').value = d.font;
-      if (d.vpos) $('vpos').value = d.vpos;
       if (Array.isArray(d.rows) && d.rows.length){
         rows = d.rows;
         groupOrder = d.groupOrder || []; groupOff = d.groupOff || {};
@@ -497,10 +619,15 @@
         var m = document.querySelector('input[name=mode][value="'+(d.mode||'one')+'"]');
         if (m) m.checked = true;
       }
+      if (d.editMode) $('editMode').checked = true;
       var k = document.querySelector('input[name=kind][value="'+(d.kind||'text')+'"]');
       if (k) k.checked = true;
       switchKind();
       if (sheets.length || (Array.isArray(d.rows) && d.rows.length)) $('d1').open = false;
+      // 写真は非同期で戻す（読めたら一覧を描き直す）
+      if (sheets.some(function(x){ return x.picId; })){
+        picLoadAll(function(){ drawSheets(); });
+      }
     }catch(e){}
   }
 
@@ -518,6 +645,13 @@
   });
 
   $('addText').addEventListener('click', function(){ addLines($('lines').value); });
+  // 🔴 空の1枚を足す。文字を打つのも、写真の「＋」を押すのも、ここから（2026-09-05 本人）
+  $('addRow').addEventListener('click', function(){
+    sheets.push({ text:'', url:'', name:'', pos:'', size:'', off:false });
+    drawSheets();
+    var list = $('sheets').querySelectorAll('input.ttl');
+    if (list.length) list[list.length-1].focus();
+  });
   // Ctrl+Enter でも入れられる
   $('lines').addEventListener('keydown', function(e){
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter'){ e.preventDefault(); addLines($('lines').value); }
@@ -526,6 +660,7 @@
   $('clearText').addEventListener('click', function(){
     // 写真のぶんはメモリを返してから消す
     sheets.forEach(function(s){ if (s.url) URL.revokeObjectURL(s.url); });
+    picClear();
     sheets = []; $('lines').value = ''; drawSheets();
   });
 
@@ -541,11 +676,22 @@
       if (f.type.indexOf('image/') !== 0) continue;
       var url = URL.createObjectURL(f);
       if (picTarget >= 0 && sheets[picTarget]){
-        if (sheets[picTarget].url) URL.revokeObjectURL(sheets[picTarget].url);
-        sheets[picTarget].url = url; sheets[picTarget].name = f.name;
+        var sh = sheets[picTarget];
+        if (sh.url) URL.revokeObjectURL(sh.url);
+        if (sh.picId) picDel(sh.picId);
+        sh.url = url; sh.name = f.name;
+        sh.blob = f; sh.picId = newPicId(); picPut(sh.picId, f);
+        // 🔴 写真を入れたら「下・小」にする（2026-09-05 本人
+        //    「写真を入れたら、下と小になるようにしたほうがいい」）。
+        //    ⚠すでに先生が選んでいる場合は上書きしない
+        if (!sh.pos || sh.pos === 'mid') sh.pos = 'bottom';
+        if (!sh.size) sh.size = 's';
         picTarget = -1;                       // 2枚目からは末尾に足す
       } else {
-        sheets.push({ text:'', url:url, name:f.name, pos:'', size:'', off:false });
+        var nid = newPicId();
+        sheets.push({ text:'', url:url, name:f.name, pos:'bottom', size:'s', off:false,
+                      blob:f, picId:nid });
+        picPut(nid, f);
       }
     }
     picTarget = -1;
@@ -571,7 +717,10 @@
     if (px){
       var pi = parseInt(px.getAttribute('data-picdel'),10);
       if (sheets[pi] && sheets[pi].url) URL.revokeObjectURL(sheets[pi].url);
-      if (sheets[pi]){ sheets[pi].url = ''; sheets[pi].name = ''; }
+      if (sheets[pi]){
+        if (sheets[pi].picId) picDel(sheets[pi].picId);
+        sheets[pi].url = ''; sheets[pi].name = ''; sheets[pi].blob = null; sheets[pi].picId = '';
+      }
       drawSheets();
       return;
     }
@@ -585,6 +734,7 @@
     } else if (b.hasAttribute('data-sdel')){
       var k = parseInt(b.getAttribute('data-sdel'),10);
       if (sheets[k] && sheets[k].url) URL.revokeObjectURL(sheets[k].url);
+      if (sheets[k] && sheets[k].picId) picDel(sheets[k].picId);
       sheets.splice(k,1);
     }
     drawSheets();
@@ -622,9 +772,10 @@
     if (picFrom >= 0){
       // 🔴 写真だけを移す。移した先に写真があれば入れ替え（文字はどちらも動かさない）
       if (to !== picFrom && sheets[to] && sheets[picFrom]){
-        var u = sheets[picFrom].url, n = sheets[picFrom].name;
-        sheets[picFrom].url = sheets[to].url; sheets[picFrom].name = sheets[to].name;
-        sheets[to].url = u; sheets[to].name = n;
+        var a = sheets[picFrom], b = sheets[to];
+        var u=a.url, n=a.name, bl=a.blob, id=a.picId;
+        a.url=b.url; a.name=b.name; a.blob=b.blob; a.picId=b.picId;
+        b.url=u; b.name=n; b.blob=bl; b.picId=id;
       }
     } else if (dragFrom >= 0 && to !== dragFrom){
       var item = sheets.splice(dragFrom,1)[0];
@@ -663,7 +814,18 @@
   });
 
   $('font').addEventListener('change', save);
-  $('vpos').addEventListener('change', save);
+  $('editMode').addEventListener('change', save);
+  $('save').addEventListener('change', function(){
+    if ($('save').checked){
+      picPutAll();            // それまでに入れた写真も一緒に残す
+      save();
+    } else {
+      // 🔴 外したら、この機器に残していたものを消す
+      try{ localStorage.removeItem(KEY); }catch(e){}
+      picClear();
+      showSaving('この機器の保存を消しました');
+    }
+  });
 
   $('read').addEventListener('click', function(){
     var got = parse($('paste').value);
@@ -727,7 +889,10 @@
     el.addEventListener('change', drawList);
   });
 
-  $('start').addEventListener('click', openShow);
+  $('start').addEventListener('click', function(){ openShow(); });
+  $('checkBtn').addEventListener('click', function(){
+    openShow(parseInt($('checkNo').value,10) || 0);
+  });
   $('next').addEventListener('click', function(){ move(1); });
   $('prev').addEventListener('click', function(){ move(-1); });
   $('close').addEventListener('click', closeShow);
@@ -751,6 +916,11 @@
     clearTimeout(hideTimer);
     hideTimer = setTimeout(function(){ document.body.classList.add('hidebar'); }, 2500);
   });
+
+  // 🔴 保存のチェックだけ先に読む（load より前。読まないと save() が消しに行く）
+  try{
+    if (localStorage.getItem(KEY)) $('save').checked = true;
+  }catch(e){}
 
   fillClassSelect();
   load();

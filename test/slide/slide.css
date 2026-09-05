@@ -21,6 +21,27 @@ h3.sub{font-size:1.02rem;margin:0 0 12px;display:flex;align-items:center}
 
 /* 見た目（書体・文字の位置） */
 .look{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-end}
+
+/* 作りながら 1枚だけ確かめる列 */
+.checkrow{
+  display:flex;gap:10px;flex-wrap:wrap;align-items:center;
+  margin:14px 0 0;padding-top:14px;border-top:1px solid var(--line);
+}
+.checkrow select{max-width:220px}
+
+/* 作成中（出したあとも設定を開いたままにする） */
+.editmode{
+  display:inline-flex;align-items:center;gap:7px;cursor:pointer;
+  margin:12px 0 0;font-size:.92rem;color:var(--ink);
+}
+.editmode input{width:17px;height:17px;cursor:pointer}
+
+/* 保存のまとまり（座席表と同じ考え方） */
+.savebox{margin:16px 0 0;padding-top:14px;border-top:1px solid var(--line)}
+.savebox label{display:inline-flex;align-items:center;gap:7px;cursor:pointer;font-size:.92rem}
+.savebox input{width:17px;height:17px;cursor:pointer}
+.savebox .hint{margin-top:6px}
+.saving{color:var(--ok);font-size:.85rem}
 .look > div{display:flex;flex-direction:column;gap:4px}
 .look label{font-size:.85rem;color:var(--ink-soft)}
 
