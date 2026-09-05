@@ -21,7 +21,7 @@
   var sheets = [];
 
   var SAMPLE_TEXT =
-    "今日のめあて/分数のたし算ができる\n" +
+    "今日のめあて//分数のたし算ができる\n" +
     "教科書 42ページ\n" +
     "となりの人と 話し合ってみよう\n" +
     "のこり 5分";
@@ -211,7 +211,7 @@
     var h = '<table><tr><th class="idx">#</th><th class="pic">写真</th>'
           + '<th>出す文字（/ で改行）</th><th class="mv">順番</th><th class="del">消す</th></tr>';
     sheets.forEach(function(sh,i){
-      h += '<tr><td class="idx">'+(i+1)+'</td>'
+      h += '<tr draggable="true" data-row="'+i+'"><td class="idx">'+(i+1)+'</td>'
         +  '<td class="pic">'
         +    (sh.type==='pic'
               ? '<img class="thumb" src="'+esc(sh.url)+'" alt="">'
@@ -377,8 +377,16 @@
     var t = s.title || '';
     var box = $('title');
     box.innerHTML = '';
-    // 🔴 "/" のところで改行する（先生が切る場所を自分で決められる・2026-09-05 本人）
-    var parts = t.split('/'), longest = 0;
+    // 🔴 "//" があれば、前を小さい見出しにする（本人「今日のめあて だったら最初から2行にする選択肢もあるかも」）
+    //    "/"  はふつうの改行。切る場所を先生が自分で決められる（2026-09-05 本人）
+    var head = '', body = t, ix = t.indexOf('//');
+    if (ix >= 0){ head = t.slice(0, ix).trim(); body = t.slice(ix + 2).trim(); }
+    if (head){
+      var hd = document.createElement('span');
+      hd.className = 'sm'; hd.textContent = head;
+      box.appendChild(hd);
+    }
+    var parts = body.split('/'), longest = 0;
     parts.forEach(function(p,i){
       if (i>0) box.appendChild(document.createElement('br'));
       box.appendChild(document.createTextNode(p.trim()));
@@ -514,6 +522,42 @@
     }
     drawSheets();
   });
+  /* 行をつかんで上下に動かす（パソコンのみ）。
+     ⚠スマホ・タブレットにはドラッグが無いので、▲▼が本線。両方あってよい。 */
+  var dragFrom = -1;
+  $('sheets').addEventListener('dragstart', function(e){
+    var tr = e.target.closest ? e.target.closest('tr[data-row]') : null;
+    if (!tr) return;
+    dragFrom = parseInt(tr.getAttribute('data-row'),10);
+    tr.classList.add('dragging');
+    try{ e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain',''); }catch(err){}
+  });
+  $('sheets').addEventListener('dragover', function(e){
+    var tr = e.target.closest ? e.target.closest('tr[data-row]') : null;
+    if (!tr || dragFrom < 0) return;
+    e.preventDefault();
+    Array.prototype.forEach.call($('sheets').querySelectorAll('tr.over'), function(x){ x.classList.remove('over'); });
+    tr.classList.add('over');
+  });
+  $('sheets').addEventListener('drop', function(e){
+    var tr = e.target.closest ? e.target.closest('tr[data-row]') : null;
+    if (!tr || dragFrom < 0) return;
+    e.preventDefault();
+    var to = parseInt(tr.getAttribute('data-row'),10);
+    if (to !== dragFrom){
+      var item = sheets.splice(dragFrom,1)[0];
+      sheets.splice(to,0,item);
+    }
+    dragFrom = -1;
+    drawSheets();
+  });
+  $('sheets').addEventListener('dragend', function(){
+    dragFrom = -1;
+    Array.prototype.forEach.call($('sheets').querySelectorAll('tr.over,tr.dragging'), function(x){
+      x.classList.remove('over'); x.classList.remove('dragging');
+    });
+  });
+
   // ⚠文字の入力では描き直さない（描き直すとカーソルが飛ぶ）
   $('sheets').addEventListener('input', function(e){
     var el = e.target;

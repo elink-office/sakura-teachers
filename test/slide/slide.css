@@ -5,13 +5,9 @@
 .sep{border:0;border-top:1px solid var(--line);margin:26px 0 20px}
 h3.sub{font-size:1.02rem;margin:0 0 12px;display:flex;align-items:center}
 
-/* 出し方の切り替え・映す映さないの切り替え */
-.modes{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 16px}
-.modes label{
-  display:flex;align-items:center;gap:6px;font-size:.92rem;cursor:pointer;
-  border:1px solid var(--line);border-radius:999px;padding:7px 16px;background:#fff;
-}
-.modes label:has(input:checked){border-color:var(--pink);background:var(--pink-pale);font-weight:bold}
+/* ⚠切り替えはサイト共通の .radios（素のラジオ）を使う。
+   一度ここで枠と塗りつぶしを付けたが、他のページに無い仕様だったのでやめた（2026-09-05 本人の指摘） */
+.radios{margin:0 0 16px}
 
 .tools{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
 
@@ -55,13 +51,22 @@ h3.sub{font-size:1.02rem;margin:0 0 12px;display:flex;align-items:center}
   background:var(--bg);color:var(--ink);
 }
 .tbl input.ttl:focus{outline:none;border-color:var(--pink);background:#fff}
+/* ⚠小さくて薄いと気づかれない（本人「どうやって移動するのかな？」2026-09-05）。
+   大きくして、色を付けて、押せると分かる形にした */
 .mvbtn{
-  border:1px solid var(--line);background:#fff;border-radius:6px;
-  width:28px;height:26px;cursor:pointer;color:var(--ink-soft);font-size:11px;
+  border:1px solid var(--pink-light);background:#fff;border-radius:8px;
+  width:36px;height:34px;cursor:pointer;color:var(--pink);font-size:15px;
   line-height:1;padding:0;
 }
 .mvbtn:hover:not(:disabled){background:var(--pink-pale)}
-.mvbtn:disabled{opacity:.25;cursor:default}
+.mvbtn:active:not(:disabled){background:var(--pink-light)}
+.mvbtn:disabled{opacity:.22;cursor:default;color:var(--ink-soft);border-color:var(--line)}
+.tbl td.mv{width:96px}
+
+/* 行をつかんで上下に動かせる（パソコンのみ） */
+#sheets tr[draggable]{cursor:grab}
+#sheets tr.dragging{opacity:.4}
+#sheets tr.over td{border-top:3px solid var(--pink)}
 .members{color:var(--ink-soft);font-size:.86rem}
 
 /* ⚠折りたたみの矢印は ../style.css が出している（SVGの「⌄」・開くと回る）。ここでは足さない */
@@ -115,8 +120,14 @@ h3.sub{font-size:1.02rem;margin:0 0 12px;display:flex;align-items:center}
 
 /* 主役の文字。長さで4段階に自動で縮む（いちばん長い行で決める） */
 #title{
-  font-weight:900;letter-spacing:.03em;line-height:1.25;
+  font-weight:900;letter-spacing:.03em;line-height:1.5;
   max-width:92vw;color:var(--ink);font-size:clamp(46px,11vw,190px);
+}
+/* ⭐見出し（// の前側）は小さく、少し藄い色で。
+   発表者の「作品名＋名前」と同じ見せ方に揃える */
+#title .sm{
+  display:block;font-size:.44em;color:var(--ink-soft);
+  font-weight:700;letter-spacing:.06em;margin-bottom:.35em;line-height:1.3;
 }
 #title[data-len="m"]{font-size:clamp(40px,8vw,140px)}
 #title[data-len="l"]{font-size:clamp(34px,6vw,104px)}

@@ -26,10 +26,10 @@
 <title>【テスト】簡単スライド｜パワーポイントの代わりに、文字と写真をモニターへ｜さくら先生の座席表</title>
 <meta name="description" content="パワーポイントの代わりに、文字と写真をそのまま大きくモニターに映せる無料の道具です。今日のめあて、問題文、作品の写真、発表する子の名前に。スライドを作り込まなくていいので、思いついたその場で出せます。写真の上に文字を重ねることもできます。名簿は座席表・班分けと共通。登録なし・インストールなし・写真も名簿も外に送りません。">
 <link rel="stylesheet" href="../style.css?v=111">
-<link rel="stylesheet" href="slide.css?v=1">
+<link rel="stylesheet" href="slide.css?v=2">
 </head>
 <body>
-<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/05 08:55</div>
+<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/05 09:12</div>
 
 <header class="site-head noprint">
   <div class="wrap">
@@ -56,7 +56,7 @@
     <summary>先生の準備</summary>
     <div class="body">
 
-      <div class="modes" id="kind">
+      <div class="radios" id="kind">
         <label><input type="radio" name="kind" value="text" checked> 文字を出す</label>
         <label><input type="radio" name="kind" value="list"> 発表者を出す</label>
       </div>
@@ -64,10 +64,11 @@
       <!-- ===== 文字を出す ===== -->
       <div id="paneText">
         <p class="hint" style="margin-bottom:10px">
-          出したい文字を打って、<b>「入れる」</b>を押してください。<b>1行が1枚</b>になります。
-          1枚の中で改行したいときは、改行したいところに <code>/</code>（スラッシュ）を入れてください。
+          出したい文字を打って、<b>「入れる」</b>を押してください。<b>1行が1枚</b>になります。<br>
+          改行したいところに <code>/</code> を入れると、そこで行が変わります。
+          <code>//</code> にすると、<b>前のほうが小さい文字</b>になります（「今日のめあて」のような見出しに）。
         </p>
-        <textarea id="lines" placeholder="今日のめあて/分数のたし算ができる
+        <textarea id="lines" placeholder="今日のめあて//分数のたし算ができる
 教科書 42ページ
 となりの人と 話し合ってみよう
 のこり 5分"></textarea>
@@ -89,6 +90,10 @@
 
         <hr class="sep">
         <h3 class="sub">出す順番</h3>
+        <p class="hint" style="margin-bottom:10px">
+          <b>▲▼を押すと、その1枚が上や下に動きます。</b>パソコンなら、行をつかんで上下にドラッグしても動かせます。
+          <b>×</b>でその1枚だけ消せます。
+        </p>
         <div class="tools">
           <button id="clearText">ぜんぶ消す</button>
         </div>
@@ -126,7 +131,7 @@
         <hr class="sep">
         <h3 class="sub"><span class="step">2</span>作品名と順番</h3>
 
-        <div class="modes" id="modes" hidden>
+        <div class="radios" id="modes" hidden>
           <label><input type="radio" name="mode" value="one" checked> 1人ずつ映す</label>
           <label><input type="radio" name="mode" value="group"> 班ごとにまとめて映す</label>
         </div>
@@ -189,10 +194,12 @@
       <h3>文字を出す</h3>
       <ul>
         <li>枠に打って「入れる」を押すと、<b>1行が1枚</b>になって下の一覧に並びます。何行でもまとめて入れられます（<span class="kbd">Ctrl</span>＋<span class="kbd">Enter</span> でも入ります）。</li>
-        <li>1枚の中で改行したいときは、改行したいところに <code>/</code> を入れてください。<br>
-          例：<code>今日のめあて/分数のたし算ができる</code></li>
+        <li>改行したいところに <code>/</code> を入れると、そこで行が変わります。<br>
+          例：<code>海の生きものを/しらべて分かったこと</code></li>
+        <li><code>//</code> にすると、<b>前のほうが小さい文字</b>になります。見出しを付けたいときに使ってください。<br>
+          例：<code>今日のめあて//分数のたし算ができる</code></li>
         <li>文字の大きさは、長さに合わせて自動で変わります。</li>
-        <li>一覧の <b>▲▼</b> で出す順番を入れ替え、<b>×</b> で1枚だけ消せます。</li>
+        <li>一覧の <b>▲▼</b> で出す順番を入れ替え、<b>×</b> で1枚だけ消せます。パソコンなら行をつかんでドラッグでも動かせます。</li>
       </ul>
 
       <h3>写真を出す</h3>
@@ -259,6 +266,6 @@
   </div>
 </div>
 
-<script src="slide.js?v=1"></script>
+<script src="slide.js?v=2"></script>
 </body>
 </html>
