@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="さくら先生の座席表">
-<meta property="og:title" content="簡単スライド｜パワーポイントの代わりに、文字と写真をモニターへ">
+<meta property="og:title" content="簡単スライドメーカー｜パワーポイントの代わりに、文字と写真をモニターへ">
 <meta property="og:description" content="打った文字と写真を、そのまま大きくモニターに映せます。今日のめあて、問題文、作品の写真、発表者の名前に。パワーポイントでスライドを作らなくていいので、思いついたその場で出せます。登録なし・無料。">
 <meta property="og:url" content="https://sakura-teachers.com/slide/">
 <meta property="og:image" content="https://sakura-teachers.com/ogp.png">
@@ -23,13 +23,13 @@
   gtag('js', new Date());
   gtag('config', 'G-GCK29PTKBG');
 </script>
-<title>【テスト】簡単スライド｜パワーポイントの代わりに、文字と写真をモニターへ｜さくら先生の座席表</title>
+<title>【テスト】簡単スライドメーカー｜パワーポイントの代わりに、文字と写真をモニターへ｜さくら先生の座席表</title>
 <meta name="description" content="パワーポイントの代わりに、文字と写真をそのまま大きくモニターに映せる無料の道具です。今日のめあて、問題文、作品の写真、発表する子の名前に。スライドを作り込まなくていいので、思いついたその場で出せます。写真の上に文字を重ねることもできます。名簿は座席表・班分けと共通。登録なし・インストールなし・写真も名簿も外に送りません。">
 <link rel="stylesheet" href="../style.css?v=111">
-<link rel="stylesheet" href="slide.css?v=5">
+<link rel="stylesheet" href="slide.css?v=8">
 </head>
 <body>
-<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/05 09:27</div>
+<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/05 09:35</div>
 
 <header class="site-head noprint">
   <div class="wrap">
@@ -43,7 +43,7 @@
 </header>
 
 <main class="wrap">
-  <h1>簡単スライド</h1>
+  <h1>簡単スライドメーカー</h1>
   <p class="catch">パワーポイントの代わりに、文字と写真をモニターへ</p>
   <p class="lead">
     打った文字と写真が、そのまま大きく映ります。今日のめあて、問題文、注意のひとこと、作品の写真、発表する子の名前。
@@ -78,28 +78,23 @@
         </div>
 
         <hr class="sep">
-        <h3 class="sub">写真を入れる</h3>
-        <p class="hint" style="margin-bottom:10px">
-          作品の写真や、見せたい画面の写真を入れられます。写真の上に文字を重ねることもできます。<br>
-          <b>下の一覧の「＋」を押すと、その1枚に写真が入ります。</b>すでに打った文字はそのままです。<br>
-          <b>写真はどこにも保存しません。</b>このページを閉じると消えるので、次に開いたときは入れ直してください。
-        </p>
-        <div class="row">
-          <label class="filebtn">写真をえらぶ<input type="file" id="pics" accept="image/*" multiple hidden></label>
-          <span class="hint" style="margin:0" id="picNote">えらんだ写真は、一覧のいちばん下に足されます</span>
-        </div>
-
-        <hr class="sep">
         <h3 class="sub">出す順番</h3>
         <p class="hint" style="margin-bottom:10px">
-          <b>▲▼</b>で、その1枚が上や下に動きます。<b>×</b>でその1枚を消します。<br>
-          写真の欄では、<b>＋</b>でその1枚に写真を入れ、写真の右上の<b>×</b>で写真だけ外せます。<br>
-          パソコンなら、<b>行をつかんでドラッグ</b>で順番を、<b>写真をつかんでドラッグ</b>で写真だけを、別の行へ動かせます。
+          <b>▲▼</b>で順番を動かし、<b>×</b>でその1枚を消します。<br>
+          写真は、写真の欄の<b>＋</b>を押すとその1枚に入ります（すでに打った文字はそのまま）。
+          まとめて足したいときは、一覧の下の<b>「＋ 写真を追加」</b>から。写真の右上の<b>×</b>で写真だけ外せます。<br>
+          <b>位置</b>と<b>大きさ</b>は1枚ずつ変えられます。「見た目」の設定のままでよければ<b>そのまま</b>にしてください。<br>
+          <b>いちばん左のチェックを外すと、その1枚は映りません。</b>1枚だけ映したいときは、ほかを外してください。<br>
+          パソコンなら、<b>行をつかんでドラッグ</b>で順番を、<b>写真をつかんでドラッグ</b>で写真だけを動かせます。
         </p>
         <div class="tools">
           <button id="clearText">ぜんぶ消す</button>
         </div>
         <div class="tbl" id="sheets"><p class="empty">まだ何も入れていません。</p></div>
+        <div class="row" style="margin-top:12px">
+          <label class="filebtn">＋ 写真を追加<input type="file" id="pics" accept="image/*" multiple hidden></label>
+          <span class="hint" style="margin:0">いちばん下に足されます。<b>写真はどこにも保存しません</b>（このページを閉じると消えます）</span>
+        </div>
       </div>
 
       <!-- ===== 発表者を出す ===== -->
@@ -207,11 +202,18 @@
       <h3>写真を出す</h3>
       <ul>
         <li>⭐<b>一覧の「＋」を押すと、その1枚に写真が入ります。</b>すでに打った文字はそのままなので、打ち直す必要はありません。</li>
-        <li>「写真をえらぶ」から、いくつでもまとめて入れられます。この場合はいちばん下に足されます。</li>
+        <li>一覧の下の<b>「＋ 写真を追加」</b>から、いくつでもまとめて入れられます。この場合はいちばん下に足されます。</li>
         <li>入れた写真は、<b>写真をつかんでドラッグ</b>すると、別の行へ移せます（パソコンのみ）。写真の右上の<b>×</b>で、写真だけ外せます。</li>
         <li>一覧の文字の欄に打つと、<b>写真の上に文字が重なります</b>。文字の後ろには白い帯が付くので、写真の上でも読めます。</li>
         <li>写真は切れません。画面に収まるように、全部が入る大きさで出ます。</li>
         <li>⚠<b>写真は保存されません。</b>このページを閉じると消えるので、次のときは入れ直してください。もちろん、どこにも送っていません。</li>
+      </ul>
+
+      <h3>1枚ずつ変えたいとき</h3>
+      <ul>
+        <li>一覧の<b>位置</b>と<b>大きさ</b>で、その1枚だけ変えられます。写真によって文字を置きたい場所が違うときに使ってください。</li>
+        <li><b>そのまま</b>を選んでおくと、下の「見た目」の設定に従います。</li>
+        <li>いちばん左の<b>チェックを外す</b>と、その1枚は映りません。<b>1枚だけ映したいときは、ほかのチェックを外してください。</b></li>
       </ul>
 
       <h3>書体と、文字の位置</h3>
@@ -270,6 +272,6 @@
   </div>
 </div>
 
-<script src="slide.js?v=5"></script>
+<script src="slide.js?v=8"></script>
 </body>
 </html>

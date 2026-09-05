@@ -45,6 +45,16 @@ h3.sub{font-size:1.02rem;margin:0 0 12px;display:flex;align-items:center}
 }
 .picadd:hover{background:var(--pink-pale);color:var(--pink);border-color:var(--pink-light)}
 .tbl td.pic{width:74px}
+.tbl td.sel{width:96px}
+.mini-sel{
+  font:inherit;font-size:.82rem;padding:4px 6px;
+  border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);
+  max-width:92px;
+}
+#sheets tr.off td:not(.chk){opacity:.32}
+/* 空のときの案内の行（中身はまだ無い） */
+#sheets tr.ghost td{background:var(--bg)}
+#sheets tr.ghost .members{color:var(--ink-soft)}
 .tbl td.del{width:52px;text-align:center}
 .count{font-size:.9rem;color:var(--ink-soft);margin:12px 0 0}
 .empty{color:var(--ink-soft);font-size:.92rem;padding:6px 0;margin:0}
@@ -146,6 +156,11 @@ h3.sub{font-size:1.02rem;margin:0 0 12px;display:flex;align-items:center}
 #title[data-len="m"]{font-size:clamp(40px,8vw,140px)}
 #title[data-len="l"]{font-size:clamp(34px,6vw,104px)}
 #title[data-len="xl"]{font-size:clamp(28px,4.4vw,78px)}
+/* 🔴 1枚ごとに大きさを決めたときはこちらが勝つ（2026-09-05 本人）。
+   ⚠詳細度が同じなので、必ず data-len のあとに書く */
+#title[data-size="s"]{font-size:clamp(28px,4.4vw,78px)}
+#title[data-size="m"]{font-size:clamp(38px,7.2vw,124px)}
+#title[data-size="l"]{font-size:clamp(50px,12vw,210px)}
 
 /* 名前。⚠名前は覚えているので、作品名より小さくする（本人・2026-09-05） */
 #name{

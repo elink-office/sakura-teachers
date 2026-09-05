@@ -14,7 +14,8 @@
   var slides = [], pos = 0;
 
   /* 「文字を出す」で並べる1枚ぶん。
-     { text:'…', url:'blob:…', name:'' }
+     { text:'…', url:'blob:…', name:'', pos:'', size:'', off:false }
+       pos/size が空なら「見た目」の全体設定に従う。off は映さない印
      🔴 どの1枚も「文字」と「写真」の両方を持てる（2026-09-05 本人
         「1行目のすでに入っている文字の左に、写真の枠があって横線が入ってる。
           5行目に入った写真を、そのすでに入っている文字の左に移動したい。
@@ -180,7 +181,11 @@
     slides = [];
     if (kind()==='text'){
       sheets.forEach(function(sh){
-        slides.push({ group:'', title:(sh.text||'').trim(), names:[], pic:(sh.url||'') });
+        if (sh.off) return;
+        slides.push({
+          group:'', title:(sh.text||'').trim(), names:[], pic:(sh.url||''),
+          pos:(sh.pos||''), size:(sh.size||'')
+        });
       });
       return;
     }
@@ -205,13 +210,33 @@
   function drawSheets(){
     var box = $('sheets');
     if (!sheets.length){
-      box.innerHTML = '<p class="empty">まだ何も入れていません。</p>';
+      // 🔴 空でも「＋」を出しておく。押せる場所が見えていないと、入れ方が分からない
+      box.innerHTML =
+        '<table><tr><th class="chk">映す</th><th class="idx">#</th><th class="pic">写真</th>'
+      + '<th>出す文字（/ で改行・// で見出し）</th><th class="mv">順番</th><th class="del">消す</th></tr>'
+      + '<tr class="ghost"><td class="chk"></td><td class="idx">1</td>'
+      + '<td class="pic"><button class="picadd" data-picnew="1" title="ここに写真を入れる">＋</button></td>'
+      + '<td class="members">「＋」で写真、上の枠から文字が入ります</td>'
+      + '<td class="mv"></td><td class="del"></td></tr></table>';
       updateCount(); save(); return;
     }
-    var h = '<table><tr><th class="idx">#</th><th class="pic">写真</th>'
-          + '<th>出す文字（/ で改行・// で見出し）</th><th class="mv">順番</th><th class="del">消す</th></tr>';
+    function sel(name, idx, val, opts){
+      var o = '<select class="mini-sel" data-'+name+'="'+idx+'">';
+      opts.forEach(function(p){
+        o += '<option value="'+p[0]+'"'+(val===p[0]?' selected':'')+'>'+p[1]+'</option>';
+      });
+      return o + '</select>';
+    }
+    var POS  = [['','そのまま'],['top','上'],['mid','まん中'],['bottom','下']];
+    var SIZE = [['','そのまま'],['s','小'],['m','中'],['l','大']];
+
+    var h = '<table><tr><th class="chk">映す</th><th class="idx">#</th><th class="pic">写真</th>'
+          + '<th>出す文字（/ で改行・// で見出し）</th><th class="sel">位置</th><th class="sel">大きさ</th>'
+          + '<th class="mv">順番</th><th class="del">消す</th></tr>';
     sheets.forEach(function(sh,i){
-      h += '<tr draggable="true" data-row="'+i+'"><td class="idx">'+(i+1)+'</td>'
+      h += '<tr draggable="true" data-row="'+i+'" class="'+(sh.off?'off':'')+'">'
+        +  '<td class="chk"><input type="checkbox" data-soff="'+i+'"'+(sh.off?'':' checked')+'></td>'
+        +  '<td class="idx">'+(i+1)+'</td>'
         +  '<td class="pic">'
         +    (sh.url
               ? '<span class="picwrap"><img class="thumb" src="'+esc(sh.url)+'" alt="" draggable="true" data-pic="'+i+'" title="ドラッグでほかの行に移せます">'
@@ -219,6 +244,8 @@
               : '<button class="picadd" data-picadd="'+i+'" title="ここに写真を入れる">＋</button>')
         +  '</td>'
         +  '<td><input class="ttl" type="text" data-s="'+i+'" value="'+esc(sh.text||'')+'" placeholder="出す文字（写真だけでもよい）"></td>'
+        +  '<td class="sel">'+sel('spos', i, sh.pos||'', POS)+'</td>'
+        +  '<td class="sel">'+sel('ssize', i, sh.size||'', SIZE)+'</td>'
         +  '<td class="mv">'
         +    '<button class="mvbtn" data-smv="'+i+'" data-d="-1"'+(i===0?' disabled':'')+'>▲</button> '
         +    '<button class="mvbtn" data-smv="'+i+'" data-d="1"'+(i===sheets.length-1?' disabled':'')+'>▼</button>'
@@ -233,7 +260,7 @@
   function addLines(text){
     String(text).replace(/\r/g,'').split('\n').forEach(function(line){
       if (line.trim()==='') return;
-      sheets.push({ text:line.trim(), url:'', name:'' });
+      sheets.push({ text:line.trim(), url:'', name:'', pos:'', size:'', off:false });
     });
     $('lines').value = '';
     drawSheets();
@@ -302,8 +329,10 @@
       if (!slides.length){
         msg = 'まだ何もありません。上の枠に文字を打って「入れる」を押すか、写真をえらんでください。';
       } else {
-        var np = sheets.filter(function(s){ return !!s.url; }).length;
-        msg = slides.length + '枚 出します' + (np ? '（うち写真 '+np+'枚）' : '');
+        var np = sheets.filter(function(s){ return !s.off && s.url; }).length;
+        var noff = sheets.filter(function(s){ return s.off; }).length;
+        msg = slides.length + '枚 出します' + (np ? '（うち写真 '+np+'枚）' : '')
+            + (noff ? '　' + noff + '枚は映しません' : '');
       }
     } else if (!rows.length){
       msg = '';
@@ -394,6 +423,10 @@
     });
     // 文字の大きさは「いちばん長い行」で決める（改行しても小さくなりすぎない）
     box.setAttribute('data-len', longest<=8?'s':longest<=14?'m':longest<=24?'l':'xl');
+    // 🔴 その1枚だけ大きさを決めてあれば、そちらを優先（2026-09-05 本人）
+    if (s.size) box.setAttribute('data-size', s.size); else box.removeAttribute('data-size');
+    // 🔴 その1枚だけ位置を決めてあれば、そちらを優先
+    $('stage').setAttribute('data-pos', s.pos || $('vpos').value);
     $('stage').classList.toggle('noTitle', t==='');
 
     var nb = $('name');
@@ -440,7 +473,8 @@
         // ⚠写真は保存しない（本人「保存なしでいい」）。文字の枚だけ残す
         // ⚠写真は保存しない。文字だけ残す（空になる1枚は落とす）
         sheets: sheets.filter(function(s){ return (s.text||'').trim() !== ''; })
-                      .map(function(s){ return { text:s.text, url:'', name:'' }; }),
+                      .map(function(s){ return { text:s.text, url:'', name:'',
+                                                 pos:s.pos||'', size:s.size||'', off:!!s.off }; }),
         font: $('font').value, vpos: $('vpos').value,
         rows: rows, groupOrder: groupOrder, groupOff: groupOff,
         origRows: origRows, origGroups: origGroups,
@@ -511,7 +545,7 @@
         sheets[picTarget].url = url; sheets[picTarget].name = f.name;
         picTarget = -1;                       // 2枚目からは末尾に足す
       } else {
-        sheets.push({ text:'', url:url, name:f.name });
+        sheets.push({ text:'', url:url, name:f.name, pos:'', size:'', off:false });
       }
     }
     picTarget = -1;
@@ -520,10 +554,15 @@
   });
 
   $('sheets').addEventListener('click', function(e){
-    // ＋ ＝ この行に写真を入れる
+    // ＋ ＝ この行に写真を入れる（空のときは、新しい1枚を作ってそこに入れる）
     var add = e.target.closest ? e.target.closest('.picadd') : null;
     if (add){
-      picTarget = parseInt(add.getAttribute('data-picadd'),10);
+      if (add.hasAttribute('data-picnew')){
+        sheets.push({ text:'', url:'', name:'', pos:'', size:'', off:false });
+        picTarget = 0;
+      } else {
+        picTarget = parseInt(add.getAttribute('data-picadd'),10);
+      }
       $('pics').click();
       return;
     }
@@ -599,6 +638,19 @@
     Array.prototype.forEach.call($('sheets').querySelectorAll('tr.over,tr.dragging'), function(x){
       x.classList.remove('over'); x.classList.remove('dragging');
     });
+  });
+
+  $('sheets').addEventListener('change', function(e){
+    var el = e.target;
+    if (el.type === 'checkbox' && el.hasAttribute('data-soff')){
+      sheets[parseInt(el.getAttribute('data-soff'),10)].off = !el.checked;
+      drawSheets(); return;
+    }
+    if (el.tagName === 'SELECT'){
+      if (el.hasAttribute('data-spos'))  sheets[parseInt(el.getAttribute('data-spos'),10)].pos  = el.value;
+      if (el.hasAttribute('data-ssize')) sheets[parseInt(el.getAttribute('data-ssize'),10)].size = el.value;
+      updateCount(); save();
+    }
   });
 
   // ⚠文字の入力では描き直さない（描き直すとカーソルが飛ぶ）
