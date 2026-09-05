@@ -24,12 +24,6 @@
      🔴 写真は保存しない（本人「保存なしでいい」）。メモリに置くだけ。 */
   var sheets = [];
 
-  var SAMPLE_TEXT =
-    "今日のめあて//分数のたし算ができる\n" +
-    "教科書 42ページ\n" +
-    "となりの人と 話し合ってみよう\n" +
-    "のこり 5分";
-
   var SAMPLE_LIST =
     "名前\t作品名\t班\n" +
     "さくら\tわたしの家族\t1班\n" +
@@ -301,7 +295,7 @@
     // 🔴「そのまま」ではなく、はじめの値をそのまま見せる（2026-09-05 本人
     //    「文字の大きさ、位置ともに、デフォルトを表示しておいて、下の文字の位置は削除でいい」）
     var POS  = [['mid','まん中'],['top','上'],['bottom','下']];
-    var SIZE = [['','自動'],['s','小'],['m','中'],['l','大']];
+    var SIZE = [['','自動'],['xs','最小'],['s','小'],['m','中'],['l','大']];
     var FONT = [['gothic','ゴシック'],['maru','丸文字'],['mincho','明朝']];
 
     var h = '<table><tr><th class="chk">映す</th><th class="idx">#</th><th class="pic">写真</th>'
@@ -662,7 +656,6 @@
   $('lines').addEventListener('keydown', function(e){
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter'){ e.preventDefault(); addLines($('lines').value); }
   });
-  $('sampleText').addEventListener('click', function(){ addLines(SAMPLE_TEXT); });
   $('clearText').addEventListener('click', function(){
     // 写真のぶんはメモリを返してから消す
     sheets.forEach(function(s){ if (s.url) URL.revokeObjectURL(s.url); });
@@ -906,6 +899,16 @@
   $('next').addEventListener('click', function(){ move(1); });
   $('prev').addEventListener('click', function(){ move(-1); });
   $('close').addEventListener('click', closeShow);
+  /* 🔴 見ている1枚から、そのまま全画面へ（2026-09-05 本人）。
+     ⚠文字の大きさと改行は画面の広さで変わる。小さい画面で折り返していても
+       全画面では折り返さないことがあるので、その場で確かめられるようにした */
+  $('toFull').addEventListener('click', function(){
+    $('show').classList.remove('check');
+    if (document.documentElement.requestFullscreen){
+      document.documentElement.requestFullscreen().catch(function(){});
+    }
+    render();
+  });
 
   document.addEventListener('keydown', function(e){
     if (!$('show').classList.contains('on')) return;

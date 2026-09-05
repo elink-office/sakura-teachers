@@ -30,11 +30,21 @@ h3.sub{font-size:1.02rem;margin:0 0 12px;display:flex;align-items:center}
 .checkrow select{max-width:220px}
 
 /* 作成中（出したあとも設定を開いたままにする） */
+/* 作成中。⚠一度下に置いたが、本人の指示で上へ戻した
+   （2026-09-05「できるだけ出す順番のウィンドウとみるボタンを近づけたい」） */
 .editmode{
   display:inline-flex;align-items:center;gap:7px;cursor:pointer;
-  margin:14px 0 0;font-size:.92rem;color:var(--ink);
+  margin:0 0 16px;font-size:.92rem;color:var(--ink);
 }
 .editmode input{width:17px;height:17px;cursor:pointer}
+
+/* 「1枚だけ見る」の枚数を選ぶところ */
+#checkNo{max-width:260px}
+
+/* 大きく出す：枠に入れず、ボタンと枚数だけ。中央に置く（2026-09-05 本人） */
+.startbox{margin:26px 0 30px;text-align:center}
+.startbox .count{margin-top:12px}
+
 
 /* 保存（いちばん下の枠。座席表と同じ考え方） */
 .saving{color:var(--ok);font-size:.85rem}
@@ -73,7 +83,7 @@ h3.sub{font-size:1.02rem;margin:0 0 12px;display:flex;align-items:center}
 #sheets tr.ghost td{background:var(--bg)}
 #sheets tr.ghost .members{color:var(--ink-soft)}
 .tbl td.del{width:52px;text-align:center}
-.count{font-size:.9rem;color:var(--ink-soft);margin:12px 0 0}
+.count{font-size:.9rem;color:var(--ink-soft);margin:12px 0 0;font-weight:normal}
 .empty{color:var(--ink-soft);font-size:.92rem;padding:6px 0;margin:0}
 
 /* 一覧 */
@@ -180,6 +190,7 @@ h3.sub{font-size:1.02rem;margin:0 0 12px;display:flex;align-items:center}
 #title[data-len="xl"]{font-size:clamp(28px,4.4vw,78px)}
 /* 🔴 1枚ごとに大きさを決めたときはこちらが勝つ（2026-09-05 本人）。
    ⚠詳細度が同じなので、必ず data-len のあとに書く */
+#title[data-size="xs"]{font-size:clamp(20px,3.1vw,54px)}
 #title[data-size="s"]{font-size:clamp(28px,4.4vw,78px)}
 #title[data-size="m"]{font-size:clamp(38px,7.2vw,124px)}
 #title[data-size="l"]{font-size:clamp(50px,12vw,210px)}
@@ -214,6 +225,9 @@ h3.sub{font-size:1.02rem;margin:0 0 12px;display:flex;align-items:center}
 }
 #bar .row{display:flex;gap:8px;align-items:center}
 #bar .primary{font-size:1rem;padding:10px 24px}
+/* 「スライド表示にする」は、確かめているときだけ出す */
+#toFull{display:none}
+#show.check #toFull{display:inline-block}
 #pos{font-size:.9rem;color:var(--ink-soft);font-variant-numeric:tabular-nums}
 /* マウスを止めるとボタンを薄くする（映している間、下の帯が目立たないように） */
 body.hidebar #bar{opacity:0}

@@ -26,10 +26,10 @@
 <title>【テスト】簡単スライドメーカー｜パワーポイントの代わりに、文字と写真をモニターへ｜さくら先生の座席表</title>
 <meta name="description" content="パワーポイントの代わりに、文字と写真をそのまま大きくモニターに映せる無料の道具です。今日のめあて、問題文、作品の写真、発表する子の名前に。スライドを作り込まなくていいので、思いついたその場で出せます。写真の上に文字を重ねることもできます。名簿は座席表・班分けと共通。登録なし・インストールなし・写真も名簿も外に送りません。">
 <link rel="stylesheet" href="../style.css?v=111">
-<link rel="stylesheet" href="slide.css?v=13">
+<link rel="stylesheet" href="slide.css?v=16">
 </head>
 <body>
-<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/05 10:20</div>
+<div style="position:fixed;right:6px;top:6px;z-index:9999;background:#c86a8e;color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;opacity:.85" class="noprint">テスト版 09/05 10:39</div>
 
 <header class="site-head noprint">
   <div class="wrap">
@@ -58,6 +58,8 @@
     <summary>先生の準備</summary>
     <div class="body">
 
+      <label class="editmode"><input type="checkbox" id="editMode"> 作成中（出したあとも、この設定を開いたままにする）</label>
+
       <div class="radios" id="kind">
         <label><input type="radio" name="kind" value="text" checked> 文字を出す</label>
         <label><input type="radio" name="kind" value="list"> 発表者を出す</label>
@@ -81,7 +83,6 @@
 のこり 5分"></textarea>
         <div class="row" style="margin-top:12px">
           <button id="addText">入れる</button>
-          <button id="sampleText">お手本を入れる</button>
         </div>
 
         <hr class="sep">
@@ -156,9 +157,6 @@
         <div class="tbl" id="list"><p class="empty">まだ名簿を読み込んでいません。</p></div>
       </div>
 
-      <hr class="sep">
-      <label class="editmode"><input type="checkbox" id="editMode"> 作成中（出したあとも、この設定を開いたままにする）</label>
-
     </div>
   </details>
 
@@ -167,12 +165,14 @@
     <h2>1枚だけ見る&#8288;<button type="button" class="tip-btn" aria-label="説明"></button></h2>
     <div class="tip-body" hidden>
       <p><strong>この1枚を見る</strong>＝選んだ1枚を映します。<strong>全画面にはなりません</strong>ので、見て、直して、また見る、がすぐできます。</p>
-      <p><strong>この1枚から出す</strong>＝選んだ1枚から、全画面で出します。途中から出したいときや、1枚だけ出しておきたいときに。</p>
+      <p>⚠<strong>文字の大きさと改行は、画面の広さで変わります。</strong>小さい画面で折り返していても、全画面では折り返さないことがあります。
+        たしかめたいときは、見ている画面の下の<strong>「スライド表示にする」</strong>を押すと、そのまま全画面になります。</p>
+      <p><strong>この1枚をスライド表示</strong>＝選んだ1枚から、全画面で出します。途中から出したいときや、1枚だけ出しておきたいときに。</p>
     </div>
     <div class="row">
       <select id="checkNo"></select>
       <button id="checkBtn">この1枚を見る</button>
-      <button id="fromBtn">この1枚から出す</button>
+      <button id="fromBtn">この1枚をスライド表示</button>
     </div>
   </div>
 
@@ -193,7 +193,10 @@
     <label style="font-weight:normal">
       <input type="checkbox" id="save"> この機器に画面を保存する
     </label>
-    <p class="hint">チェックを入れると、次に開いたときも<b>文字・順番・写真</b>がそのまま残ります。サーバーには送信されません。</p>
+    <p class="hint">
+      チェックを入れると、次に開いたときも<b>文字・順番・写真</b>がそのまま残ります。サーバーには送信されません。<br>
+      ⚠<b>写真も残るのは、このページだけです。</b>ほかのページ（座席表など）は、読み込んだ画像を保存していません。
+    </p>
     <p><span class="saving" id="savingLabel"></span></p>
   </section>
 
@@ -243,6 +246,7 @@
       <ul>
         <li>一覧の<b>位置</b>と<b>大きさ</b>で、その1枚だけ変えられます。写真によって文字を置きたい場所が違うときに使ってください。</li>
         <li>位置は「まん中」、大きさは「自動」がはじめの値です。<b>自動</b>は、文字の長さに合わせて大きさが決まります。</li>
+        <li>大きさは<b>最小・小・中・大</b>から選べます。⭐<b>写真をできるだけ見せたいときは「最小」</b>にしてください。</li>
         <li>いちばん左の<b>チェックを外す</b>と、その1枚は映りません。<b>1枚だけ映したいときは、ほかのチェックを外してください。</b></li>
       </ul>
 
@@ -276,6 +280,7 @@
         <li>「大きく出す」の下の<b>「この機器に画面を保存する」</b>にチェックを入れると、次に開いたときも文字・順番・<b>写真</b>がそのまま残ります。</li>
         <li>残るのは<b>使っているこの機器のブラウザの中だけ</b>です。<b>どこにも送信されません。</b></li>
         <li>チェックを外すと、この機器に残していたものを消します。</li>
+        <li>⚠<b>写真も残るのは、このページだけです。</b>ほかのページは画像を保存していません。</li>
         <li>⚠<b>共用のパソコンでは外しておいてください。</b>写真に子どもが写っていることがあります。</li>
       </ul>
 
@@ -304,6 +309,7 @@
   <div id="bar">
     <span id="pos"></span>
     <span class="row">
+      <button id="toFull">スライド表示にする</button>
       <button id="prev">◀ もどる</button>
       <button class="primary" id="next">つぎへ ▶</button>
       <button id="close">おわり</button>
@@ -311,6 +317,6 @@
   </div>
 </div>
 
-<script src="slide.js?v=13"></script>
+<script src="slide.js?v=16"></script>
 </body>
 </html>
